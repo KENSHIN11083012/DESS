@@ -1,0 +1,69 @@
+<!-- Modal Editar Perfil -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Editar Perfil</h3>
+            <button class="close" onclick="ProfileModule.closeModal('editModal')">&times;</button>
+        </div>
+        
+        <form id="editForm" method="post" action="{% url 'update_profile' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label" for="email">Email</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ profile.email }}" required>
+                <div id="email-feedback" class="feedback"></div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="full_name">Nombre Completo</label>
+                <input type="text" class="form-control" id="full_name" name="full_name" value="{{ profile.full_name }}" required>
+            </div>
+            
+            <div class="d-flex gap-2 justify-content-end">
+                <button type="button" class="btn-secondary" onclick="ProfileModule.closeModal('editModal')">Cancelar</button>
+                <button type="submit" class="btn-edit" id="saveProfileBtn">
+                    <span class="btn-text">Guardar Cambios</span>
+                    <span class="loading" style="display: none;"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Cambiar Contraseña -->
+<div id="passwordModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Cambiar Contraseña</h3>
+            <button class="close" onclick="ProfileModule.closeModal('passwordModal')">&times;</button>
+        </div>
+        
+        <form id="passwordForm" method="post" action="{% url 'change_password' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label" for="current_password">Contraseña Actual</label>
+                <input type="password" class="form-control" id="current_password" name="current_password" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="new_password">Nueva Contraseña</label>
+                <input type="password" class="form-control" id="new_password" name="new_password" required>
+                <small class="text-muted">Mínimo 8 caracteres</small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="confirm_password">Confirmar Nueva Contraseña</label>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                <div id="password-feedback" class="feedback"></div>
+            </div>
+            
+            <div class="d-flex gap-2 justify-content-end">
+                <button type="button" class="btn-secondary" onclick="ProfileModule.closeModal('passwordModal')">Cancelar</button>
+                <button type="submit" class="btn-edit" id="savePasswordBtn">
+                    <span class="btn-text">Cambiar Contraseña</span>
+                    <span class="loading" style="display: none;"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,387 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel de Administración - DESS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="admin-wrapper">
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="header-content">
+            <div class="header-left">
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Panel de Administración</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span class="user-name">{{ user.full_name }}</span>
+                    <span class="user-role">Super Administrador</span>
+                </div>
+                <a href="{% url 'logout' %}" class="btn btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Cerrar Sesión
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">DESS Admin</h3>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'admin_dashboard' %}" class="nav-item active">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Panel Principal</span>
+            </a>
+            <a href="{% url 'admin_users' %}" class="nav-item">
+                <i class="fas fa-users"></i>
+                <span>Gestión de Usuarios</span>
+            </a>
+            <a href="{% url 'admin_solutions' %}" class="nav-item">
+                <i class="fas fa-puzzle-piece"></i>
+                <span>Gestión de Soluciones</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <div class="main-content">
+            <div class="admin-dashboard">
+                <!-- Dashboard Resumen (Cards de información) -->
+                <div class="dashboard-cards">
+                    <div class="dashboard-card users-card">
+                        <div class="card-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-number">{{ stats.total_users|default:0 }}</div>
+                            <div class="card-label">Usuarios Totales</div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card solutions-card">
+                        <div class="card-icon">
+                            <i class="fas fa-cube"></i>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-number">{{ stats.total_solutions|default:0 }}</div>
+                            <div class="card-label">Soluciones</div>
+                        </div>
+                    </div>
+                    <div class="dashboard-card assignments-card">
+                        <div class="card-icon">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-number">{{ stats.total_assignments|default:0 }}</div>
+                            <div class="card-label">Asignaciones</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Secciones de Gestión (3 columnas) -->
+                <div class="management-sections">
+                    <!-- Gestión de Usuarios -->
+                    <div class="management-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-users"></i> Gestión de Usuarios</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="action-buttons">
+                                <a href="{% url 'admin_users' %}" class="action-btn btn-blue">
+                                    <i class="fas fa-list"></i>
+                                    <span>Ver todos los usuarios</span>
+                                </a>
+                                <a href="{% url 'admin_create_user' %}" class="action-btn btn-green">
+                                    <i class="fas fa-user-plus"></i>
+                                    <span>Crear nuevo usuario</span>
+                                </a>
+                                <a href="#" class="action-btn btn-yellow" onclick="exportUsers()">
+                                    <i class="fas fa-download"></i>
+                                    <span>Exportar usuarios</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Gestión de Soluciones -->
+                    <div class="management-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-cube"></i> Gestión de Soluciones</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="action-buttons">
+                                <a href="{% url 'admin_solutions' %}" class="action-btn btn-blue">
+                                    <i class="fas fa-list"></i>
+                                    <span>Ver todas las soluciones</span>
+                                </a>
+                                <a href="#" class="action-btn btn-green" onclick="createSolution()">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Crear nueva solución</span>
+                                </a>
+                                <a href="#" class="action-btn btn-yellow" onclick="deploySolutions()">
+                                    <i class="fas fa-rocket"></i>
+                                    <span>Gestionar despliegues</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Administración del Sistema -->
+                    <div class="management-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-cog"></i> Administración del Sistema</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="action-buttons">
+                                <a href="#" class="action-btn btn-yellow" onclick="generateReport()">
+                                    <i class="fas fa-chart-bar"></i>
+                                    <span>Generar reportes</span>
+                                </a>
+                                <a href="#" class="action-btn btn-red" onclick="systemMaintenance()">
+                                    <i class="fas fa-tools"></i>
+                                    <span>Mantenimiento</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Actividad Reciente -->
+                <div class="recent-activity-section">
+                    <div class="activity-header">
+                        <h3><i class="fas fa-clock"></i> Actividad Reciente</h3>
+                    </div>
+                    <div class="activity-content">
+                        {% if recent_activities %}
+                            {% for activity in recent_activities %}
+                            <div class="activity-item">
+                                <div class="activity-time">{{ activity.timestamp|date:"d/m/Y H:i" }}</div>
+                                <div class="activity-text">{{ activity.description }}</div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="activity-item no-activity">
+                                <div class="activity-text">No hay actividad reciente registrada.</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal para acciones rápidas -->
+        <div id="actionModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div id="modalContent"></div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle sidebar
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.getElementById('admin-sidebar');
+    const mainContent = document.querySelector('.main-content');
+    if (sidebarToggle && sidebar && mainContent) {
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('sidebar-collapsed');
+        });
+    }
+    // Modal close
+    const modal = document.getElementById('actionModal');
+    if (modal) {
+        const closeBtn = modal.querySelector('.close');
+        if (closeBtn) {
+            closeBtn.onclick = function() { modal.style.display = 'none'; };
+        }
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    }
+    // Auto-collapse on mobile
+    if (window.innerWidth <= 768 && sidebar && mainContent) {
+        sidebar.classList.add('collapsed');
+        mainContent.classList.add('sidebar-collapsed');
+    }
+});
+// Funciones para acciones administrativas
+function exportUsers() {
+    if (confirm('¿Desea exportar la lista de usuarios a CSV?')) {
+        showModal('Exportando Usuarios', `
+            <div class="export-progress">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Generando archivo de exportación...</p>
+            </div>
+        `);
+        setTimeout(() => {
+            window.location.href = '/api/admin/export-users/';
+            document.getElementById('actionModal').style.display = 'none';
+        }, 2000);
+    }
+}
+function createSolution() {
+    showModal('Crear Nueva Solución', `
+        <form id="createSolutionForm" class="modern-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nombre de la Solución:</label>
+                    <input type="text" name="name" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Solución:</label>
+                    <select name="solution_type" required class="form-control">
+                        <option value="">Seleccionar tipo...</option>
+                        <option value="web">Aplicación Web</option>
+                        <option value="mobile">Aplicación Móvil</option>
+                        <option value="api">API/Servicio</option>
+                        <option value="desktop">Aplicación de Escritorio</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Descripción:</label>
+                <textarea name="description" required class="form-control" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>URL del Repositorio:</label>
+                <input type="url" name="repository_url" required class="form-control" placeholder="https://github.com/usuario/repositorio">
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                <button type="submit" class="btn-submit">Crear Solución</button>
+            </div>
+        </form>
+    `);
+}
+function deploySolutions() {
+    showModal('Gestión de Despliegues', `
+        <div class="deploy-manager">
+            <h4><i class="fas fa-rocket"></i> Centro de Despliegues</h4>
+            <div class="deploy-status">
+                <div class="status-item">
+                    <span class="status-dot active"></span>
+                    <span>3 soluciones activas</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot pending"></span>
+                    <span>2 despliegues pendientes</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot error"></span>
+                    <span>1 error de despliegue</span>
+                </div>
+            </div>
+        </div>
+    `);
+}
+function generateReport() {
+    showModal('Generar Reporte', `
+        <form class="modern-form">
+            <div class="form-group">
+                <label>Tipo de Reporte:</label>
+                <select class="form-control">
+                    <option value="usuarios">Usuarios</option>
+                    <option value="soluciones">Soluciones</option>
+                    <option value="asignaciones">Asignaciones</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Período:</label>
+                <div class="date-range">
+                    <input type="date" name="start_date" class="form-control">
+                    <span>hasta</span>
+                    <input type="date" name="end_date" class="form-control">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                <button type="submit" class="btn-submit">Generar</button>
+            </div>
+        </form>
+    `);
+}
+function systemMaintenance() {
+    if (confirm('¿Está seguro de que desea acceder al modo de mantenimiento? Esto puede afectar a los usuarios activos.')) {
+        showModal('Mantenimiento del Sistema', `
+            <div class="maintenance-panel">
+                <h4><i class="fas fa-tools"></i> Centro de Mantenimiento</h4>
+                <div class="maintenance-grid">
+                    <button class="maintenance-btn warning" onclick="clearCache()">
+                        <i class="fas fa-broom"></i>
+                        <span>Limpiar Cache</span>
+                    </button>
+                    <button class="maintenance-btn warning" onclick="optimizeDatabase()">
+                        <i class="fas fa-database"></i>
+                        <span>Optimizar BD</span>
+                    </button>
+                    <button class="maintenance-btn danger" onclick="backupSystem()">
+                        <i class="fas fa-save"></i>
+                        <span>Crear Backup</span>
+                    </button>
+                    <button class="maintenance-btn danger" onclick="restartServices()">
+                        <i class="fas fa-redo"></i>
+                        <span>Reiniciar Servicios</span>
+                    </button>
+                </div>
+            </div>
+        `);
+    }
+}
+function showModal(title, content) {
+    document.getElementById('modalContent').innerHTML = `
+        <div class="modal-header">
+            <h3>${title}</h3>
+        </div>
+        <div class="modal-body">
+            ${content}
+        </div>
+    `;
+    document.getElementById('actionModal').style.display = 'block';
+}
+function closeModal() {
+    document.getElementById('actionModal').style.display = 'none';
+}
+// Auto-refresh de estadísticas cada 30 segundos
+setInterval(function() {
+    fetch('/api/admin/stats/')
+        .then(response => response.json())
+        .then(data => {
+            if (data) {
+                updateDashboardStats(data);
+            }
+        })
+        .catch(error => console.log('Error actualizando estadísticas:', error));
+}, 30000);
+function updateDashboardStats(data) {
+    const updateElement = (selector, value) => {
+        const element = document.querySelector(selector);
+        if (element) element.textContent = value || 0;
+    };
+    updateElement('.users-card .card-number', data.total_users);
+    updateElement('.solutions-card .card-number', data.total_solutions);
+    updateElement('.assignments-card .card-number', data.total_assignments);
+}
+// Placeholder functions for maintenance actions
+function clearCache() { alert('Cache limpiado exitosamente'); }
+function optimizeDatabase() { alert('Base de datos optimizada'); }
+function backupSystem() { alert('Backup creado exitosamente'); }
+function restartServices() { alert('Servicios reiniciados'); }
+function deployAll() { alert('Desplegando todas las soluciones...'); }
+function checkStatus() { alert('Verificando estado de despliegues...'); }
+</script>
+{% endblock %}

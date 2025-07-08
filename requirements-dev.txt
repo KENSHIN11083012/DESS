@@ -1,0 +1,115 @@
+# DESS - Dependencias de Desarrollo y Testing
+# Archivo complementario a requirements.txt para desarrollo
+
+# ============================================================================
+# DEPENDENCIAS BASE
+# ============================================================================
+
+# Incluir dependencias de producción
+-r requirements.txt
+
+# ============================================================================
+# FRAMEWORK DE TESTING
+# ============================================================================
+
+# Testing principal
+pytest==7.4.3
+pytest-django==4.7.0
+pytest-cov==4.1.0
+
+# Factory para crear datos de prueba
+factory-boy==3.3.0
+
+# ============================================================================
+# HERRAMIENTAS DE CALIDAD DE CÓDIGO
+# ============================================================================
+
+# Formateador de código
+black==23.10.1
+
+# Linter y análisis estático
+flake8==6.1.0
+
+# Ordenador de imports
+isort==5.12.0
+
+# ============================================================================
+# HERRAMIENTAS DE DESARROLLO
+# ============================================================================
+
+# Debug toolbar para Django
+django-debug-toolbar==4.2.0
+
+# Extensiones útiles para desarrollo Django
+django-extensions==3.2.3
+
+# ============================================================================
+# ARQUITECTURA Y GESTIÓN DE DEPENDENCIAS
+# ============================================================================
+
+# Framework de inyección de dependencias
+dependency-injector==4.41.0
+
+# ============================================================================
+# INTEGRACIÓN Y DEPLOYMENT
+# ============================================================================
+
+# Para trabajar con repositorios Git en el sistema de deployment
+GitPython==3.1.40
+
+# Gestión de procesos del sistema
+psutil==5.9.6
+
+# ============================================================================
+# BASE DE DATOS ADICIONALES
+# ============================================================================
+
+# Driver Oracle para ambiente de producción
+
+
+# Driver PostgreSQL como alternativa
+# psycopg2-binary==2.9.7
+
+# ============================================================================
+# UTILIDADES DE DESARROLLO
+# ============================================================================
+
+# Para generar reportes HTML de coverage
+coverage[toml]==7.3.2
+
+# Pre-commit hooks para calidad de código
+# pre-commit==3.5.0
+
+# Debugger mejorado
+# ipdb==0.13.13
+
+# Shell interactivo mejorado
+# ipython==8.16.1
+
+# ============================================================================
+# DOCUMENTACIÓN
+# ============================================================================
+
+# Generación de documentación de API
+# sphinx==7.2.6
+# sphinx-rtd-theme==1.3.0
+
+# ============================================================================
+# NOTAS DE USO
+# ============================================================================
+#
+# Instalación para desarrollo:
+# pip install -r requirements-dev.txt
+#
+# Instalación solo producción:
+# pip install -r requirements.txt
+#
+# Ejecutar tests:
+# pytest
+# pytest --cov=core --cov-report=html
+#
+# Formatear código:
+# black .
+# isort .
+# flake8 .
+#

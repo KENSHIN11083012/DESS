@@ -1,0 +1,518 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - DESS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<style>
+    .solutions-container {
+        padding: 2rem 0;
+    }
+    
+    .solutions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .solution-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid #e3e6f0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .solution-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+    }
+    
+    .solution-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .solution-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        margin-right: 1rem;
+    }
+    
+    .solution-icon.web-app { background: linear-gradient(45deg, #4e73df, #224abe); }
+    .solution-icon.desktop-app { background: linear-gradient(45deg, #1cc88a, #13855c); }
+    .solution-icon.mobile-app { background: linear-gradient(45deg, #f6c23e, #dda20a); }
+    .solution-icon.api { background: linear-gradient(45deg, #e74a3b, #c0392b); }
+    .solution-icon.other { background: linear-gradient(45deg, #6c757d, #495057); }
+    
+    .solution-info h3 {
+        margin: 0;
+        font-size: 1.2rem;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    
+    .solution-type {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .solution-description {
+        color: #5a6c7d;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+    
+    .solution-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .solution-status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .status-active {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .status-deployed {
+        background: #cce7ff;
+        color: #0056b3;
+    }
+    
+    .status-maintenance {
+        background: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-inactive {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .solution-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    .btn-access {
+        flex: 1;
+        background: linear-gradient(45deg, #4e73df, #224abe);
+        color: white;
+        border: none;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-access:hover {
+        background: linear-gradient(45deg, #375a7f, #1e3a8a);
+        transform: translateY(-1px);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-access:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    
+    .btn-info {
+        background: #f8f9fa;
+        color: #495057;
+        border: 1px solid #dee2e6;
+        padding: 0.75rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-info:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 1rem;
+    }
+    
+    .stats-bar {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e3e6f0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        display: block;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .search-filters {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e3e6f0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .filter-row {
+        display: flex;
+        gap: 1rem;
+        align-items: end;
+    }
+    
+    .filter-group {
+        flex: 1;
+    }
+    
+    .filter-label {
+        display: block;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .filter-input, .filter-select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d3e2;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        transition: border-color 0.3s ease;
+    }
+    
+    .filter-input:focus, .filter-select:focus {
+        outline: none;
+        border-color: #4e73df;
+        box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
+    }
+    
+    .btn-filter {
+        background: #4e73df;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-filter:hover {
+        background: #375a7f;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="solutions-container">
+    <div class="container">
+        <!-- Título -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 mb-0 text-gray-800">{{ page_title }}</h1>
+                <p class="text-muted">Accede a las soluciones empresariales asignadas a tu cuenta</p>
+            </div>
+        </div>
+        
+        <!-- Mensajes -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <!-- Estadísticas -->
+        <div class="stats-bar">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-value">{{ solutions_stats.total_assigned|default:0 }}</span>
+                    <div class="stat-label">Soluciones Asignadas</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ solutions_stats.active_solutions|default:0 }}</span>
+                    <div class="stat-label">Activas</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ solutions_stats.recent_accesses|default:0 }}</span>
+                    <div class="stat-label">Accesos Recientes</div>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ solutions_stats.favorite_count|default:0 }}</span>
+                    <div class="stat-label">Favoritas</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filtros de Búsqueda -->
+        <div class="search-filters">
+            <form method="get" class="filter-form">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">Buscar Solución</label>
+                        <input type="text" name="search" class="filter-input" 
+                               placeholder="Nombre o descripción..." 
+                               value="{{ request.GET.search }}">
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Tipo</label>
+                        <select name="type" class="filter-select">
+                            <option value="">Todos los tipos</option>
+                            <option value="web_app" {% if request.GET.type == 'web_app' %}selected{% endif %}>Aplicación Web</option>
+                            <option value="desktop_app" {% if request.GET.type == 'desktop_app' %}selected{% endif %}>Aplicación de Escritorio</option>
+                            <option value="mobile_app" {% if request.GET.type == 'mobile_app' %}selected{% endif %}>Aplicación Móvil</option>
+                            <option value="api" {% if request.GET.type == 'api' %}selected{% endif %}>API</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Estado</label>
+                        <select name="status" class="filter-select">
+                            <option value="">Todos los estados</option>
+                            <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Activa</option>
+                            <option value="deployed" {% if request.GET.status == 'deployed' %}selected{% endif %}>Desplegada</option>
+                            <option value="maintenance" {% if request.GET.status == 'maintenance' %}selected{% endif %}>Mantenimiento</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn-filter">
+                            <i class="fas fa-search"></i> Filtrar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Grid de Soluciones -->
+        {% if user_solutions %}
+            <div class="solutions-grid">
+                {% for assignment in user_solutions %}
+                    <div class="solution-card">
+                        <div class="solution-header">
+                            <div class="solution-icon {{ assignment.solution.solution_type|default:'other' }}">
+                                {% if assignment.solution.solution_type == 'web_app' %}
+                                    <i class="fas fa-globe"></i>
+                                {% elif assignment.solution.solution_type == 'desktop_app' %}
+                                    <i class="fas fa-desktop"></i>
+                                {% elif assignment.solution.solution_type == 'mobile_app' %}
+                                    <i class="fas fa-mobile-alt"></i>
+                                {% elif assignment.solution.solution_type == 'api' %}
+                                    <i class="fas fa-code"></i>
+                                {% else %}
+                                    <i class="fas fa-cube"></i>
+                                {% endif %}
+                            </div>
+                            <div class="solution-info">
+                                <h3>{{ assignment.solution.name }}</h3>
+                                <div class="solution-type">
+                                    {% if assignment.solution.solution_type == 'web_app' %}
+                                        Aplicación Web
+                                    {% elif assignment.solution.solution_type == 'desktop_app' %}
+                                        Aplicación de Escritorio
+                                    {% elif assignment.solution.solution_type == 'mobile_app' %}
+                                        Aplicación Móvil
+                                    {% elif assignment.solution.solution_type == 'api' %}
+                                        API
+                                    {% else %}
+                                        Solución Empresarial
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p class="solution-description">
+                            {{ assignment.solution.description|truncatewords:20 }}
+                        </p>
+                        
+                        <div class="solution-meta">
+                            <div>
+                                <i class="fas fa-calendar-alt"></i>
+                                Asignada: {{ assignment.assigned_at|date:"d/m/Y" }}
+                            </div>
+                            <div class="solution-status status-{{ assignment.solution.status|default:'inactive' }}">
+                                {{ assignment.solution.get_status_display|default:'Inactiva' }}
+                            </div>
+                        </div>
+                        
+                        <div class="solution-actions">
+                            {% if assignment.solution.access_url and assignment.solution.status == 'deployed' %}
+                                <a href="{% url 'solution_access' assignment.solution.id %}" 
+                                   class="btn-access">
+                                    <i class="fas fa-external-link-alt"></i>
+                                    Acceder
+                                </a>
+                            {% elif assignment.solution.status == 'active' %}
+                                <button class="btn-access" disabled>
+                                    <i class="fas fa-clock"></i>
+                                    Pendiente de Despliegue
+                                </button>
+                            {% elif assignment.solution.status == 'maintenance' %}
+                                <button class="btn-access" disabled>
+                                    <i class="fas fa-tools"></i>
+                                    En Mantenimiento
+                                </button>
+                            {% else %}
+                                <button class="btn-access" disabled>
+                                    <i class="fas fa-pause"></i>
+                                    No Disponible
+                                </button>
+                            {% endif %}
+                            
+                            <button class="btn-info" 
+                                    data-solution-id="{{ assignment.solution.id }}"
+                                    data-action="show-info"
+                                    title="Ver información">
+                                <i class="fas fa-info-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-cube"></i>
+                <h3>No tienes soluciones asignadas</h3>
+                <p>Contacta a tu administrador para que te asigne soluciones empresariales.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal Información de Solución -->
+<div id="solutionInfoModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Información de la Solución</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="solutionInfoContent">
+                <!-- El contenido se cargará dinámicamente -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Event listeners para botones de información
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('[data-action="show-info"]')) {
+            const button = e.target.closest('[data-action="show-info"]');
+            const solutionId = button.getAttribute('data-solution-id');
+            showSolutionInfo(solutionId);
+        }
+    });
+    
+    function showSolutionInfo(solutionId) {
+        // Mostrar modal con información de la solución
+        const modal = new bootstrap.Modal(document.getElementById('solutionInfoModal'));
+        const content = document.getElementById('solutionInfoContent');
+        
+        content.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>';
+        modal.show();
+        
+        // Simular carga de datos (aquí harías una llamada AJAX real)
+        setTimeout(() => {
+            content.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Detalles Técnicos</h6>
+                        <p><strong>Versión:</strong> v1.0.0</p>
+                        <p><strong>Última actualización:</strong> 15/06/2025</p>
+                        <p><strong>Repositorio:</strong> <a href="#" target="_blank">Ver código</a></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Estadísticas de Uso</h6>
+                        <p><strong>Último acceso:</strong> 01/07/2025</p>
+                        <p><strong>Total de accesos:</strong> 47</p>
+                        <p><strong>Tiempo promedio:</strong> 2h 15min</p>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h6>Descripción Completa</h6>
+                    <p>Esta es una descripción más detallada de la solución empresarial...</p>
+                </div>
+            `;
+        }, 1000);
+    }
+    
+    // Auto-submit del formulario de filtros con delay
+    let filterTimeout;
+    document.querySelectorAll('.filter-input, .filter-select').forEach(element => {
+        element.addEventListener('input', function() {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(() => {
+                this.closest('form').submit();
+            }, 500);
+        });
+    });
+</script>
+{% endblock %}

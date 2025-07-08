@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - DESS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<!-- Header Superior -->
+<div class="admin-header">
+    <div class="header-container">
+        <div class="header-left">
+            <div class="brand-logo">
+                <i class="fas fa-cube"></i>
+                <span class="brand-text">DESS</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="user-section">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-details">
+                    <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="user-role">Super Administrador</div>
+                    <div class="user-last-login">Última conexión: {{ user.last_login|date:"d/m/Y H:i" }}</div>
+                </div>
+                <a href="{% url 'logout' %}" class="logout-btn" title="Cerrar Sesión">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar Vertical -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-content">
+        <a href="{% url 'user_profile' %}" class="sidebar-item" title="Perfil">
+            <i class="fas fa-user"></i>
+            <span>Perfil</span>
+        </a>
+        <a href="{% url 'admin_system_management' %}" class="sidebar-item active" title="Configuración">
+            <i class="fas fa-cog"></i>
+            <span>Configuración</span>
+        </a>
+        <a href="{% url 'admin_users' %}" class="sidebar-item" title="Gestión de Usuarios">
+            <i class="fas fa-users"></i>
+            <span>Usuarios</span>
+        </a>
+        <a href="{% url 'admin_solutions' %}" class="sidebar-item" title="Gestión de Soluciones">
+            <i class="fas fa-puzzle-piece"></i>
+            <span>Soluciones</span>
+        </a>
+    </div>
+</div>
+
+<!-- Contenido Principal -->
+<div class="main-content">
+    <div class="content-wrapper">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb-section">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">{{ page_title }}</li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Título de la página -->
+        <div class="page-header">
+            <div class="page-title">
+                <i class="fas fa-cog"></i>
+                <h1>{{ page_title }}</h1>
+                <p class="page-subtitle">Configuración y administración del sistema DESS</p>
+            </div>
+        </div>
+
+        <!-- Mensajes del Sistema -->
+        {% if messages %}
+            <div class="system-messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <i class="fas fa-info-circle"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Dashboard Cards - Estadísticas del Sistema -->
+        <div class="dashboard-cards">
+            <div class="dashboard-card users-card">
+                <div class="card-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="card-content">
+                    <div class="card-number">{{ system_stats.total_users|default:0 }}</div>
+                    <div class="card-label">Total Usuarios</div>
+                </div>
+            </div>
+            
+            <div class="dashboard-card solutions-card">
+                <div class="card-icon">
+                    <i class="fas fa-puzzle-piece"></i>
+                </div>
+                <div class="card-content">
+                    <div class="card-number">{{ system_stats.total_solutions|default:0 }}</div>
+                    <div class="card-label">Total Soluciones</div>
+                </div>
+            </div>
+            
+            <div class="dashboard-card active-solutions-card">
+                <div class="card-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="card-content">
+                    <div class="card-number">{{ system_stats.active_solutions|default:0 }}</div>
+                    <div class="card-label">Soluciones Activas</div>
+                </div>
+            </div>
+
+            <div class="dashboard-card assignments-card">
+                <div class="card-icon">
+                    <i class="fas fa-link"></i>
+                </div>
+                <div class="card-content">
+                    <div class="card-number">{{ system_stats.total_assignments|default:0 }}</div>
+                    <div class="card-label">Asignaciones</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secciones de Gestión del Sistema -->
+        <div class="management-sections">
+            <!-- Acciones Rápidas -->
+            <div class="management-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-bolt"></i> Acciones Rápidas</h3>
+                </div>
+                <div class="quick-actions-grid">
+                    <a href="{% url 'admin_create_user' %}" class="quick-action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="action-content">
+                            <h4>Crear Usuario</h4>
+                            <p>Agregar nuevo usuario al sistema</p>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'admin_users' %}" class="quick-action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-users-cog"></i>
+                        </div>
+                        <div class="action-content">
+                            <h4>Gestionar Usuarios</h4>
+                            <p>Administrar usuarios existentes</p>
+                        </div>
+                    </a>
+
+                    <a href="{% url 'admin_solutions' %}" class="quick-action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-puzzle-piece"></i>
+                        </div>
+                        <div class="action-content">
+                            <h4>Gestionar Soluciones</h4>
+                            <p>Administrar soluciones empresariales</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Información del Sistema -->
+            <div class="management-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-info-circle"></i> Información del Sistema</h3>
+                </div>
+                <div class="system-info-grid">
+                    <div class="info-card">
+                        <div class="info-header">
+                            <h4><i class="fas fa-server"></i> Sistema DESS</h4>
+                        </div>
+                        <div class="info-content">
+                            <p class="system-description">Desarrollador de Ecosistemas de Soluciones Empresariales</p>
+                            <div class="info-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Versión:</span>
+                                    <span class="detail-value">1.0.0</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Entorno:</span>
+                                    <span class="detail-value">Desarrollo</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Base de Datos:</span>
+                                    <span class="detail-value">SQLite</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-header">
+                            <h4><i class="fas fa-heartbeat"></i> Estado del Sistema</h4>
+                        </div>
+                        <div class="info-content">
+                            <div class="status-indicators">
+                                <div class="status-item status-online">
+                                    <span class="status-dot"></span>
+                                    <span class="status-text">Base de datos conectada</span>
+                                </div>
+                                <div class="status-item status-online">
+                                    <span class="status-dot"></span>
+                                    <span class="status-text">API REST funcional</span>
+                                </div>
+                                <div class="status-item status-online">
+                                    <span class="status-dot"></span>
+                                    <span class="status-text">Autenticación JWT activa</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

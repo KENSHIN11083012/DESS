@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - DESS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="admin-wrapper">
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="header-content">
+            <div class="header-left">
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">{{ page_title }}</h1>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <span class="user-name">{{ user.full_name }}</span>
+                    <span class="user-role">Super Administrador</span>
+                </div>
+                <a href="{% url 'logout' %}" class="btn btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Cerrar Sesión
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+        <div class="sidebar-header">
+            <h3 class="sidebar-title">DESS Admin</h3>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'admin_dashboard' %}" class="nav-item">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Panel Principal</span>
+            </a>
+            <a href="{% url 'admin_users' %}" class="nav-item active">
+                <i class="fas fa-users"></i>
+                <span>Gestión de Usuarios</span>
+            </a>
+            <a href="{% url 'admin_solutions' %}" class="nav-item">
+                <i class="fas fa-puzzle-piece"></i>
+                <span>Gestión de Soluciones</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <div class="main-content">
+            <!-- Modern Page Header -->
+            <div class="modern-page-header">
+                <div class="breadcrumb-section">
+                    <a href="{% url 'admin_users' %}" class="breadcrumb-link">
+                        <i class="fas fa-arrow-left"></i>
+                        Gestión de Usuarios
+                    </a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-current">Crear Usuario</span>
+                </div>
+            </div>
+
+            <!-- Create User Form Card -->
+            <div class="management-card-modern">
+                <div class="card-header-modern">
+                    <div class="header-title-section">
+                        <h2 class="card-title-modern">
+                            <i class="fas fa-user-plus"></i>
+                            Crear Nuevo Usuario
+                        </h2>
+                        <p class="card-subtitle-modern">Completa el formulario para agregar un nuevo usuario al sistema</p>
+                    </div>
+                </div>
+
+                <div class="card-content-modern">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" class="modern-form">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="full_name" class="form-label">Nombre Completo</label>
+                                <input type="text" class="form-control" id="full_name" name="full_name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password" class="form-label">Contraseña</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="role" class="form-label">Rol del Usuario</label>
+                            <select class="form-control" id="role" name="role">
+                                <option value="user">Usuario Regular</option>
+                                <option value="super_admin">Super Administrador</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <a href="{% url 'admin_users' %}" class="btn-cancel">
+                                <i class="fas fa-times"></i>
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn-submit">
+                                <i class="fas fa-save"></i>
+                                Crear Usuario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Scripts -->
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle sidebar
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.getElementById('admin-sidebar');
+    
+    sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('collapsed');
+    });
+});
+</script>
+{% endblock %}
+
+{% endblock %}

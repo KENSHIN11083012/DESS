@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - DESS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="container">
+        <!-- Mensajes -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <!-- Perfil Principal -->
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="profile-name">{{ profile.full_name }}</div>
+                <div class="profile-role">
+                    {% if profile.role == 'super_admin' %}
+                        <i class="fas fa-crown"></i> Super Administrador
+                    {% else %}
+                        <i class="fas fa-user"></i> Usuario
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="profile-content">
+                <!-- Información Básica -->
+                <div class="profile-section">
+                    <div class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Información Básica
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Nombre de Usuario</span>
+                        <span class="info-value">{{ profile.username }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">{{ profile.email }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Nombre Completo</span>
+                        <span class="info-value">{{ profile.full_name }}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Estado</span>
+                        <span class="status-badge {% if profile.is_active %}status-active{% else %}status-inactive{% endif %}">
+                            {% if profile.is_active %}
+                                <i class="fas fa-check-circle"></i> Activo
+                            {% else %}
+                                <i class="fas fa-times-circle"></i> Inactivo
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Completitud del Perfil -->
+                <div class="profile-section">
+                    <div class="section-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Completitud del Perfil
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-bar" data-width="{{ profile.profile_completion|default:0 }}"></div>
+                        <div class="progress-text">{{ profile.profile_completion|default:0 }}% Completo</div>
+                    </div>
+                </div>
+                
+                <!-- Actividad -->
+                <div class="profile-section">
+                    <div class="section-title">
+                        <i class="fas fa-clock"></i>
+                        Actividad
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Último Acceso</span>
+                        <span class="info-value">
+                            {% if activity.last_login %}
+                                {{ activity.last_login|date:"d/m/Y H:i" }}
+                            {% else %}
+                                Nunca
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Miembro Desde</span>
+                        <span class="info-value">
+                            {% if profile.created_at %}
+                                {{ profile.created_at|date:"d/m/Y" }}
+                            {% else %}
+                                No disponible
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Días de Actividad</span>
+                        <span class="info-value">{{ activity.account_age_days }} días</span>
+                    </div>
+                </div>
+                
+                <!-- Permisos -->
+                <div class="profile-section">
+                    <div class="section-title">
+                        <i class="fas fa-shield-alt"></i>
+                        Permisos y Capacidades
+                    </div>
+                    
+                    <div class="permissions-grid">
+                        <div class="permission-item">
+                            <i class="fas fa-{% if profile.permissions.can_view_dashboard %}check{% else %}times{% endif %} permission-icon {% if not profile.permissions.can_view_dashboard %}disabled{% endif %}"></i>
+                            <span>Ver Dashboard</span>
+                        </div>
+                        
+                        <div class="permission-item">
+                            <i class="fas fa-{% if profile.permissions.can_edit_profile %}check{% else %}times{% endif %} permission-icon {% if not profile.permissions.can_edit_profile %}disabled{% endif %}"></i>
+                            <span>Editar Perfil</span>
+                        </div>
+                        
+                        <div class="permission-item">
+                            <i class="fas fa-{% if profile.permissions.can_manage_users %}check{% else %}times{% endif %} permission-icon {% if not profile.permissions.can_manage_users %}disabled{% endif %}"></i>
+                            <span>Gestionar Usuarios</span>
+                        </div>
+                        
+                        <div class="permission-item">
+                            <i class="fas fa-{% if profile.permissions.can_manage_solutions %}check{% else %}times{% endif %} permission-icon {% if not profile.permissions.can_manage_solutions %}disabled{% endif %}"></i>
+                            <span>Gestionar Soluciones</span>
+                        </div>
+                        
+                        <div class="permission-item">
+                            <i class="fas fa-{% if profile.permissions.can_view_logs %}check{% else %}times{% endif %} permission-icon {% if not profile.permissions.can_view_logs %}disabled{% endif %}"></i>
+                            <span>Ver Logs</span>
+                        </div>
+                        
+                        <div class="permission-item">
+                            <i class="fas fa-{% if profile.permissions.can_export_data %}check{% else %}times{% endif %} permission-icon {% if not profile.permissions.can_export_data %}disabled{% endif %}"></i>
+                            <span>Exportar Datos</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Botones de Acción -->
+                <div class="profile-section">
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button class="btn-edit" onclick="ProfileModule.openEditModal()">
+                            <i class="fas fa-edit"></i> Editar Perfil
+                        </button>
+                        
+                        <button class="btn-secondary" onclick="ProfileModule.openPasswordModal()">
+                            <i class="fas fa-key"></i> Cambiar Contraseña
+                        </button>
+                        
+                        <a href="{% url 'dashboard' %}" class="btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver al Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'components/profile_modals.html' %}
+            </div>
+            
+            <div class="d-flex gap-2 justify-content-end">
+                <button type="button" class="btn-secondary" onclick="closeModal('editModal')">Cancelar</button>
+                <button type="submit" class="btn-edit" id="saveProfileBtn">
+                    <span class="btn-text">Guardar Cambios</span>
+                    <span class="loading"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Cambiar Contraseña -->
+<div id="passwordModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Cambiar Contraseña</h3>
+            <button class="close" onclick="closeModal('passwordModal')">&times;</button>
+        </div>
+        
+        <form id="passwordForm" method="post" action="{% url 'change_password' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label" for="current_password">Contraseña Actual</label>
+                <input type="password" class="form-control" id="current_password" name="current_password" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="new_password">Nueva Contraseña</label>
+                <input type="password" class="form-control" id="new_password" name="new_password" required>
+                <small class="text-muted">Mínimo 8 caracteres</small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="confirm_password">Confirmar Nueva Contraseña</label>
+                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                <div id="password-feedback" class="feedback"></div>
+            </div>
+            
+            <div class="d-flex gap-2 justify-content-end">
+                <button type="button" class="btn-secondary" onclick="closeModal('passwordModal')">Cancelar</button>
+                <button type="submit" class="btn-edit" id="savePasswordBtn">
+                    <span class="btn-text">Cambiar Contraseña</span>
+                    <span class="loading"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Módulo de perfil -->
+<script src="{% static 'js/modules/profile.js' %}"></script>
+
+<script>
+    // Configurar barra de progreso
+    document.addEventListener('DOMContentLoaded', function() {
+        const progressBar = document.querySelector('.progress-bar');
+        if (progressBar) {
+            const width = progressBar.getAttribute('data-width');
+            progressBar.style.width = width + '%';
+        }
+        
+        // Inicializar módulo de perfil
+        ProfileModule.init();
+    });
+</script>
+{% endblock %}

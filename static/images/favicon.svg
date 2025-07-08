@@ -1,0 +1,27 @@
+<!-- Favicon DESS SVG -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="favicon-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB"/>
+      <stop offset="50%" style="stop-color:#4FC3F7"/>
+      <stop offset="100%" style="stop-color:#1e3a5f"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Fondo -->
+  <rect width="32" height="32" fill="#2d2d2d" rx="6"/>
+  
+  <!-- Hexágono simplificado -->
+  <polygon points="16,4 22,8 22,16 16,20 10,16 10,8" 
+           fill="url(#favicon-grad)" 
+           stroke="#ffffff" 
+           stroke-width="0.5"/>
+  
+  <!-- Texto D -->
+  <text x="16" y="30" 
+        font-family="Arial, sans-serif" 
+        font-size="8" 
+        font-weight="bold" 
+        text-anchor="middle" 
+        fill="#4FC3F7">D</text>
+</svg>
