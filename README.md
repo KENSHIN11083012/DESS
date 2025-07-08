@@ -144,23 +144,6 @@ python manage.py makemigrations
 
 # Aplicar migraciones
 python manage.py migrate
-```
-
-## Estado del Proyecto
-
-### MVP - Semana 1: ✅ Fundación Técnica Completada
-
-- [x] Estructura del proyecto con arquitectura limpia
-- [x] Configuración Django + Oracle
-- [x] Archivos de configuración base
-- [x] Documentación de setup
-
-### Próximos Pasos - Semana 2: Modelos y Entidades
-
-- [ ] Implementar entidades core (User, Solution)
-- [ ] Crear casos de uso básicos
-- [ ] Configurar modelos Django
-- [ ] Implementar repositorios
 
 ## Contribución
 
@@ -169,13 +152,3 @@ python manage.py migrate
 3. Commit cambios (`git commit -am 'Agregar nueva funcionalidad'`)
 4. Push branch (`git push origin feature/nueva-funcionalidad`)
 5. Crear Pull Request
-
-## Licencia
-
-Proyecto interno empresarial - Todos los derechos reservados.
-
-## Contacto
-
-- **Desarrollador**: [Tu nombre]
-- **Email**: [tu-email@empresa.com]
-- **Proyecto**: DESS v1.0.0
