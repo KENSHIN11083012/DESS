@@ -3,16 +3,9 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
-from infrastructure.web.views import home_view, api_status
 
 urlpatterns = [
-    # Página de inicio (redirección al dashboard)
-    path('', home_view, name='home'),
-    
-    # API Status
-    path('status/', api_status, name='api_status'),
-    
-    # Admin
+    # Admin Django
     path('admin/', admin.site.urls),
     
     # API Documentation
@@ -20,7 +13,7 @@ urlpatterns = [
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     
-    # URLs principales de DESS (incluye dashboard y API)
+    # URLs principales de DESS (incluye todas las funcionalidades)
     path('', include('infrastructure.web.urls')),
 ]
 

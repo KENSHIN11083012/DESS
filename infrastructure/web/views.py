@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -23,8 +24,8 @@ def api_status(request):
         'message': 'DESS API funcionando correctamente',
         'endpoints': {
             'admin': '/admin/',
-            'documentation': '/api/docs/',
-            'schema': '/api/schema/',
-            'auth': '/api/v1/auth/',
+            'documentation': reverse('swagger-ui'),
+            'schema': reverse('schema'),
+            'auth': reverse('api_auth_login'),
         }
     })

@@ -4,7 +4,7 @@ Redirige automáticamente del admin Django al dashboard DESS
 """
 from django.shortcuts import redirect
 from django.contrib import messages
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 
 
 class UnifyInterfacesMiddleware:
@@ -16,12 +16,13 @@ class UnifyInterfacesMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
-    def __call__(self, request):        # URLs del admin Django que deben redirigirse al dashboard DESS
+    def __call__(self, request):
+        # URLs del admin Django que deben redirigirse al dashboard DESS
         admin_redirects = {
-            '/admin/': '/dashboard/',
-            '/admin/database/dessuser/': '/admin-panel/users/',
-            '/admin/database/dessuser/add/': '/admin-panel/users/create/',
-            '/admin/database/solution/': '/admin-panel/solutions/',
+            '/admin/': reverse_lazy('dashboard'),
+            '/admin/database/dessuser/': reverse_lazy('admin_users'),
+            '/admin/database/dessuser/add/': reverse_lazy('admin_create_user'),
+            '/admin/database/solution/': reverse_lazy('admin_solutions'),
         }
         
         # Si es una URL del admin Django

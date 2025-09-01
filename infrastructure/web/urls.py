@@ -1,27 +1,31 @@
+"""
+URLs principales de DESS
+Estructura modular organizada por funcionalidad
+"""
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-    TokenVerifyView,
-)
-from .views import api_status
-from .dashboard_urls import dashboard_urlpatterns
-from .api_urls import urlpatterns as api_urlpatterns
+from .views import home_view, api_status
 
-# Router para ViewSets
+# Router para ViewSets (futuro)
 router = DefaultRouter()
 
-# URLs principales de la aplicación web
+# URLs principales organizadas por módulos
 urlpatterns = [
-    # Estado de la API
-    path('status/', api_status, name='api_v1_status'),
+    # Página de inicio
+    path('', home_view, name='home'),
     
-    # Autenticación JWT
-    path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('auth/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    # Estado del sistema
+    path('status/', api_status, name='api_status'),
     
-    # API Endpoints del router
-    path('', include(router.urls)),
-] + dashboard_urlpatterns + api_urlpatterns
+    # URLs de autenticación (login, logout, JWT)
+    path('', include('infrastructure.web.urls_auth')),
+    
+    # URLs de dashboards (user, admin)
+    path('', include('infrastructure.web.urls_dashboard')),
+    
+    # URLs de APIs (AJAX internas y REST)
+    path('', include('infrastructure.web.urls_api')),
+    
+    # Router para ViewSets (futuro)
+    path('api/', include(router.urls)),
+]
