@@ -4,515 +4,555 @@
 {% block title %}{{ page_title }} - DESS{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 <style>
-    .solutions-container {
-        padding: 2rem 0;
-    }
-    
-    .solutions-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 1.5rem;
-        margin-top: 2rem;
-    }
-    
+    /* Estilos modernos siguiendo el patrón del admin */
     .solution-card {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        border: 1px solid #e3e6f0;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         transition: all 0.3s ease;
-        position: relative;
     }
-    
     .solution-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     }
-    
-    .solution-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
+    .status-badge {
+        transition: all 0.2s ease;
     }
-    
     .solution-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        color: white;
-        margin-right: 1rem;
-    }
-    
-    .solution-icon.web-app { background: linear-gradient(45deg, #4e73df, #224abe); }
-    .solution-icon.desktop-app { background: linear-gradient(45deg, #1cc88a, #13855c); }
-    .solution-icon.mobile-app { background: linear-gradient(45deg, #f6c23e, #dda20a); }
-    .solution-icon.api { background: linear-gradient(45deg, #e74a3b, #c0392b); }
-    .solution-icon.other { background: linear-gradient(45deg, #6c757d, #495057); }
-    
-    .solution-info h3 {
-        margin: 0;
-        font-size: 1.2rem;
-        color: #2c3e50;
-        font-weight: 600;
-    }
-    
-    .solution-type {
-        font-size: 0.85rem;
-        color: #6c757d;
-        margin-top: 0.25rem;
-    }
-    
-    .solution-description {
-        color: #5a6c7d;
-        line-height: 1.6;
-        margin-bottom: 1.5rem;
-    }
-    
-    .solution-meta {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
-        font-size: 0.875rem;
-        color: #6c757d;
-    }
-    
-    .solution-status {
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        text-transform: uppercase;
-    }
-    
-    .status-active {
-        background: #d4edda;
-        color: #155724;
-    }
-    
-    .status-deployed {
-        background: #cce7ff;
-        color: #0056b3;
-    }
-    
-    .status-maintenance {
-        background: #fff3cd;
-        color: #856404;
-    }
-    
-    .status-inactive {
-        background: #f8d7da;
-        color: #721c24;
-    }
-    
-    .solution-actions {
-        display: flex;
-        gap: 0.75rem;
-    }
-    
-    .btn-access {
-        flex: 1;
-        background: linear-gradient(45deg, #4e73df, #224abe);
-        color: white;
-        border: none;
-        padding: 0.75rem 1rem;
-        border-radius: 8px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        text-align: center;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-    }
-    
-    .btn-access:hover {
-        background: linear-gradient(45deg, #375a7f, #1e3a8a);
-        transform: translateY(-1px);
-        color: white;
-        text-decoration: none;
-    }
-    
-    .btn-access:disabled {
-        background: #6c757d;
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
-    
-    .btn-info {
-        background: #f8f9fa;
-        color: #495057;
-        border: 1px solid #dee2e6;
-        padding: 0.75rem;
-        border-radius: 8px;
-        cursor: pointer;
         transition: all 0.3s ease;
     }
-    
-    .btn-info:hover {
-        background: #e9ecef;
-        border-color: #adb5bd;
-    }
-    
-    .empty-state {
-        text-align: center;
-        padding: 3rem 1rem;
-        color: #6c757d;
-    }
-    
-    .empty-state i {
-        font-size: 4rem;
-        color: #dee2e6;
-        margin-bottom: 1rem;
-    }
-    
-    .stats-bar {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        border: 1px solid #e3e6f0;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-    }
-    
-    .stat-item {
-        text-align: center;
-    }
-    
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #2c3e50;
-        display: block;
-    }
-    
-    .stat-label {
-        color: #6c757d;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-    }
-    
-    .search-filters {
-        background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        border: 1px solid #e3e6f0;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    .filter-row {
-        display: flex;
-        gap: 1rem;
-        align-items: end;
-    }
-    
-    .filter-group {
-        flex: 1;
-    }
-    
-    .filter-label {
-        display: block;
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 0.5rem;
-        font-size: 0.875rem;
-    }
-    
-    .filter-input, .filter-select {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #d1d3e2;
-        border-radius: 8px;
-        font-size: 0.875rem;
-        transition: border-color 0.3s ease;
-    }
-    
-    .filter-input:focus, .filter-select:focus {
-        outline: none;
-        border-color: #4e73df;
-        box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
-    }
-    
-    .btn-filter {
-        background: #4e73df;
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-size: 0.875rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-filter:hover {
-        background: #375a7f;
+    .solution-icon:hover {
+        transform: scale(1.1);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="solutions-container">
-    <div class="container">
-        <!-- Título -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h1 class="h3 mb-0 text-gray-800">{{ page_title }}</h1>
-                <p class="text-muted">Accede a las soluciones empresariales asignadas a tu cuenta</p>
-            </div>
-        </div>
-        
-        <!-- Mensajes -->
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-        
-        <!-- Estadísticas -->
-        <div class="stats-bar">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-value">{{ solutions_stats.total_assigned|default:0 }}</span>
-                    <div class="stat-label">Soluciones Asignadas</div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value">{{ solutions_stats.active_solutions|default:0 }}</span>
-                    <div class="stat-label">Activas</div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value">{{ solutions_stats.recent_accesses|default:0 }}</span>
-                    <div class="stat-label">Accesos Recientes</div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-value">{{ solutions_stats.favorite_count|default:0 }}</span>
-                    <div class="stat-label">Favoritas</div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Filtros de Búsqueda -->
-        <div class="search-filters">
-            <form method="get" class="filter-form">
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label class="filter-label">Buscar Solución</label>
-                        <input type="text" name="search" class="filter-input" 
-                               placeholder="Nombre o descripción..." 
-                               value="{{ request.GET.search }}">
-                    </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Tipo</label>
-                        <select name="type" class="filter-select">
-                            <option value="">Todos los tipos</option>
-                            <option value="web_app" {% if request.GET.type == 'web_app' %}selected{% endif %}>Aplicación Web</option>
-                            <option value="desktop_app" {% if request.GET.type == 'desktop_app' %}selected{% endif %}>Aplicación de Escritorio</option>
-                            <option value="mobile_app" {% if request.GET.type == 'mobile_app' %}selected{% endif %}>Aplicación Móvil</option>
-                            <option value="api" {% if request.GET.type == 'api' %}selected{% endif %}>API</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Estado</label>
-                        <select name="status" class="filter-select">
-                            <option value="">Todos los estados</option>
-                            <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Activa</option>
-                            <option value="deployed" {% if request.GET.status == 'deployed' %}selected{% endif %}>Desplegada</option>
-                            <option value="maintenance" {% if request.GET.status == 'maintenance' %}selected{% endif %}>Mantenimiento</option>
-                        </select>
-                    </div>
-                    <div>
-                        <button type="submit" class="btn-filter">
-                            <i class="fas fa-search"></i> Filtrar
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-        
-        <!-- Grid de Soluciones -->
-        {% if user_solutions %}
-            <div class="solutions-grid">
-                {% for assignment in user_solutions %}
-                    <div class="solution-card">
-                        <div class="solution-header">
-                            <div class="solution-icon {{ assignment.solution.solution_type|default:'other' }}">
-                                {% if assignment.solution.solution_type == 'web_app' %}
-                                    <i class="fas fa-globe"></i>
-                                {% elif assignment.solution.solution_type == 'desktop_app' %}
-                                    <i class="fas fa-desktop"></i>
-                                {% elif assignment.solution.solution_type == 'mobile_app' %}
-                                    <i class="fas fa-mobile-alt"></i>
-                                {% elif assignment.solution.solution_type == 'api' %}
-                                    <i class="fas fa-code"></i>
-                                {% else %}
-                                    <i class="fas fa-cube"></i>
-                                {% endif %}
-                            </div>
-                            <div class="solution-info">
-                                <h3>{{ assignment.solution.name }}</h3>
-                                <div class="solution-type">
-                                    {% if assignment.solution.solution_type == 'web_app' %}
-                                        Aplicación Web
-                                    {% elif assignment.solution.solution_type == 'desktop_app' %}
-                                        Aplicación de Escritorio
-                                    {% elif assignment.solution.solution_type == 'mobile_app' %}
-                                        Aplicación Móvil
-                                    {% elif assignment.solution.solution_type == 'api' %}
-                                        API
-                                    {% else %}
-                                        Solución Empresarial
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <p class="solution-description">
-                            {{ assignment.solution.description|truncatewords:20 }}
-                        </p>
-                        
-                        <div class="solution-meta">
-                            <div>
-                                <i class="fas fa-calendar-alt"></i>
-                                Asignada: {{ assignment.assigned_at|date:"d/m/Y" }}
-                            </div>
-                            <div class="solution-status status-{{ assignment.solution.status|default:'inactive' }}">
-                                {{ assignment.solution.get_status_display|default:'Inactiva' }}
-                            </div>
-                        </div>
-                        
-                        <div class="solution-actions">
-                            {% if assignment.solution.access_url and assignment.solution.status == 'deployed' %}
-                                <a href="{% url 'solution_access' assignment.solution.id %}" 
-                                   class="btn-access">
-                                    <i class="fas fa-external-link-alt"></i>
-                                    Acceder
-                                </a>
-                            {% elif assignment.solution.status == 'active' %}
-                                <button class="btn-access" disabled>
-                                    <i class="fas fa-clock"></i>
-                                    Pendiente de Despliegue
-                                </button>
-                            {% elif assignment.solution.status == 'maintenance' %}
-                                <button class="btn-access" disabled>
-                                    <i class="fas fa-tools"></i>
-                                    En Mantenimiento
-                                </button>
-                            {% else %}
-                                <button class="btn-access" disabled>
-                                    <i class="fas fa-pause"></i>
-                                    No Disponible
-                                </button>
-                            {% endif %}
-                            
-                            <button class="btn-info" 
-                                    data-solution-id="{{ assignment.solution.id }}"
-                                    data-action="show-info"
-                                    title="Ver información">
-                                <i class="fas fa-info-circle"></i>
-                            </button>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="empty-state">
-                <i class="fas fa-cube"></i>
-                <h3>No tienes soluciones asignadas</h3>
-                <p>Contacta a tu administrador para que te asigne soluciones empresariales.</p>
-            </div>
-        {% endif %}
+{% csrf_token %}
+<!-- Contenedor principal -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  
+  <!-- Header con breadcrumb y estadísticas -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div class="flex justify-between items-center flex-wrap gap-4">
+      <!-- Breadcrumb -->
+      <div class="flex items-center space-x-2 text-sm">
+        <a href="{% url 'dashboard' %}" class="text-blue-600 hover:text-blue-800">Panel Principal</a>
+        <span class="text-gray-400">/</span>
+        <span class="text-gray-600">Mis Soluciones</span>
+      </div>
+      
+      <!-- Estadística del usuario -->
+      <div class="flex items-center space-x-4">
+        <span class="text-blue-600 font-medium">{{ solutions_stats.total_assigned|default:0 }} solución(es) asignada(s)</span>
+      </div>
     </div>
-</div>
+  </div>
 
-<!-- Modal Información de Solución -->
-<div id="solutionInfoModal" class="modal fade" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Información de la Solución</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="solutionInfoContent">
-                <!-- El contenido se cargará dinámicamente -->
-            </div>
+  <!-- Estadísticas rápidas -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex items-center">
+        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+          </svg>
         </div>
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">{{ solutions_stats.total_assigned|default:0 }}</h3>
+          <p class="text-sm text-gray-600">Soluciones Asignadas</p>
+        </div>
+      </div>
     </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex items-center">
+        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">{{ solutions_stats.ready_solutions|default:0 }}</h3>
+          <p class="text-sm text-gray-600">Listas para usar</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex items-center">
+        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5a3 3 0 003 3h6a3 3 0 003-3V4"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">{{ solutions_stats.configuring_solutions|default:0 }}</h3>
+          <p class="text-sm text-gray-600">En configuración</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="flex items-center">
+        <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
+          <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">{{ solutions_stats.maintenance_solutions|default:0 }}</h3>
+          <p class="text-sm text-gray-600">En mantenimiento</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros de búsqueda -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <form method="GET" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Búsqueda -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Buscar soluciones...</label>
+          <input type="text" name="search" value="{{ search_query }}" 
+                 placeholder="Buscar por nombre, descripción..." 
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        
+        <!-- Filtro por tipo -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por tipo</label>
+          <select name="type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">Todos los tipos</option>
+            <option value="web_app" {% if selected_type == 'web_app' %}selected{% endif %}>Aplicación Web</option>
+            <option value="desktop_app" {% if selected_type == 'desktop_app' %}selected{% endif %}>Aplicación de Escritorio</option>
+            <option value="mobile_app" {% if selected_type == 'mobile_app' %}selected{% endif %}>Aplicación Móvil</option>
+            <option value="api" {% if selected_type == 'api' %}selected{% endif %}>API</option>
+            <option value="database" {% if selected_type == 'database' %}selected{% endif %}>Base de Datos</option>
+          </select>
+        </div>
+        
+        <!-- Filtro por estado -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por estado</label>
+          <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">Todos los estados</option>
+            <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Lista para usar</option>
+            <option value="deployed" {% if selected_status == 'deployed' %}selected{% endif %}>En configuración</option>
+            <option value="maintenance" {% if selected_status == 'maintenance' %}selected{% endif %}>En mantenimiento</option>
+            <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>No disponible</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="flex justify-between items-center">
+        <div class="flex space-x-2">
+          <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-150">
+            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            Buscar
+          </button>
+          
+          <a href="{% url 'user_solutions' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md transition duration-150">
+            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            Limpiar
+          </a>
+        </div>
+        
+        {% if search_query or selected_type or selected_status %}
+        <div class="text-sm text-gray-600">
+          Mostrando resultados filtrados
+          {% if search_query %}para "{{ search_query }}"{% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Catálogo de Mis Soluciones -->
+  <div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 flex items-center">
+      <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">Mis Soluciones Empresariales</h2>
+        <p class="text-sm text-gray-600">{{ solutions_stats.total_assigned|default:0 }} solución(es) asignada(s) a tu cuenta</p>
+      </div>
+    </div>
+
+    {% if user_solutions %}
+    <div class="p-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for assignment in user_solutions %}
+        <div class="solution-card bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all duration-300
+                    {% if assignment.solution.status == 'active' and assignment.solution.access_url %}border-l-4 border-l-green-500
+                    {% elif assignment.solution.status == 'active' or assignment.solution.status == 'deployed' %}border-l-4 border-l-blue-500
+                    {% elif assignment.solution.status == 'maintenance' %}border-l-4 border-l-yellow-500
+                    {% else %}border-l-4 border-l-red-500{% endif %}">
+          <!-- Header de la tarjeta -->
+          <div class="flex items-start justify-between mb-4">
+            <div class="w-12 h-12 rounded-lg flex items-center justify-center solution-icon 
+                        {% if assignment.solution.solution_type == 'web_app' %}bg-blue-100 text-blue-600
+                        {% elif assignment.solution.solution_type == 'desktop_app' %}bg-green-100 text-green-600
+                        {% elif assignment.solution.solution_type == 'mobile_app' %}bg-purple-100 text-purple-600
+                        {% elif assignment.solution.solution_type == 'api' %}bg-red-100 text-red-600
+                        {% elif assignment.solution.solution_type == 'database' %}bg-gray-100 text-gray-600
+                        {% else %}bg-yellow-100 text-yellow-600{% endif %}">
+              {% if assignment.solution.solution_type == 'web_app' %}
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                </svg>
+              {% elif assignment.solution.solution_type == 'desktop_app' %}
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+              {% elif assignment.solution.solution_type == 'mobile_app' %}
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a1 1 0 001-1V4a1 1 0 00-1-1H8a1 1 0 00-1 1v16a1 1 0 001 1z"></path>
+                </svg>
+              {% elif assignment.solution.solution_type == 'api' %}
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+              {% elif assignment.solution.solution_type == 'database' %}
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
+                </svg>
+              {% else %}
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                </svg>
+              {% endif %}
+            </div>
+            
+            <!-- Estado de la solución -->
+            {% if assignment.solution.status == 'active' %}
+              {% if assignment.solution.access_url %}
+                <span class="status-badge inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  Lista para usar
+                </span>
+              {% else %}
+                <span class="status-badge inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5a3 3 0 003 3h6a3 3 0 003-3V4"></path>
+                  </svg>
+                  En configuración
+                </span>
+              {% endif %}
+            {% elif assignment.solution.status == 'deployed' %}
+              <span class="status-badge inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5a3 3 0 003 3h6a3 3 0 003-3V4"></path>
+                </svg>
+                En configuración
+              </span>
+            {% elif assignment.solution.status == 'inactive' %}
+              <span class="status-badge inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
+                </svg>
+                No disponible
+              </span>
+            {% elif assignment.solution.status == 'maintenance' %}
+              <span class="status-badge inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+                En mantenimiento
+              </span>
+            {% else %}
+              <span class="status-badge inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Estado desconocido
+              </span>
+            {% endif %}
+          </div>
+
+          <!-- Información de la solución -->
+          <div class="mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ assignment.solution.name }}</h3>
+            <p class="text-sm text-gray-600 line-clamp-3 mb-3">
+              {{ assignment.solution.description|truncatewords:20 }}
+            </p>
+            
+            <!-- Metadatos -->
+            <div class="space-y-1 text-xs text-gray-500">
+              <div class="flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.99 1.99 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                Tipo: 
+                {% if assignment.solution.solution_type == 'web_app' %}Aplicación Web
+                {% elif assignment.solution.solution_type == 'desktop_app' %}Aplicación de Escritorio
+                {% elif assignment.solution.solution_type == 'mobile_app' %}Aplicación Móvil
+                {% elif assignment.solution.solution_type == 'api' %}API
+                {% elif assignment.solution.solution_type == 'database' %}Base de Datos
+                {% else %}{{ assignment.solution.solution_type|capfirst }}{% endif %}
+              </div>
+              <div class="flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 12a4 4 0 100-8 4 4 0 000 8z"></path>
+                </svg>
+                Asignada: {{ assignment.assigned_at|date:"d/m/Y" }}
+              </div>
+              {% if assignment.solution.version %}
+              <div class="flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Versión: {{ assignment.solution.version }}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="flex space-x-2">
+            {% if assignment.solution.access_url %}
+              {% if assignment.solution.status == 'active' or assignment.solution.status == 'deployed' %}
+                <a href="{% url 'solution_access' assignment.solution.id %}" 
+                   class="flex-1 bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-2 rounded-md text-center transition duration-150">
+                  <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                  Acceder
+                </a>
+              {% elif assignment.solution.status == 'maintenance' %}
+                <button disabled class="flex-1 bg-yellow-300 text-yellow-800 text-sm px-3 py-2 rounded-md text-center">
+                  <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                  En mantenimiento
+                </button>
+              {% else %}
+                <button disabled class="flex-1 bg-red-300 text-red-800 text-sm px-3 py-2 rounded-md text-center">
+                  <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
+                  </svg>
+                  No disponible
+                </button>
+              {% endif %}
+            {% else %}
+              {% if assignment.solution.status == 'active' or assignment.solution.status == 'deployed' %}
+                <button disabled class="flex-1 bg-blue-300 text-blue-800 text-sm px-3 py-2 rounded-md text-center">
+                  <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5a3 3 0 003 3h6a3 3 0 003-3V4"></path>
+                  </svg>
+                  Configurando acceso
+                </button>
+              {% elif assignment.solution.status == 'maintenance' %}
+                <button disabled class="flex-1 bg-yellow-300 text-yellow-800 text-sm px-3 py-2 rounded-md text-center">
+                  <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  </svg>
+                  En mantenimiento
+                </button>
+              {% else %}
+                <button disabled class="flex-1 bg-gray-300 text-gray-500 text-sm px-3 py-2 rounded-md text-center">
+                  <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
+                  </svg>
+                  No disponible
+                </button>
+              {% endif %}
+            {% endif %}
+            
+            <button onclick="showSolutionInfo('{{ assignment.solution.id }}', '{{ assignment.solution.name|escapejs }}')" 
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm px-3 py-2 rounded-md transition duration-150"
+                    title="Ver información">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% else %}
+    <div class="text-center py-12">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        {% if search_query or selected_type or selected_status %}
+        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        {% else %}
+        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+        </svg>
+        {% endif %}
+      </div>
+      
+      {% if search_query or selected_type or selected_status %}
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No se encontraron resultados</h3>
+      <p class="text-gray-500 mb-6">
+        No hay soluciones que coincidan con los filtros aplicados.
+        {% if search_query %}Buscaste: "{{ search_query }}"{% endif %}
+      </p>
+      <a href="{% url 'user_solutions' %}" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-150">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        Limpiar filtros
+      </a>
+      {% else %}
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No tienes soluciones asignadas</h3>
+      <p class="text-gray-500 mb-6">Contacta a tu administrador para que te asigne soluciones empresariales.</p>
+      <a href="{% url 'dashboard' %}" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-150">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-5L12 5H5a2 2 0 00-2 2z"></path>
+        </svg>
+        Volver al Dashboard
+      </a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</main>
+
+<!-- Modal de información de solución -->
+<div id="solutionInfoModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div class="mt-3">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg leading-6 font-medium text-gray-900" id="solutionInfoTitle">
+          Información de la Solución
+        </h3>
+        <button onclick="closeSolutionInfo()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div id="solutionInfoContent" class="text-sm text-gray-600">
+        <!-- El contenido se cargará dinámicamente -->
+      </div>
+      <div class="flex justify-end mt-4">
+        <button onclick="closeSolutionInfo()" 
+                class="px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Event listeners para botones de información
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('[data-action="show-info"]')) {
-            const button = e.target.closest('[data-action="show-info"]');
-            const solutionId = button.getAttribute('data-solution-id');
-            showSolutionInfo(solutionId);
-        }
-    });
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard de usuario con Tailwind CSS cargado correctamente');
+});
+
+function showSolutionInfo(solutionId, solutionName) {
+    const modal = document.getElementById('solutionInfoModal');
+    const title = document.getElementById('solutionInfoTitle');
+    const content = document.getElementById('solutionInfoContent');
     
-    function showSolutionInfo(solutionId) {
-        // Mostrar modal con información de la solución
-        const modal = new bootstrap.Modal(document.getElementById('solutionInfoModal'));
-        const content = document.getElementById('solutionInfoContent');
-        
-        content.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>';
-        modal.show();
-        
-        // Simular carga de datos (aquí harías una llamada AJAX real)
-        setTimeout(() => {
-            content.innerHTML = `
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Detalles Técnicos</h6>
-                        <p><strong>Versión:</strong> v1.0.0</p>
-                        <p><strong>Última actualización:</strong> 15/06/2025</p>
-                        <p><strong>Repositorio:</strong> <a href="#" target="_blank">Ver código</a></p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Estadísticas de Uso</h6>
-                        <p><strong>Último acceso:</strong> 01/07/2025</p>
-                        <p><strong>Total de accesos:</strong> 47</p>
-                        <p><strong>Tiempo promedio:</strong> 2h 15min</p>
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <h6>Descripción Completa</h6>
-                    <p>Esta es una descripción más detallada de la solución empresarial...</p>
-                </div>
-            `;
-        }, 1000);
+    title.textContent = solutionName;
+    content.innerHTML = `
+        <div class="space-y-3">
+            <div class="flex items-center text-sm">
+                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="font-medium">ID de Solución:</span> ${solutionId}
+            </div>
+            <div class="flex items-center text-sm">
+                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <span class="font-medium">Estado:</span> Disponible para uso
+            </div>
+            <div class="flex items-center text-sm">
+                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 12a4 4 0 100-8 4 4 0 000 8z"></path>
+                </svg>
+                <span class="font-medium">Acceso:</span> Autorizado para tu cuenta
+            </div>
+            <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p class="text-sm text-blue-800">
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Si tienes problemas para acceder a esta solución, contacta a tu administrador.
+                </p>
+            </div>
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+}
+
+function closeSolutionInfo() {
+    const modal = document.getElementById('solutionInfoModal');
+    modal.classList.add('hidden');
+}
+
+// Cerrar modal al hacer clic fuera de él
+window.onclick = function(event) {
+    const modal = document.getElementById('solutionInfoModal');
+    if (event.target == modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+// Configurar filtrado dinámico
+function setupDynamicFiltering() {
+    const searchInput = document.querySelector('input[name="search"]');
+    const typeSelect = document.querySelector('select[name="type"]');
+    const statusSelect = document.querySelector('select[name="status"]');
+    const form = document.querySelector('form');
+    
+    // Auto-submit en cambio de selects
+    if (typeSelect) {
+        typeSelect.addEventListener('change', function() {
+            form.submit();
+        });
     }
     
-    // Auto-submit del formulario de filtros con delay
-    let filterTimeout;
-    document.querySelectorAll('.filter-input, .filter-select').forEach(element => {
-        element.addEventListener('input', function() {
-            clearTimeout(filterTimeout);
-            filterTimeout = setTimeout(() => {
-                this.closest('form').submit();
-            }, 500);
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+            form.submit();
         });
-    });
+    }
+    
+    // Debounced search para evitar demasiadas peticiones
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() {
+                form.submit();
+            }, 500); // Esperar 500ms después de que el usuario pare de escribir
+        });
+        
+        // Permitir búsqueda instantánea con Enter
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                clearTimeout(searchTimeout);
+                form.submit();
+            }
+        });
+    }
+}
+
+// Inicializar cuando se carga la página
+document.addEventListener('DOMContentLoaded', function() {
+    setupDynamicFiltering();
+    console.log('Mis soluciones con Tailwind CSS y filtrado dinámico cargadas correctamente');
+});
 </script>
 {% endblock %}

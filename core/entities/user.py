@@ -29,7 +29,7 @@ class User:
     email: str
     full_name: str
     role: UserRole
-    password: str
+    password: Optional[str] = None
     is_active: bool = True
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -57,9 +57,9 @@ class User:
         if len(self.username) > ValidationConstants.MAX_USERNAME_LENGTH:
             raise ValueError(f"El nombre de usuario no puede tener más de {ValidationConstants.MAX_USERNAME_LENGTH} caracteres")
         
-        # Solo letras, números, guiones y guiones bajos
-        if not re.match(r'^[a-zA-Z0-9_-]+$', self.username):
-            raise ValueError("El nombre de usuario solo puede contener letras, números, guiones y guiones bajos")
+        # Solo letras, números, guiones, guiones bajos y puntos
+        if not re.match(ValidationConstants.USERNAME_REGEX, self.username):
+            raise ValueError(ValidationConstants.USERNAME_PATTERN_MESSAGE)
     
     def _validate_email(self):
         """Validar formato de email"""
@@ -83,16 +83,26 @@ class User:
     
     def _validate_password(self):
         """Validar contraseña"""
-        if not self.password:
-            raise ValueError("La contraseña es obligatoria")
-        
-        if len(self.password) < ValidationConstants.MIN_PASSWORD_LENGTH:
-            raise ValueError(f"La contraseña debe tener al menos {ValidationConstants.MIN_PASSWORD_LENGTH} caracteres")
+        # Solo validar si se proporciona una contraseña
+        if self.password is not None:
+            if not self.password:
+                raise ValueError("La contraseña es obligatoria")
+            
+            if len(self.password) < ValidationConstants.MIN_PASSWORD_LENGTH:
+                raise ValueError(f"La contraseña debe tener al menos {ValidationConstants.MIN_PASSWORD_LENGTH} caracteres")
     
     def _validate_role(self):
         """Validar rol de usuario"""
         if not isinstance(self.role, UserRole):
             raise ValueError("El rol debe ser una instancia de UserRole")
+    
+    def validate_for_creation(self):
+        """Validar entidad para operaciones de creación (requiere contraseña)"""
+        if self.password is None or not self.password:
+            raise ValueError("La contraseña es obligatoria")
+        
+        # Ejecutar todas las demás validaciones
+        self.validate()
     
     def is_super_admin(self) -> bool:
         """Verificar si el usuario es super administrador"""

@@ -146,21 +146,44 @@ class DashboardContextBuilder:
                 # Super admin ve todas las soluciones
                 from infrastructure.database.models import Solution
                 solutions = Solution.objects.all()[:10]  # Últimas 10
+                self.context['user_solutions'] = solutions
             else:
                 # Usuario regular ve solo sus soluciones asignadas
-                from infrastructure.database.models import SolutionAssignment
-                assignments = SolutionAssignment.objects.filter(
-                    user=self.user
-                ).select_related('solution')[:10]
-                solutions = [assignment.solution for assignment in assignments]
+                from infrastructure.database.models import UserSolutionAssignment
+                assignments = UserSolutionAssignment.objects.filter(
+                    user=self.user,
+                    is_active=True
+                ).select_related('solution').order_by('-assigned_at')
+                
+                self.context['user_solutions'] = assignments
+                
+                # Estadísticas para el dashboard de usuario
+                total_assigned = assignments.count()
+                active_solutions = assignments.filter(solution__status='active').count()
+                deployed_solutions = assignments.filter(solution__status='deployed').count()
+                recent_accesses = 0  # TODO: implementar después
+                
+                self.context['solutions_stats'] = {
+                    'total_assigned': total_assigned,
+                    'active_solutions': active_solutions,
+                    'deployed_solutions': deployed_solutions,
+                    'recent_accesses': recent_accesses,
+                    'favorite_count': 0  # TODO: implementar favoritos después
+                }
             
-            self.context['user_solutions'] = solutions
-            self.context['solutions_count'] = len(solutions)
+            self.context['solutions_count'] = len(self.context['user_solutions'])
             
         except Exception as e:
             logger.error(f"Error obteniendo soluciones del usuario: {e}")
             self.context['user_solutions'] = []
             self.context['solutions_count'] = 0
+            self.context['solutions_stats'] = {
+                'total_assigned': 0,
+                'active_solutions': 0,
+                'deployed_solutions': 0,
+                'recent_accesses': 0,
+                'favorite_count': 0
+            }
             
         return self
     

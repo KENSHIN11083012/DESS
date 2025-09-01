@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Asignar Solución - DESS{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos adicionales específicos para asignación */
+    .user-card {
+        transition: all 0.3s ease;
+    }
+    .user-card:hover {
+        transform: translateY(-1px);
+    }
+    .user-card.selected {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Contenedor principal -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  
+  <!-- Header con breadcrumb y acciones -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <!-- Breadcrumb -->
+        <div class="flex items-center space-x-2 text-sm mb-4">
+          <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-800">Panel Principal</a>
+          <span class="text-gray-400">/</span>
+          <a href="{% url 'admin_solutions' %}" class="text-blue-600 hover:text-blue-800">Gestión de Soluciones</a>
+          <span class="text-gray-400">/</span>
+          <a href="{% url 'admin_solution_detail' solution.id %}" class="text-blue-600 hover:text-blue-800">{{ solution.name }}</a>
+          <span class="text-gray-400">/</span>
+          <span class="text-gray-600">Asignar a Usuarios</span>
+        </div>
+        
+        <!-- Título y descripción -->
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">Asignar Solución a Usuarios</h1>
+            <p class="text-gray-600">Seleccione los usuarios que tendrán acceso a "{{ solution.name }}"</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Botón de volver -->
+      <div>
+        <a href="{% url 'admin_solution_detail' solution.id %}" 
+           class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 transition duration-150">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          Volver a la Solución
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Información de la solución -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div class="flex items-start">
+      <div class="flex-shrink-0">
+        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+          <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+          </svg>
+        </div>
+      </div>
+      <div class="ml-4">
+        <h3 class="text-lg font-medium text-gray-900">{{ solution.name }}</h3>
+        <p class="text-gray-600 mt-1">{{ solution.description }}</p>
+        <div class="mt-2 flex items-center space-x-4 text-sm text-gray-500">
+          <span class="inline-flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+            </svg>
+            {{ solution.get_solution_type_display }}
+          </span>
+          <span class="inline-flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            {{ solution.get_status_display }}
+          </span>
+          {% if solution.version %}
+          <span class="inline-flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+            </svg>
+            v{{ solution.version }}
+          </span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario de asignación -->
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <form method="POST" id="assignForm">
+      {% csrf_token %}
+      
+      <!-- Header de selección -->
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+        <div>
+          <h3 class="text-lg font-medium text-gray-900 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+            Seleccionar Usuarios
+          </h3>
+          <p class="text-sm text-gray-500 mt-1">Marque los usuarios que tendrán acceso a esta solución</p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="text-sm text-gray-500">
+            <span class="font-medium">Seleccionados:</span> 
+            <span id="selectedCount" class="text-blue-600 font-semibold">0</span> 
+            de {{ available_users|length }}
+          </div>
+          <button type="button" id="selectAllBtn" 
+                  class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+            Seleccionar Todos
+          </button>
+          <button type="button" id="clearAllBtn" 
+                  class="text-sm text-gray-600 hover:text-gray-800 font-medium">
+            Limpiar Selección
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de usuarios -->
+      {% if available_users %}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        {% for user in available_users %}
+        <label class="user-card flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 transition duration-200">
+          <input type="checkbox" 
+                 name="selected_users" 
+                 value="{{ user.id }}" 
+                 class="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 focus:ring-2 mr-3">
+          <div class="flex items-center flex-grow">
+            <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+              <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+            </div>
+            <div class="flex-grow">
+              <h4 class="text-sm font-medium text-gray-900">{{ user.get_full_name|default:user.username }}</h4>
+              <p class="text-xs text-gray-500">@{{ user.username }}</p>
+              {% if user.email %}
+              <p class="text-xs text-gray-400">{{ user.email }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </label>
+        {% endfor %}
+      </div>
+      {% else %}
+      <!-- Estado vacío -->
+      <div class="text-center py-12">
+        <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+        </svg>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No hay usuarios disponibles</h3>
+        <p class="text-gray-500">Todos los usuarios ya tienen asignada esta solución.</p>
+      </div>
+      {% endif %}
+
+      <!-- Botones de acción -->
+      {% if available_users %}
+      <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+        <a href="{% url 'admin_solution_detail' solution.id %}" 
+           class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-150">
+          Cancelar
+        </a>
+        <button type="submit" 
+                id="assignBtn"
+                disabled
+                class="px-6 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-md font-medium transition duration-150">
+          Asignar Solución
+        </button>
+      </div>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Información adicional -->
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+    <div class="flex items-start">
+      <div class="flex-shrink-0">
+        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <div class="ml-3">
+        <h4 class="text-sm font-medium text-blue-800">Información sobre asignación</h4>
+        <div class="text-sm text-blue-700 mt-1">
+          <ul class="list-disc pl-5 space-y-1">
+            <li>Los usuarios asignados podrán ver y acceder a esta solución</li>
+            <li>Puede modificar las asignaciones en cualquier momento</li>
+            <li>Los usuarios recibirán notificación de las nuevas asignaciones</li>
+            <li>Las asignaciones se registran en el sistema de auditoría</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mostrar mensajes si existen -->
+  {% if messages %}
+  <div class="fixed top-20 right-4 z-50 space-y-2">
+    {% for message in messages %}
+    <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow-lg p-4 
+                {% if message.tags == 'error' %}border-l-4 border-l-red-500{% endif %}
+                {% if message.tags == 'success' %}border-l-4 border-l-green-500{% endif %}
+                {% if message.tags == 'warning' %}border-l-4 border-l-yellow-500{% endif %}">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          {% if message.tags == 'error' %}
+            <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          {% elif message.tags == 'success' %}
+            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          {% elif message.tags == 'warning' %}
+            <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          {% endif %}
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-gray-800">{{ message }}</p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('input[name="selected_users"]');
+    const selectedCountElement = document.getElementById('selectedCount');
+    const assignBtn = document.getElementById('assignBtn');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const form = document.getElementById('assignForm');
+    
+    // Función para actualizar el contador y estado del botón
+    function updateSelectionState() {
+        const selectedCount = document.querySelectorAll('input[name="selected_users"]:checked').length;
+        selectedCountElement.textContent = selectedCount;
+        
+        // Habilitar/deshabilitar botón de asignar
+        if (assignBtn) {
+            assignBtn.disabled = selectedCount === 0;
+        }
+        
+        // Actualizar estilos de las tarjetas
+        checkboxes.forEach(checkbox => {
+            const card = checkbox.closest('.user-card');
+            if (checkbox.checked) {
+                card.classList.add('selected', 'border-blue-500', 'bg-blue-50');
+                card.classList.remove('border-gray-200');
+            } else {
+                card.classList.remove('selected', 'border-blue-500', 'bg-blue-50');
+                card.classList.add('border-gray-200');
+            }
+        });
+    }
+    
+    // Event listeners para checkboxes
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectionState);
+    });
+    
+    // Seleccionar todos
+    if (selectAllBtn) {
+        selectAllBtn.addEventListener('click', function() {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            updateSelectionState();
+        });
+    }
+    
+    // Limpiar selección
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', function() {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateSelectionState();
+        });
+    }
+    
+    // Confirmación al enviar formulario
+    if (form) {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const selectedUsers = document.querySelectorAll('input[name="selected_users"]:checked');
+            if (selectedUsers.length === 0) {
+                await DESSModal.warning('Debe seleccionar al menos un usuario.', 'Selección Requerida');
+                return;
+            }
+            
+            const solutionName = '{{ solution.name|escapejs }}';
+            const confirmMessage = `¿Confirma asignar la solución "${solutionName}" a ${selectedUsers.length} usuario(s) seleccionado(s)?`;
+            
+            const confirmed = await DESSModal.confirm(
+                confirmMessage,
+                'Confirmar Asignación'
+            );
+            
+            if (confirmed) {
+                // Mostrar loading en el botón
+                assignBtn.disabled = true;
+                assignBtn.textContent = 'Asignando...';
+                
+                // Enviar formulario
+                this.submit();
+            }
+        });
+    }
+    
+    // Inicializar estado
+    updateSelectionState();
+    
+    // Auto-ocultar mensajes después de 5 segundos
+    setTimeout(() => {
+        const messages = document.querySelectorAll('.fixed.top-20 > div');
+        messages.forEach(msg => {
+            msg.style.transition = 'opacity 0.5s ease-out';
+            msg.style.opacity = '0';
+            setTimeout(() => msg.remove(), 500);
+        });
+    }, 5000);
+});
+
+console.log('Formulario de asignación de solución DESS cargado correctamente');
+</script>
+{% endblock %}

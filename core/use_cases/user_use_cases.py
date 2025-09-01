@@ -50,6 +50,9 @@ class CreateUserUseCase(BaseUserUseCase):
             is_active=is_active
         )
         
+        # Validar específicamente para creación (requiere contraseña)
+        user.validate_for_creation()
+        
         # Guardar y retornar
         return self.user_repository.save(user)
 

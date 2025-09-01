@@ -49,111 +49,110 @@
 
 {% block content %}
 <div class="login-page">
-    <!-- Background Decorations -->
-    <div class="login-decorations">
-        <div class="decoration-icon" style="top: 10%; left: 15%;"><i class="fas fa-shield-alt"></i></div>
-        <div class="decoration-icon" style="top: 20%; right: 20%;"><i class="fas fa-network-wired"></i></div>
-        <div class="decoration-icon" style="bottom: 30%; left: 10%;"><i class="fas fa-globe"></i></div>
-        <div class="decoration-icon" style="bottom: 15%; right: 15%;"><i class="fas fa-cog"></i></div>
-        <div class="decoration-line decoration-line-1"></div>
-        <div class="decoration-line decoration-line-2"></div>
+    <!-- Logo DESS -->
+    <div class="login-logo">DESS</div>
+    
+    <!-- Decoraciones flotantes -->
+    <div class="floating-decorations">
+        <div class="decoration-icon">☁️</div>
+        <div class="decoration-icon">📁</div>
+        <div class="decoration-icon">🔒</div>
+        <div class="decoration-icon">�</div>
+        
+        <!-- Formas geométricas -->
+        <div class="geometric-shape shape-1"></div>
+        <div class="geometric-shape shape-2"></div>
+        <div class="geometric-shape shape-3"></div>
     </div>
 
-    <div class="login-container">
-        <!-- Brand Header -->
-        <div class="brand-header">
-            <div class="brand-logo">
-                <i class="fas fa-cube"></i>
-                <span>DESS</span>
-            </div>
-        </div>
-        
-        <div class="login-content">
-            <!-- Left Side - Form -->
-            <div class="login-form-section">
-                <div class="welcome-header">
-                    <h1 class="welcome-title">BIENVENIDO</h1>
-                    <p class="welcome-subtitle">Desarrollador de Ecosistemas de Soluciones Empresariales</p>
+    <!-- Contenedor principal con dos columnas -->
+    <div class="main-container">
+        <!-- Panel del formulario -->
+        <div class="login-container">
+            <h1 class="login-title">BIENVENIDO</h1>
+            <p class="login-subtitle">Desarrollador de Ecosistemas de Soluciones Empresariales</p>
+
+            <!-- Formulario de login -->
+            <form method="post" class="login-form">
+                {% csrf_token %}
+                
+                <!-- Mostrar errores si los hay -->
+                {% if form.errors %}
+                    <div class="error-message">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                {{ error }}
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label for="username" class="form-label">Usuario</label>
+                    <input type="text" 
+                           id="username" 
+                           name="username" 
+                           class="form-input" 
+                           required 
+                           autocomplete="username"
+                           value="{{ form.username.value|default:'' }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           class="form-input" 
+                           required 
+                           autocomplete="current-password">
                 </div>
 
-                <!-- Login Form -->
-                <form method="post" class="login-form">
-                    {% csrf_token %}
-                    
-                    <div class="input-group">
-                        <label for="username" class="input-label">Usuario</label>
-                        <div class="input-wrapper">
-                            <input type="text" id="username" name="username" class="form-input" required autocomplete="username">
-                            <div class="input-underline"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="input-group">
-                        <label for="password" class="input-label">Contraseña</label>
-                        <div class="input-wrapper">
-                            <input type="password" id="password" name="password" class="form-input" required autocomplete="current-password">
-                            <div class="input-underline"></div>
-                        </div>
-                    </div>
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember" class="remember-checkbox">
+                        <span>Recordar</span>
+                    </label>
+                    <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+                </div>
+                
+                <button type="submit" class="login-button">
+                    INGRESAR
+                </button>
+            </form>
+        </div>
 
-                    <div class="form-options">
-                        <label class="checkbox-wrapper">
-                            <input type="checkbox" name="remember">
-                            <span class="checkmark"></span>
-                            <span class="checkbox-label">Recordar</span>
-                        </label>
-                        <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+        <!-- Panel de ilustración -->
+        <div class="illustration-panel">
+            <!-- Ventana del navegador -->
+            <div class="browser-window">
+                <div class="browser-header">
+                    <div class="browser-dots">
+                        <div class="browser-dot red"></div>
+                        <div class="browser-dot yellow"></div>
+                        <div class="browser-dot green"></div>
                     </div>
-                    
-                    <button type="submit" class="btn-submit">
-                        INGRESAR
-                    </button>
-                </form>
+                </div>
+                <div class="browser-content">
+                    <div class="lock-icon">🔒</div>
+                    <div class="mock-inputs">
+                        <div class="mock-input"></div>
+                        <div class="mock-input"></div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Right Side - Illustration -->
-            <div class="login-illustration-section">
-                <div class="illustration-container">
-                    <!-- Browser Window -->
-                    <div class="browser-window">
-                        <div class="browser-header">
-                            <div class="browser-dots">
-                                <span class="dot"></span>
-                                <span class="dot"></span>
-                                <span class="dot"></span>
-                            </div>
-                        </div>
-                        <div class="browser-content">
-                            <div class="login-screen">
-                                <div class="screen-lock-icon">
-                                    <i class="fas fa-lock"></i>
-                                </div>
-                                <div class="screen-inputs">
-                                    <div class="screen-input">
-                                        <i class="fas fa-user"></i>
-                                        <span>xxxxxxx</span>
-                                    </div>
-                                    <div class="screen-input">
-                                        <i class="fas fa-lock"></i>
-                                        <span>• • • • • • •</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Characters -->
-                    <div class="character character-1">
-                        <div class="character-body"></div>
-                        <div class="character-head"></div>
-                        <div class="character-phone">📱</div>
-                    </div>
-                    
-                    <div class="character character-2">
-                        <div class="character-body"></div>
-                        <div class="character-head"></div>
-                        <div class="character-laptop">💻</div>
-                    </div>
+            <!-- Personajes -->
+            <div class="characters">
+                <div class="character">
+                    <div class="character-head"></div>
+                    <div class="character-body"></div>
+                    <div class="character-device">📱</div>
+                </div>
+                <div class="character">
+                    <div class="character-head"></div>
+                    <div class="character-body"></div>
+                    <div class="character-device">💻</div>
                 </div>
             </div>
         </div>

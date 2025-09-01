@@ -366,3 +366,138 @@ def user_profile(request):
         
     except Exception as e:
         return handle_api_exception(e, "Error al obtener perfil del usuario")
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def export_users_excel(request):
+    """
+    GET /api/v1/admin/export-users/
+    Exportar lista de usuarios a archivo Excel.
+    """
+    try:
+        from django.http import HttpResponse
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+        from openpyxl.utils import get_column_letter
+        from datetime import datetime
+        
+        # Verificar que el usuario sea super admin
+        if not request.user.is_super_admin():
+            return create_api_response(
+                success=False,
+                error="No tienes permisos para exportar usuarios",
+                status_code=status.HTTP_403_FORBIDDEN
+            )
+        
+        user_service = get_user_service()
+        users = user_service.get_all_users()
+        
+        # Crear workbook y worksheet
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Usuarios DESS"
+        
+        # Definir estilos
+        header_font = Font(bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="1E3A5F", end_color="1E3A5F", fill_type="solid")
+        header_alignment = Alignment(horizontal="center", vertical="center")
+        
+        border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'), 
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+        
+        # Definir headers
+        headers = [
+            'ID', 'Username', 'Nombre Completo', 'Email', 'Rol', 
+            'Estado', 'Fecha de Creación', 'Soluciones Asignadas', 
+            'Último Acceso', 'Es Super Admin'
+        ]
+        
+        # Escribir headers
+        for col, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+            cell.border = border
+        
+        # Escribir datos de usuarios
+        for row, user in enumerate(users, 2):
+            # Obtener soluciones asignadas
+            if user.is_super_admin():
+                solutions_count = "TODAS (Super Admin)"
+            else:
+                solutions_count = user.assigned_solutions.filter(
+                    usersolutionassignment__is_active=True
+                ).count()
+            
+            # Obtener último acceso si está disponible
+            last_login = "N/A"
+            if hasattr(user, 'last_login') and user.last_login:
+                last_login = user.last_login.strftime("%Y-%m-%d %H:%M:%S")
+            
+            # Datos de la fila
+            row_data = [
+                user.id,
+                user.username,
+                user.full_name,
+                user.email,
+                user.get_role_display(),
+                "Activo" if getattr(user, 'is_active', True) else "Inactivo",
+                user.created_at.strftime("%Y-%m-%d %H:%M:%S") if hasattr(user, 'created_at') else "N/A",
+                solutions_count,
+                last_login,
+                "Sí" if user.is_super_admin() else "No"
+            ]
+            
+            # Escribir datos en las celdas
+            for col, data in enumerate(row_data, 1):
+                cell = ws.cell(row=row, column=col, value=data)
+                cell.border = border
+                cell.alignment = Alignment(horizontal="left", vertical="center")
+        
+        # Ajustar ancho de columnas
+        for col in range(1, len(headers) + 1):
+            column_letter = get_column_letter(col)
+            max_length = 0
+            
+            for row in ws[column_letter]:
+                try:
+                    if len(str(row.value)) > max_length:
+                        max_length = len(str(row.value))
+                except:
+                    pass
+            
+            adjusted_width = min(max_length + 2, 50)
+            ws.column_dimensions[column_letter].width = adjusted_width
+        
+        # Agregar información adicional
+        info_row = len(users) + 3
+        ws.cell(row=info_row, column=1, value=f"Reporte generado el: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        ws.cell(row=info_row + 1, column=1, value=f"Total de usuarios: {len(users)}")
+        ws.cell(row=info_row + 2, column=1, value=f"Generado por: {request.user.full_name} ({request.user.username})")
+        
+        # Preparar respuesta HTTP
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        filename = f"usuarios_dess_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        # Guardar workbook en response
+        wb.save(response)
+        
+        return response
+        
+    except ImportError:
+        return create_api_response(
+            success=False,
+            error="La librería openpyxl no está instalada. Ejecuta: pip install openpyxl",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    except Exception as e:
+        return handle_api_exception(e, "Error al exportar usuarios a Excel")

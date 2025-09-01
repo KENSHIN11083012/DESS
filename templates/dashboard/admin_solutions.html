@@ -4,194 +4,503 @@
 {% block title %}{{ page_title }} - DESS{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<style>
+    /* Additional admin-specific styles if needed */
+    .solution-card {
+        transition: all 0.3s ease;
+    }
+    .solution-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    .status-badge {
+        transition: all 0.2s ease;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="admin-wrapper">
-    <!-- Header -->
-    <header class="admin-header">
-        <div class="header-content">
-            <div class="header-left">
-                <button class="sidebar-toggle" id="sidebar-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <h1 class="page-title">{{ page_title }}</h1>
-            </div>
-            <div class="header-right">
-                <div class="user-info">
-                    <span class="user-name">{{ user.full_name }}</span>
-                    <span class="user-role">Super Administrador</span>
-                </div>
-                <a href="{% url 'logout' %}" class="btn btn-logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Cerrar Sesión
-                </a>
-            </div>
-        </div>
-    </header>
+{% csrf_token %}
+<!-- Contenedor principal -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  
+  <!-- Header con breadcrumb y acciones -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div class="flex justify-between items-center flex-wrap gap-4">
+      <!-- Breadcrumb -->
+      <div class="flex items-center space-x-2 text-sm">
+        <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-800">Panel Principal</a>
+        <span class="text-gray-400">/</span>
+        <span class="text-gray-600">Gestión de Soluciones</span>
+      </div>
+      
+      <!-- Estadística y acción -->
+      <div class="flex items-center space-x-4">
+        <span class="text-blue-600 font-medium">{{ total_count }} solución(es)</span>
+        <a href="{% url 'admin_create_solution' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition duration-150">
+          Nueva Solución
+        </a>
+      </div>
+    </div>
+  </div>
 
-    <!-- Sidebar -->
-    <aside class="admin-sidebar" id="admin-sidebar">
-        <div class="sidebar-header">
-            <h3 class="sidebar-title">DESS Admin</h3>
+  <!-- Filtros de búsqueda -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <form method="GET" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Búsqueda -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Buscar soluciones...</label>
+          <input type="text" name="search" value="{{ search }}" 
+                 placeholder="Buscar por nombre, descripción..." 
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
         </div>
-        <nav class="sidebar-nav">
-            <a href="{% url 'admin_dashboard' %}" class="nav-item">
-                <i class="fas fa-tachometer-alt"></i>
-                <span>Panel Principal</span>
-            </a>
-            <a href="{% url 'admin_users' %}" class="nav-item">
-                <i class="fas fa-users"></i>
-                <span>Gestión de Usuarios</span>
-            </a>
-            <a href="{% url 'admin_solutions' %}" class="nav-item active">
-                <i class="fas fa-puzzle-piece"></i>
-                <span>Gestión de Soluciones</span>
-            </a>
-            <a href="{% url 'admin_dashboard' %}" class="nav-item">
-                <i class="fas fa-cog"></i>
-                <span>Gestión del Sistema</span>
-            </a>
-        </nav>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="admin-main">
-        <div class="main-content">
-            <!-- Action Bar -->
-            <div class="action-bar">
-                <div class="search-box">
-                    <form method="get" class="search-form">
-                        <input type="text" name="search" placeholder="Buscar soluciones..." value="{{ search }}" class="search-input">
-                        <select name="status" class="filter-select">
-                            <option value="">Todos los estados</option>
-                            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Activo</option>
-                            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactivo</option>
-                            <option value="maintenance" {% if status_filter == 'maintenance' %}selected{% endif %}>Mantenimiento</option>
-                        </select>
-                        <button type="submit" class="btn btn-search">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </form>
-                </div>
-                <a href="{% url 'admin_create_solution' %}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i>
-                    Nueva Solución
-                </a>
-            </div>
-
-            <!-- Solutions Grid -->
-            <div class="content-card">
-                <div class="card-header">
-                    <h3>Catálogo de Soluciones</h3>
-                    <span class="card-subtitle">{{ solutions|length }} solución(es) disponible(s)</span>
-                </div>
-                <div class="card-content">
-                    {% if solutions %}
-                        <div class="solutions-grid">
-                            {% for solution in solutions %}
-                            <div class="solution-card">
-                                <div class="solution-header">
-                                    <div class="solution-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                        <i class="fas fa-cube"></i>
-                                    </div>
-                                    <div class="solution-title">
-                                        <h4>{{ solution.name }}</h4>
-                                        <span class="solution-type">{{ solution.application_type|title }}</span>
-                                    </div>
-                                    <div class="solution-status">
-                                        <span class="status-badge {% if solution.is_active %}status-active{% else %}status-inactive{% endif %}">
-                                            {% if solution.is_active %}
-                                                <i class="fas fa-check-circle"></i> Activo
-                                            {% else %}
-                                                <i class="fas fa-pause-circle"></i> Inactivo
-                                            {% endif %}
-                                        </span>
-                                    </div>
-                                </div>
-                                
-                                <div class="solution-content">
-                                    <p class="solution-description">{{ solution.description|truncatewords:20 }}</p>
-                                    
-                                    <div class="solution-info">
-                                        <div class="info-item">
-                                            <i class="fas fa-users"></i>
-                                            <span>{{ solution.assigned_users_count }} usuario(s) asignado(s)</span>
-                                        </div>
-                                        <div class="info-item">
-                                            <i class="fas fa-calendar-alt"></i>
-                                            <span>Creado: {{ solution.created_at|date:"d/m/Y" }}</span>
-                                        </div>
-                                        {% if solution.url %}
-                                        <div class="info-item">
-                                            <i class="fas fa-link"></i>
-                                            <span>URL configurada</span>
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                
-                                <div class="solution-actions">
-                                    <a href="{% url 'admin_solution_detail' solution.id %}" class="btn btn-sm btn-info">
-                                        <i class="fas fa-eye"></i> Ver Detalles
-                                    </a>
-                                    <a href="{% url 'admin_assign_solution' solution.id %}" class="btn btn-sm btn-success">
-                                        <i class="fas fa-user-plus"></i> Asignar
-                                    </a>
-                                    <button class="btn btn-sm btn-warning" onclick="editSolution('{{ solution.id }}')">
-                                        <i class="fas fa-edit"></i> Editar
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" onclick="deleteSolution('{{ solution.id }}')">
-                                        <i class="fas fa-trash"></i> Eliminar
-                                    </button>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <div class="empty-state">
-                            <i class="fas fa-puzzle-piece fa-3x"></i>
-                            <h3>No hay soluciones disponibles</h3>
-                            <p>Comienza creando la primera solución empresarial.</p>
-                            <a href="{% url 'admin_create_solution' %}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i>
-                                Crear Primera Solución
-                            </a>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
+        
+        <!-- Filtro por estado -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por estado</label>
+          <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">Todos los estados</option>
+            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Activa</option>
+            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactiva</option>
+            <option value="maintenance" {% if status_filter == 'maintenance' %}selected{% endif %}>Mantenimiento</option>
+            <option value="error" {% if status_filter == 'error' %}selected{% endif %}>Error</option>
+          </select>
         </div>
-    </main>
+        
+        <!-- Botón de búsqueda -->
+        <div class="flex items-end">
+          <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-150">
+            Buscar
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Catálogo de Soluciones -->
+  <div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 flex items-center">
+      <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-lg font-semibold text-gray-900">Catálogo de Soluciones</h2>
+        <p class="text-sm text-gray-600">{{ total_count }} solución(es) disponible(s)</p>
+      </div>
+    </div>
+
+    {% if solutions %}
+    <div class="p-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for solution in solutions %}
+        <div class="solution-card bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all duration-300">
+          <!-- Header de la tarjeta -->
+          <div class="flex items-start justify-between mb-4">
+            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+              </svg>
+            </div>
+            
+            <!-- Estado de la solución -->
+            {% if solution.status == 'active' %}
+              <span class="status-badge inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                Activa
+              </span>
+            {% elif solution.status == 'inactive' %}
+              <span class="status-badge inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                Inactiva
+              </span>
+            {% elif solution.status == 'maintenance' %}
+              <span class="status-badge inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                Mantenimiento
+              </span>
+            {% else %}
+              <span class="status-badge inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                {{ solution.get_status_display }}
+              </span>
+            {% endif %}
+          </div>
+
+          <!-- Información de la solución -->
+          <div class="mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ solution.name }}</h3>
+            <p class="text-sm text-gray-600 line-clamp-3 mb-3">
+              {{ solution.description|truncatewords:20 }}
+            </p>
+            
+            <!-- Metadatos -->
+            <div class="space-y-1 text-xs text-gray-500">
+              <div class="flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.99 1.99 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                Tipo: {{ solution.solution_type|capfirst }}
+              </div>
+              <div class="flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Versión: {{ solution.version }}
+              </div>
+              {% if solution.created_by %}
+              <div class="flex items-center">
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                Creado por: {{ solution.created_by.full_name }}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="flex space-x-2">
+            <a href="{% url 'admin_solution_detail' solution.id %}" 
+               class="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-sm px-3 py-2 rounded-md text-center transition duration-150">
+              Ver Detalles
+            </a>
+            <a href="{% url 'admin_edit_solution' solution.id %}" 
+               class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm px-3 py-2 rounded-md transition duration-150">
+              Editar
+            </a>
+            <button onclick="deleteSolution({{ solution.id }}, '{{ solution.name }}')" 
+                    class="bg-red-100 hover:bg-red-200 text-red-600 text-sm px-3 py-2 rounded-md transition duration-150">
+              Eliminar
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% else %}
+    <div class="text-center py-12">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No hay soluciones</h3>
+      <p class="text-gray-500 mb-6">No se encontraron soluciones que coincidan con los criterios de búsqueda.</p>
+      <a href="{% url 'admin_create_solution' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-150">
+        Crear primera solución
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</main>
+
+<!-- Modal de confirmación para eliminar solución -->
+<div id="deleteSolutionModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div class="mt-3 text-center">
+      <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Eliminar Solución</h3>
+      <div class="mt-2 px-7 py-3">
+        <p class="text-sm text-gray-500" id="deleteSolutionMessage">
+          ¿Estás seguro de que deseas eliminar esta solución? Esta acción no se puede deshacer.
+        </p>
+      </div>
+      <div class="items-center px-4 py-3 space-x-2">
+        <button id="confirmDeleteSolution" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">
+          Eliminar
+        </button>
+        <button id="cancelDeleteSolution" class="px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- Scripts -->
+<!-- Modal de Éxito -->
+<div id="successModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div class="mt-3 text-center">
+      <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">¡Éxito!</h3>
+      <div class="mt-2 px-7 py-3">
+        <p class="text-sm text-gray-500" id="successMessage">
+          Operación completada exitosamente.
+        </p>
+      </div>
+      <div class="items-center px-4 py-3">
+        <button id="closeSuccessModal" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300">
+          Aceptar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Error -->
+<div id="errorModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div class="mt-3 text-center">
+      <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Error</h3>
+      <div class="mt-2 px-7 py-3">
+        <p class="text-sm text-gray-500" id="errorMessage">
+          Ha ocurrido un error inesperado.
+        </p>
+      </div>
+      <div class="items-center px-4 py-3">
+        <button id="closeErrorModal" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">
+          Aceptar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Token CSRF para peticiones AJAX -->
+{% csrf_token %}
+
+{% endblock %}
+
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Toggle sidebar
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    const sidebar = document.getElementById('admin-sidebar');
+    console.log('🚀 Inicializando gestión de soluciones...');
     
-    sidebarToggle.addEventListener('click', function() {
-        sidebar.classList.toggle('collapsed');
-    });
-
-    // Funciones para gestión de soluciones
-    window.editSolution = function(solutionId) {
-        // Implementar modal de edición o redirigir a página de edición
-        console.log('Editar solución:', solutionId);
-    };
-
-    window.deleteSolution = function(solutionId) {
-        if (confirm('¿Estás seguro de que deseas eliminar esta solución?')) {
-            // Implementar eliminación
-            console.log('Eliminar solución:', solutionId);
+    // Modal functionality
+    const modal = document.getElementById('deleteSolutionModal');
+    const confirmBtn = document.getElementById('confirmDeleteSolution');
+    const cancelBtn = document.getElementById('cancelDeleteSolution');
+    
+    // Verificar que todos los elementos existen
+    if (!modal) {
+        console.error('❌ Modal de eliminación no encontrado');
+        return;
+    }
+    
+    if (!confirmBtn) {
+        console.error('❌ Botón de confirmación no encontrado');
+        return;
+    }
+    
+    console.log('✅ Elementos del modal encontrados correctamente');
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() { 
+            console.log('🚫 Cancelando eliminación');
+            modal.classList.add('hidden');
+            window.solutionIdToDelete = null;
+        });
+    }
+    
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function() {
+            if (window.solutionIdToDelete) {
+                console.log(`🗑️ Confirmando eliminación de solución ID: ${window.solutionIdToDelete}`);
+                performSolutionDeletion(window.solutionIdToDelete);
+            } else {
+                console.warn('⚠️ No hay ID de solución para eliminar');
+            }
+        });
+    }
+    
+    // Cerrar modal al hacer clic fuera
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            console.log('🚫 Cerrando modal por clic externo');
+            modal.classList.add('hidden');
+            window.solutionIdToDelete = null;
         }
-    };
+    });
 });
-</script>
-{% endblock %}
 
+function deleteSolution(solutionId, solutionName) {
+    console.log(`🎯 Preparando eliminación: ID=${solutionId}, Nombre="${solutionName}"`);
+    
+    // Guardar ID globalmente
+    window.solutionIdToDelete = solutionId;
+    
+    // Actualizar mensaje del modal
+    const messageElement = document.getElementById('deleteSolutionMessage');
+    if (messageElement) {
+        messageElement.textContent = 
+            `¿Estás seguro de que deseas eliminar la solución "${solutionName}"? Esta acción eliminará también todas las asignaciones y no se puede deshacer.`;
+    }
+    
+    // Mostrar modal
+    const modal = document.getElementById('deleteSolutionModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        console.log('✅ Modal mostrado correctamente');
+    } else {
+        console.error('❌ No se pudo mostrar el modal');
+    }
+}
+
+function performSolutionDeletion(solutionId) {
+    console.log(`🔄 Iniciando eliminación de solución ID: ${solutionId}`);
+    
+    // Mostrar loading
+    const confirmBtn = document.getElementById('confirmDeleteSolution');
+    if (!confirmBtn) {
+        console.error('❌ Botón de confirmación no encontrado');
+        return;
+    }
+    
+    const originalText = confirmBtn.textContent;
+    confirmBtn.textContent = 'Eliminando...';
+    confirmBtn.disabled = true;
+    
+    // Obtener CSRF token
+    const csrfToken = getCsrfToken();
+    if (!csrfToken) {
+        console.error('❌ No se pudo obtener el token CSRF');
+        showErrorModal('Error: No se pudo obtener el token de seguridad');
+        confirmBtn.textContent = originalText;
+        confirmBtn.disabled = false;
+        return;
+    }
+    
+    console.log('🔒 Token CSRF obtenido correctamente');
+    
+    // Realizar petición AJAX
+    fetch('/api/admin/delete-solution/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken
+        },
+        body: `solution_id=${solutionId}`
+    })
+    .then(response => {
+        console.log(`📡 Respuesta del servidor: ${response.status}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        return response.json();
+    })
+    .then(data => {
+        console.log('📊 Datos recibidos:', data);
+        
+        if (data.success) {
+            console.log('✅ Eliminación exitosa');
+            
+            // Ocultar modal de eliminación
+            document.getElementById('deleteSolutionModal').classList.add('hidden');
+            
+            // Mostrar modal de éxito
+            showSuccessModal(data.message);
+            
+            // Recargar página después de un breve delay
+            setTimeout(() => {
+                console.log('🔄 Recargando página...');
+                window.location.reload();
+            }, 1500);
+        } else {
+            console.error('❌ Error en eliminación:', data.message);
+            showErrorModal('Error al eliminar: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('💥 Error en petición:', error);
+        showErrorModal('Error al eliminar solución: ' + error.message);
+    })
+    .finally(() => {
+        // Restaurar botón
+        confirmBtn.textContent = originalText;
+        confirmBtn.disabled = false;
+        console.log('🔄 Botón restaurado');
+    });
+}
+
+// Funciones para manejar modales de éxito y error
+function showSuccessModal(message) {
+    const modal = document.getElementById('successModal');
+    const messageElement = document.getElementById('successMessage');
+    
+    if (messageElement) {
+        messageElement.textContent = message;
+    }
+    
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+}
+
+function showErrorModal(message) {
+    const modal = document.getElementById('errorModal');
+    const messageElement = document.getElementById('errorMessage');
+    
+    if (messageElement) {
+        messageElement.textContent = message;
+    }
+    
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
+}
+
+function hideSuccessModal() {
+    const modal = document.getElementById('successModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+function hideErrorModal() {
+    const modal = document.getElementById('errorModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+// Event listeners para los botones de cerrar modales
+document.addEventListener('DOMContentLoaded', function() {
+    const closeSuccessBtn = document.getElementById('closeSuccessModal');
+    const closeErrorBtn = document.getElementById('closeErrorModal');
+    
+    if (closeSuccessBtn) {
+        closeSuccessBtn.addEventListener('click', hideSuccessModal);
+    }
+    
+    if (closeErrorBtn) {
+        closeErrorBtn.addEventListener('click', hideErrorModal);
+    }
+});
+
+function getCsrfToken() {
+    // Buscar token en formularios
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfInput) {
+        return csrfInput.value;
+    }
+    
+    // Buscar en cookies
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'csrftoken') {
+            return value;
+        }
+    }
+    
+    // Template tag como fallback
+    return '{{ csrf_token }}';
+}
+
+console.log('✅ Gestión de soluciones con Tailwind CSS cargada correctamente');
+</script>
 {% endblock %}

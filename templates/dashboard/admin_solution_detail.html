@@ -1,0 +1,440 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - DESS Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dess-professional.css' %}">
+<style>
+.detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.solution-info-card {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.solution-status {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-active {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.status-inactive {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.status-maintenance {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.stat-card {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 32px;
+    font-weight: bold;
+    color: #4338ca;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4338ca, #5b21b6);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(67, 56, 202, 0.3);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.btn-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.section-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+    margin: 0 0 20px 0;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.assignments-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.assignment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s ease;
+}
+
+.assignment-item:hover {
+    background-color: #f8fafc;
+}
+
+.assignment-item:last-child {
+    border-bottom: none;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4338ca, #5b21b6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+
+.user-details h4 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 16px;
+}
+
+.user-details p {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.assignment-date {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    color: #4338ca;
+    text-decoration: none;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.back-link:hover {
+    color: #5b21b6;
+}
+
+.back-link i {
+    margin-right: 8px;
+}
+
+.no-data {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+.access-log {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.access-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.access-item:last-child {
+    border-bottom: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <a href="{% url 'admin_solutions' %}" class="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Volver a Gestión de Soluciones
+    </a>
+
+    <!-- Información de la solución -->
+    <div class="solution-info-card">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+            <div>
+                <h1 style="margin: 0 0 10px 0; color: #1e293b;">
+                    {{ solution.name }}
+                </h1>
+                <span class="solution-status status-{{ solution.status }}">
+                    {{ solution.get_status_display }}
+                </span>
+            </div>
+            <div class="action-buttons">
+                <a href="{% url 'admin_assign_solution' solution.id %}" class="btn-action btn-primary">
+                    <i class="fas fa-user-plus"></i>
+                    Asignar Usuarios
+                </a>
+                <a href="{% url 'admin_edit_solution' solution.id %}" class="btn-action btn-warning">
+                    <i class="fas fa-edit"></i>
+                    Editar
+                </a>
+                <button class="btn-action btn-danger" data-solution-id="{{ solution.id }}">
+                    <i class="fas fa-trash"></i>
+                    Eliminar
+                </button>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: #4338ca; margin: 0 0 10px 0;">Descripción</h3>
+            <p style="color: #64748b; margin: 0; line-height: 1.6;">
+                {{ solution.description|default:"Sin descripción disponible" }}
+            </p>
+        </div>
+
+        {% if solution.access_url %}
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: #4338ca; margin: 0 0 10px 0;">URL de Acceso</h3>
+            <a href="{{ solution.access_url }}" target="_blank" style="color: #4338ca; text-decoration: none;">
+                <i class="fas fa-external-link-alt"></i>
+                {{ solution.access_url }}
+            </a>
+        </div>
+        {% endif %}
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ assignments|length }}</div>
+                <div class="stat-label">Usuarios Asignados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ access_stats|length }}</div>
+                <div class="stat-label">Accesos Recientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ solution.created_at|date:"d/m/Y" }}</div>
+                <div class="stat-label">Fecha de Creación</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ solution.updated_at|date:"d/m/Y" }}</div>
+                <div class="stat-label">Última Actualización</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usuarios asignados -->
+    <div class="section-card">
+        <h2 class="section-title">
+            <i class="fas fa-users" style="color: #4338ca;"></i>
+            Usuarios Asignados ({{ assignments|length }})
+        </h2>
+        
+        {% if assignments %}
+            <div class="assignments-list">
+                {% for assignment in assignments %}
+                <div class="assignment-item">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            {{ assignment.user.full_name|first|upper }}
+                        </div>
+                        <div class="user-details">
+                            <h4>{{ assignment.user.full_name }}</h4>
+                            <p>@{{ assignment.user.username }} • {{ assignment.user.email }}</p>
+                        </div>
+                    </div>
+                    <div class="assignment-date">
+                        Asignado: {{ assignment.assigned_at|date:"d/m/Y H:i" }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-data">
+                <i class="fas fa-user-slash" style="font-size: 48px; margin-bottom: 20px; color: #cbd5e1;"></i>
+                <h3>No hay usuarios asignados</h3>
+                <p>Esta solución no tiene usuarios asignados aún.</p>
+                <a href="{% url 'admin_assign_solution' solution.id %}" class="btn-action btn-primary" style="margin-top: 15px;">
+                    <i class="fas fa-user-plus"></i>
+                    Asignar Usuarios
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Log de accesos recientes -->
+    {% if access_stats %}
+    <div class="section-card">
+        <h2 class="section-title">
+            <i class="fas fa-history" style="color: #059669;"></i>
+            Accesos Recientes
+        </h2>
+        
+        <div class="access-log">
+            {% for access in access_stats %}
+            <div class="access-item">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        {{ access.user.full_name|first|upper }}
+                    </div>
+                    <div class="user-details">
+                        <h4>{{ access.user.full_name }}</h4>
+                        <p>@{{ access.user.username }}</p>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="color: #1e293b; font-weight: 500;">
+                        {{ access.accessed_at|date:"d/m/Y" }}
+                    </div>
+                    <div style="color: #64748b; font-size: 14px;">
+                        {{ access.accessed_at|time:"H:i" }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar event listener al botón de eliminar
+    var deleteBtn = document.querySelector('[data-solution-id]');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function() {
+            var solutionId = this.getAttribute('data-solution-id');
+            deleteSolution(solutionId);
+        });
+    }
+});
+
+function deleteSolution(solutionId) {
+    var solutionName = '{{ solution.name|escapejs }}';
+    
+    DESSModal.deleteConfirm(
+        solutionName,
+        'la solución',
+        function() {
+            // Usuario confirmó, proceder con la eliminación
+            fetch('/api/admin/delete-solution/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: 'solution_id=' + solutionId
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    DESSModal.success(
+                        'La solución ha sido eliminada exitosamente',
+                        'Eliminación Exitosa',
+                        function() {
+                            window.location.href = '/admin-panel/solutions/';
+                        }
+                    );
+                } else {
+                    DESSModal.error(data.message, 'Error al Eliminar');
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+                DESSModal.error(
+                    'Ocurrió un error inesperado al intentar eliminar la solución',
+                    'Error de Conexión'
+                );
+            });
+        }
+    );
+}
+</script>
+{% endblock %}

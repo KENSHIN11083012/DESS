@@ -27,9 +27,14 @@ dashboard_urlpatterns = [
     path('admin-panel/solutions/<int:solution_id>/edit/', dashboard_views.admin_edit_solution_view, name='admin_edit_solution'),
     path('admin-panel/solutions/<int:solution_id>/assign/', dashboard_views.admin_assign_solution_view, name='admin_assign_solution'),
     
+    # Sistema de Diseño - Documentación
+    path('admin-panel/design-system/', dashboard_views.design_system_view, name='design_system'),
+    
     # APIs AJAX
     path('api/user/profile/', dashboard_views.api_user_profile, name='api_user_profile'),
     path('api/admin/remove-assignment/', dashboard_views.api_remove_assignment, name='api_remove_assignment'),
+    path('api/admin/delete-user/', dashboard_views.api_delete_user, name='api_delete_user'),
+    path('api/admin/delete-solution/', dashboard_views.api_delete_solution, name='api_delete_solution'),
     
     # URLs de perfil - TEMPORALMENTE COMENTADAS PARA DEBUGGING
     # path('', include('infrastructure.web.profile_urls')),

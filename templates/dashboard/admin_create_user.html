@@ -4,153 +4,311 @@
 {% block title %}{{ page_title }} - DESS{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<style>
+    /* Additional admin-specific styles if needed */
+    .form-field {
+        transition: all 0.3s ease;
+    }
+    .form-field:focus-within {
+        transform: translateY(-1px);
+    }
+    .submit-btn {
+        transition: all 0.3s ease;
+    }
+    .submit-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.25);
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="admin-wrapper">
-    <!-- Header -->
-    <header class="admin-header">
-        <div class="header-content">
-            <div class="header-left">
-                <button class="sidebar-toggle" id="sidebar-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <h1 class="page-title">{{ page_title }}</h1>
-            </div>
-            <div class="header-right">
-                <div class="user-info">
-                    <span class="user-name">{{ user.full_name }}</span>
-                    <span class="user-role">Super Administrador</span>
-                </div>
-                <a href="{% url 'logout' %}" class="btn btn-logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Cerrar Sesión
-                </a>
-            </div>
+{% csrf_token %}
+<!-- Contenedor principal -->
+<main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  
+  <!-- Header con breadcrumb -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div class="flex items-center space-x-2 text-sm mb-4">
+      <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-800">Panel Principal</a>
+      <span class="text-gray-400">/</span>
+      <a href="{% url 'admin_users' %}" class="text-blue-600 hover:text-blue-800">Gestión de Usuarios</a>
+      <span class="text-gray-400">/</span>
+      <span class="text-gray-600">Crear Usuario</span>
+    </div>
+    <div class="flex items-center">
+      <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Crear Nuevo Usuario</h1>
+        <p class="text-gray-600">Completa la información para crear un nuevo usuario en el sistema</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulario de creación -->
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <form method="POST" class="space-y-6">
+      {% csrf_token %}
+      
+      <!-- Información básica -->
+      <div>
+        <h3 class="text-lg font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200">
+          Información Básica
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Nombre de usuario -->
+          <div class="form-field">
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+              Nombre de Usuario <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="username" name="username" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   placeholder="Ingresa el nombre de usuario">
+            <p class="text-xs text-gray-500 mt-1">Debe ser único en el sistema</p>
+          </div>
+
+          <!-- Email -->
+          <div class="form-field">
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+              Correo Electrónico <span class="text-red-500">*</span>
+            </label>
+            <input type="email" id="email" name="email" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   placeholder="usuario@ejemplo.com">
+            <p class="text-xs text-gray-500 mt-1">Será usado para notificaciones</p>
+          </div>
+
+          <!-- Nombre completo -->
+          <div class="form-field md:col-span-2">
+            <label for="full_name" class="block text-sm font-medium text-gray-700 mb-1">
+              Nombre Completo <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="full_name" name="full_name" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   placeholder="Nombre y apellidos completos">
+          </div>
         </div>
-    </header>
+      </div>
 
-    <!-- Sidebar -->
-    <aside class="admin-sidebar" id="admin-sidebar">
-        <div class="sidebar-header">
-            <h3 class="sidebar-title">DESS Admin</h3>
+      <!-- Configuración de acceso -->
+      <div>
+        <h3 class="text-lg font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200">
+          Configuración de Acceso
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Contraseña -->
+          <div class="form-field">
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+              Contraseña <span class="text-red-500">*</span>
+            </label>
+            <input type="password" id="password" name="password" required
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   placeholder="Contraseña segura">
+            <p class="text-xs text-gray-500 mt-1">Mínimo 8 caracteres</p>
+          </div>
+
+          <!-- Rol del usuario -->
+          <div class="form-field">
+            <label for="role" class="block text-sm font-medium text-gray-700 mb-1">
+              Rol del Usuario
+            </label>
+            <select id="role" name="role"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <option value="user">Usuario Regular</option>
+              <option value="super_admin">Super Administrador</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">Define los permisos del usuario</p>
+          </div>
         </div>
-        <nav class="sidebar-nav">
-            <a href="{% url 'admin_dashboard' %}" class="nav-item">
-                <i class="fas fa-tachometer-alt"></i>
-                <span>Panel Principal</span>
-            </a>
-            <a href="{% url 'admin_users' %}" class="nav-item active">
-                <i class="fas fa-users"></i>
-                <span>Gestión de Usuarios</span>
-            </a>
-            <a href="{% url 'admin_solutions' %}" class="nav-item">
-                <i class="fas fa-puzzle-piece"></i>
-                <span>Gestión de Soluciones</span>
-            </a>
-        </nav>
-    </aside>
+      </div>
 
-    <!-- Main Content -->
-    <main class="admin-main">
-        <div class="main-content">
-            <!-- Modern Page Header -->
-            <div class="modern-page-header">
-                <div class="breadcrumb-section">
-                    <a href="{% url 'admin_users' %}" class="breadcrumb-link">
-                        <i class="fas fa-arrow-left"></i>
-                        Gestión de Usuarios
-                    </a>
-                    <span class="breadcrumb-separator">/</span>
-                    <span class="breadcrumb-current">Crear Usuario</span>
-                </div>
+      <!-- Información adicional -->
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h4 class="text-sm font-medium text-blue-800">Información sobre roles</h4>
+            <div class="text-sm text-blue-700 mt-1">
+              <ul class="list-disc pl-5 space-y-1">
+                <li><strong>Usuario Regular:</strong> Acceso a soluciones asignadas</li>
+                <li><strong>Super Administrador:</strong> Acceso completo al sistema</li>
+              </ul>
             </div>
-
-            <!-- Create User Form Card -->
-            <div class="management-card-modern">
-                <div class="card-header-modern">
-                    <div class="header-title-section">
-                        <h2 class="card-title-modern">
-                            <i class="fas fa-user-plus"></i>
-                            Crear Nuevo Usuario
-                        </h2>
-                        <p class="card-subtitle-modern">Completa el formulario para agregar un nuevo usuario al sistema</p>
-                    </div>
-                </div>
-
-                <div class="card-content-modern">
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-
-                    <form method="post" class="modern-form">
-                        {% csrf_token %}
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control" id="username" name="username" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="full_name" class="form-label">Nombre Completo</label>
-                                <input type="text" class="form-control" id="full_name" name="full_name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="password" class="form-label">Contraseña</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="role" class="form-label">Rol del Usuario</label>
-                            <select class="form-control" id="role" name="role">
-                                <option value="user">Usuario Regular</option>
-                                <option value="super_admin">Super Administrador</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-actions">
-                            <a href="{% url 'admin_users' %}" class="btn-cancel">
-                                <i class="fas fa-times"></i>
-                                Cancelar
-                            </a>
-                            <button type="submit" class="btn-submit">
-                                <i class="fas fa-save"></i>
-                                Crear Usuario
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+          </div>
         </div>
-    </main>
-</div>
+      </div>
 
-<!-- Scripts -->
+      <!-- Botones de acción -->
+      <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+        <a href="{% url 'admin_users' %}" 
+           class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-150">
+          Cancelar
+        </a>
+        <button type="submit" 
+                class="submit-btn px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-medium transition duration-150">
+          Crear Usuario
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Mostrar mensajes si existen -->
+  {% if messages %}
+  <div class="fixed top-20 right-4 z-50 space-y-2">
+    {% for message in messages %}
+    <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow-lg p-4 
+                {% if message.tags == 'error' %}border-l-4 border-l-red-500{% endif %}
+                {% if message.tags == 'success' %}border-l-4 border-l-green-500{% endif %}
+                {% if message.tags == 'warning' %}border-l-4 border-l-yellow-500{% endif %}">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          {% if message.tags == 'error' %}
+            <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          {% elif message.tags == 'success' %}
+            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          {% elif message.tags == 'warning' %}
+            <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          {% endif %}
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-gray-800">{{ message }}</p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</main>
+{% endblock %}
+
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Toggle sidebar
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    const sidebar = document.getElementById('admin-sidebar');
+    // Validación en tiempo real
+    const form = document.querySelector('form');
+    const usernameField = document.getElementById('username');
+    const emailField = document.getElementById('email');
+    const passwordField = document.getElementById('password');
+    const fullNameField = document.getElementById('full_name');
     
-    sidebarToggle.addEventListener('click', function() {
-        sidebar.classList.toggle('collapsed');
+    // Función para validar campos
+    function validateField(field, validator, errorMessage) {
+        const isValid = validator(field.value);
+        const parent = field.parentElement;
+        let errorElement = parent.querySelector('.error-message');
+        
+        if (!isValid) {
+            field.classList.add('border-red-500');
+            field.classList.remove('border-gray-300');
+            
+            if (!errorElement) {
+                errorElement = document.createElement('p');
+                errorElement.className = 'error-message text-xs text-red-500 mt-1';
+                parent.appendChild(errorElement);
+            }
+            errorElement.textContent = errorMessage;
+        } else {
+            field.classList.remove('border-red-500');
+            field.classList.add('border-gray-300');
+            
+            if (errorElement) {
+                errorElement.remove();
+            }
+        }
+        
+        return isValid;
+    }
+    
+    // Validadores
+    usernameField.addEventListener('blur', function() {
+        validateField(this, 
+            value => value.length >= 3 && /^[a-zA-Z0-9_]+$/.test(value),
+            'El nombre de usuario debe tener al menos 3 caracteres y solo contener letras, números y guiones bajos'
+        );
     });
+    
+    emailField.addEventListener('blur', function() {
+        validateField(this,
+            value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+            'Ingresa un email válido'
+        );
+    });
+    
+    passwordField.addEventListener('blur', function() {
+        validateField(this,
+            value => value.length >= 8,
+            'La contraseña debe tener al menos 8 caracteres'
+        );
+    });
+    
+    fullNameField.addEventListener('blur', function() {
+        validateField(this,
+            value => value.trim().length >= 2,
+            'El nombre completo es requerido'
+        );
+    });
+    
+    // Validación antes de enviar
+    form.addEventListener('submit', function(e) {
+        const isUsernameValid = validateField(usernameField, 
+            value => value.length >= 3 && /^[a-zA-Z0-9_]+$/.test(value),
+            'El nombre de usuario debe tener al menos 3 caracteres y solo contener letras, números y guiones bajos'
+        );
+        
+        const isEmailValid = validateField(emailField,
+            value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+            'Ingresa un email válido'
+        );
+        
+        const isPasswordValid = validateField(passwordField,
+            value => value.length >= 8,
+            'La contraseña debe tener al menos 8 caracteres'
+        );
+        
+        const isFullNameValid = validateField(fullNameField,
+            value => value.trim().length >= 2,
+            'El nombre completo es requerido'
+        );
+        
+        if (!isUsernameValid || !isEmailValid || !isPasswordValid || !isFullNameValid) {
+            e.preventDefault();
+            
+            // Scroll al primer campo con error
+            const firstError = document.querySelector('.border-red-500');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+    });
+    
+    // Auto-ocultar mensajes después de 5 segundos
+    setTimeout(() => {
+        const messages = document.querySelectorAll('.fixed.top-20 > div');
+        messages.forEach(msg => {
+            msg.style.transition = 'opacity 0.5s ease-out';
+            msg.style.opacity = '0';
+            setTimeout(() => msg.remove(), 500);
+        });
+    }, 5000);
 });
-</script>
-{% endblock %}
 
+console.log('Crear usuario con Tailwind CSS cargado correctamente');
+</script>
 {% endblock %}

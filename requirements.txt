@@ -7,25 +7,19 @@
 
 # Framework Django
 Django==4.2
-djangorestframework==3.16.0
-djangorestframework-simplejwt==5.5.0
+python-decouple==3.8
 
 # Base de Datos (Actualmente usando SQLite, Oracle disponible)
-
-
-# Configuración y Variables de Entorno
-python-decouple==3.8
+oracledb==1.4.0
 
 # ============================================================================
 # DEPENDENCIAS API Y DOCUMENTACIÓN
 # ============================================================================
 
 # API Documentation (OpenAPI/Swagger)
-drf-spectacular==0.28.0
-
-# Validación de Esquemas JSON
-jsonschema==4.24.0
-jsonschema-specifications==2025.4.1
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.0
+drf-spectacular==0.26.5
 
 # ============================================================================
 # DEPENDENCIAS DE AUTENTICACIÓN Y SEGURIDAD
@@ -36,6 +30,9 @@ PyJWT==2.9.0
 
 # Cliente HTTP para APIs externas
 requests==2.32.4
+
+# Excel export functionality
+openpyxl==3.1.2
 
 # ============================================================================
 # DEPENDENCIAS CORE DJANGO
@@ -102,28 +99,26 @@ attrs==25.3.0
 # para desarrollo y testing:
 
 # Testing Framework
-# pytest==7.4.3
-# pytest-django==4.7.0
-# pytest-cov==4.1.0
-# factory-boy==3.3.0
+pytest==7.4.3
+pytest-django==4.7.0
+pytest-cov==4.1.0
 
 # Code Quality Tools
-# black==23.10.1
-# flake8==6.1.0
-# isort==5.12.0
+black==23.11.0
+flake8==6.1.0
 
 # Development Tools
-# django-debug-toolbar==4.2.0
-# django-extensions==3.2.3
+django-debug-toolbar==4.2.0
+django-extensions==3.2.3
 
 # Dependency Injection Framework
-# dependency-injector==4.41.0
+dependency-injector==4.41.0
 
 # Git Integration para sistema de deployment
-# GitPython==3.1.40
+GitPython==3.1.40
 
 # Process Management
-# psutil==5.9.6
+psutil==5.9.6
 
 # Oracle Database Driver (para ambiente de producción)
 
@@ -131,6 +126,14 @@ attrs==25.3.0
 # NOTAS IMPORTANTES
 # ============================================================================
 #
+# 1. Este archivo refleja el estado ACTUAL del proyecto DESS
+# 2. Dependencias marcadas como "comentadas" están disponibles en el documento
+#    de requerimientos de modernización si se necesitan en el futuro
+# 3. El sistema actualmente usa SQLite para desarrollo, Oracle está configurado
+#    pero no activo
+# 4. Todas las dependencias listadas están validadas como necesarias para
+#    el funcionamiento actual del sistema
+# 5. Para ambiente de producción, descomentar cx-Oracle y configurar DB
 # 1. Este archivo refleja el estado ACTUAL del proyecto DESS
 # 2. Dependencias marcadas como "comentadas" están disponibles en el documento
 #    de requerimientos de modernización si se necesitan en el futuro

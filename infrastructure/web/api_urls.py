@@ -12,6 +12,7 @@ from .api_user_views import (
     user_stats,
     user_login,
     user_profile,
+    export_users_excel,
 )
 
 from .api_solution_views import (
@@ -26,12 +27,16 @@ from .api_solution_views import (
     user_solutions,
 )
 
+# Importar vista de estadísticas de admin
+from .dashboard_views import admin_stats_api
+
 # URLs para usuarios
 user_patterns = [
     path('', user_list, name='api_user_list'),
     path('create/', user_create, name='api_user_create'),
     path('stats/', user_stats, name='api_user_stats'),
     path('profile/', user_profile, name='api_user_profile_jwt'),
+    path('export/', export_users_excel, name='api_export_users'),
     path('<int:user_id>/', user_detail, name='api_user_detail'),
     path('<int:user_id>/update/', user_update, name='api_user_update'),
     path('<int:user_id>/delete/', user_delete, name='api_user_delete'),
@@ -55,14 +60,22 @@ auth_patterns = [
     path('login/', user_login, name='api_auth_login'),
 ]
 
+# URLs para administración
+admin_patterns = [
+    path('stats/', admin_stats_api, name='api_admin_stats'),
+]
+
 # URLs principales de la API v1
 api_v1_patterns = [
     path('users/', include(user_patterns)),
     path('solutions/', include(solution_patterns)),
     path('auth/', include(auth_patterns)),
+    path('admin/', include(admin_patterns)),
 ]
 
 # Patrón principal
 urlpatterns = [
     path('api/v1/', include(api_v1_patterns)),
+    # Endpoint directo para compatibilidad con dashboard existente
+    path('api/admin/stats/', admin_stats_api, name='api_admin_stats_direct'),
 ]

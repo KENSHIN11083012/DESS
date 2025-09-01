@@ -15,6 +15,10 @@ class ValidationConstants:
     MAX_SOLUTION_NAME_LENGTH = 100
     MIN_SOLUTION_DESCRIPTION_LENGTH = 10
     MAX_SOLUTION_DESCRIPTION_LENGTH = 1000
+    
+    # Mensajes de validación
+    USERNAME_PATTERN_MESSAGE = "El nombre de usuario solo puede contener letras, números, puntos, guiones y guiones bajos"
+    USERNAME_REGEX = r'^[a-zA-Z0-9._-]+$'
 
 # Constantes de UI/UX
 class UIConstants:

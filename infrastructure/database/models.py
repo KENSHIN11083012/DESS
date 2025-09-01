@@ -16,9 +16,11 @@ class Solution(models.Model):
     
     TYPE_CHOICES = [
         ('web_app', 'Aplicación Web'),
-        ('api', 'API/Servicio'),
-        ('desktop', 'Aplicación de Escritorio'),
-        ('script', 'Script/Herramienta'),
+        ('desktop_app', 'Aplicación de Escritorio'),
+        ('mobile_app', 'Aplicación Móvil'),
+        ('api', 'API/Servicio Web'),
+        ('database', 'Base de Datos'),
+        ('other', 'Otro'),
     ]
     
     name = models.CharField(
@@ -54,6 +56,14 @@ class Solution(models.Model):
         blank=True,
         null=True,
         help_text="Versión actual desplegada"
+    )
+    created_by = models.ForeignKey(
+        'DESSUser',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_solutions',
+        help_text="Usuario que creó la solución"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

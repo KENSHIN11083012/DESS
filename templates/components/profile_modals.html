@@ -6,22 +6,22 @@
             <button class="close" onclick="ProfileModule.closeModal('editModal')">&times;</button>
         </div>
         
-        <form id="editForm" method="post" action="{% url 'update_profile' %}">
+        <form id="editForm" method="post" action="{% url 'update_profile' %}" class="dess-form">
             {% csrf_token %}
-            <div class="form-group">
-                <label class="form-label" for="email">Email</label>
-                <input type="email" class="form-control" id="email" name="email" value="{{ profile.email }}" required>
-                <div id="email-feedback" class="feedback"></div>
+            <div class="dess-form-group">
+                <label class="dess-form-label dess-required" for="email">Email</label>
+                <input type="email" class="dess-form-control" id="email" name="email" value="{{ profile.email }}" required>
+                <div id="email-feedback" class="dess-form-feedback"></div>
             </div>
             
-            <div class="form-group">
-                <label class="form-label" for="full_name">Nombre Completo</label>
-                <input type="text" class="form-control" id="full_name" name="full_name" value="{{ profile.full_name }}" required>
+            <div class="dess-form-group">
+                <label class="dess-form-label dess-required" for="full_name">Nombre Completo</label>
+                <input type="text" class="dess-form-control" id="full_name" name="full_name" value="{{ profile.full_name }}" required>
             </div>
             
             <div class="d-flex gap-2 justify-content-end">
-                <button type="button" class="btn-secondary" onclick="ProfileModule.closeModal('editModal')">Cancelar</button>
-                <button type="submit" class="btn-edit" id="saveProfileBtn">
+                <button type="button" class="dess-btn dess-btn-secondary" onclick="ProfileModule.closeModal('editModal')">Cancelar</button>
+                <button type="submit" class="dess-btn dess-btn-primary" id="saveProfileBtn">
                     <span class="btn-text">Guardar Cambios</span>
                     <span class="loading" style="display: none;"></span>
                 </button>
@@ -38,28 +38,28 @@
             <button class="close" onclick="ProfileModule.closeModal('passwordModal')">&times;</button>
         </div>
         
-        <form id="passwordForm" method="post" action="{% url 'change_password' %}">
+        <form id="passwordForm" method="post" action="{% url 'change_password' %}" class="dess-form">
             {% csrf_token %}
-            <div class="form-group">
-                <label class="form-label" for="current_password">Contraseña Actual</label>
-                <input type="password" class="form-control" id="current_password" name="current_password" required>
+            <div class="dess-form-group">
+                <label class="dess-form-label dess-required" for="current_password">Contraseña Actual</label>
+                <input type="password" class="dess-form-control" id="current_password" name="current_password" required>
             </div>
             
-            <div class="form-group">
-                <label class="form-label" for="new_password">Nueva Contraseña</label>
-                <input type="password" class="form-control" id="new_password" name="new_password" required>
-                <small class="text-muted">Mínimo 8 caracteres</small>
+            <div class="dess-form-group">
+                <label class="dess-form-label dess-required" for="new_password">Nueva Contraseña</label>
+                <input type="password" class="dess-form-control" id="new_password" name="new_password" required>
+                <div class="dess-form-help">Mínimo 8 caracteres</div>
             </div>
             
-            <div class="form-group">
-                <label class="form-label" for="confirm_password">Confirmar Nueva Contraseña</label>
-                <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                <div id="password-feedback" class="feedback"></div>
+            <div class="dess-form-group">
+                <label class="dess-form-label dess-required" for="confirm_password">Confirmar Nueva Contraseña</label>
+                <input type="password" class="dess-form-control" id="confirm_password" name="confirm_password" required>
+                <div id="password-feedback" class="dess-form-feedback"></div>
             </div>
             
             <div class="d-flex gap-2 justify-content-end">
-                <button type="button" class="btn-secondary" onclick="ProfileModule.closeModal('passwordModal')">Cancelar</button>
-                <button type="submit" class="btn-edit" id="savePasswordBtn">
+                <button type="button" class="dess-btn dess-btn-secondary" onclick="ProfileModule.closeModal('passwordModal')">Cancelar</button>
+                <button type="submit" class="dess-btn dess-btn-primary" id="savePasswordBtn">
                     <span class="btn-text">Cambiar Contraseña</span>
                     <span class="loading" style="display: none;"></span>
                 </button>

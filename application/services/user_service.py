@@ -13,7 +13,7 @@ from core.use_cases.user_use_cases import (
     GetUserStatsUseCase
 )
 from core.interfaces.repositories import UserRepository
-from application.dtos import CreateUserRequest, UserResponse, UserStatsResponse, UserListResponse
+from application.dtos import CreateUserRequest, UserResponse, UserStatsResponse, UserListResponse, UpdateUserRequest
 
 
 class UserService:
@@ -49,7 +49,7 @@ class UserService:
     
     def get_user(self, user_id: int) -> Optional[UserResponse]:
         """Obtener un usuario por ID."""
-        user = self.get_user_use_case.execute(user_id)
+        user = self.get_user_use_case.execute_by_id(user_id)
         return self._user_to_response(user) if user else None
     
     def list_users(self, page: int = 1, page_size: int = 10) -> UserListResponse:
@@ -78,6 +78,26 @@ class UserService:
             super_admins=stats['super_admins'],
             regular_users=stats['regular_users']
         )
+    
+    def update_user(self, user_id: int, request: UpdateUserRequest) -> UserResponse:
+        """Actualizar un usuario existente."""
+        # Preparar datos de actualización
+        updates = {}
+        if request.full_name is not None:
+            updates['full_name'] = request.full_name
+        if request.email is not None:
+            updates['email'] = request.email
+        if request.role is not None:
+            updates['role'] = request.role
+        if request.is_active is not None:
+            updates['is_active'] = request.is_active
+        
+        user = self.update_user_use_case.execute(user_id, **updates)
+        return self._user_to_response(user)
+    
+    def delete_user(self, user_id: int) -> bool:
+        """Eliminar un usuario."""
+        return self.delete_user_use_case.execute(user_id)
     
     def _user_to_response(self, user: User) -> UserResponse:
         """Convertir entidad User a UserResponse DTO."""

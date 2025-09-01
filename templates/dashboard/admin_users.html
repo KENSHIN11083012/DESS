@@ -4,299 +4,310 @@
 {% block title %}{{ page_title }} - DESS{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<style>
+    /* Additional admin-specific styles if needed */
+    .user-table-row {
+        transition: all 0.3s ease;
+    }
+    .user-table-row:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="admin-wrapper">
-    <!-- Header -->
-    <header class="admin-header">
-        <div class="header-content">
-            <div class="header-left">
-                <button class="sidebar-toggle" id="sidebar-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <h1 class="page-title">{{ page_title }}</h1>
-            </div>
-            <div class="header-right">
-                <div class="user-info">
-                    <span class="user-name">{{ user.full_name }}</span>
-                    <span class="user-role">Super Administrador</span>
-                </div>
-                <a href="{% url 'logout' %}" class="btn btn-logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Cerrar Sesión
+{% csrf_token %}
+<!-- Contenedor principal -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  
+  <!-- Header con breadcrumb y acciones -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div class="flex justify-between items-center flex-wrap gap-4">
+      <!-- Breadcrumb -->
+      <div class="flex items-center space-x-2 text-sm">
+        <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-800">Panel Principal</a>
+        <span class="text-gray-400">/</span>
+        <span class="text-gray-600">Gestión de Usuarios</span>
+      </div>
+      
+      <!-- Estadística y acción -->
+      <div class="flex items-center space-x-4">
+        <span class="text-blue-600 font-medium">{{ total_count }} usuario(s)</span>
+        <a href="{% url 'admin_create_user' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition duration-150">
+          Crear Usuario
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros de búsqueda -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <form method="GET" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Búsqueda -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Buscar por nombre, usuario...</label>
+          <input type="text" name="search" value="{{ search }}" 
+                 placeholder="Buscar usuarios..." 
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        
+        <!-- Filtro por rol -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por rol</label>
+          <select name="role" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">Todos los roles</option>
+            <option value="user" {% if role_filter == 'user' %}selected{% endif %}>Usuario</option>
+            <option value="super_admin" {% if role_filter == 'super_admin' %}selected{% endif %}>Super Administrador</option>
+          </select>
+        </div>
+        
+        <!-- Filtro por estado -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por estado</label>
+          <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="">Todos los estados</option>
+            <option value="active">Activo</option>
+            <option value="inactive">Inactivo</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="flex justify-end">
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-150">
+          Buscar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Lista de Usuarios -->
+  <div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-semibold text-gray-900">Lista de Usuarios</h2>
+      <p class="text-sm text-gray-600">Gestiona todos los usuarios del sistema</p>
+    </div>
+
+    {% if users %}
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avatar</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Información de Usuario</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre Completo</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rol del Sistema</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Soluciones</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for target_user in users %}
+          <tr class="user-table-row hover:bg-gray-50">
+            <!-- Avatar -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <span class="text-blue-600 font-medium text-sm">
+                  {{ target_user.full_name|first|upper }}
+                </span>
+              </div>
+            </td>
+            
+            <!-- Información de Usuario -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div>
+                <div class="text-sm font-medium text-gray-900">{{ target_user.username }}</div>
+                <div class="text-sm text-gray-500">{{ target_user.email }}</div>
+              </div>
+            </td>
+            
+            <!-- Nombre Completo -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{ target_user.full_name }}</div>
+            </td>
+            
+            <!-- Rol del Sistema -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              {% if target_user.role == 'super_admin' %}
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                  Super Administrador
+                </span>
+              {% else %}
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                  Usuario
+                </span>
+              {% endif %}
+            </td>
+            
+            <!-- Soluciones -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              {% if target_user.role == 'super_admin' %}
+                <span class="text-sm text-gray-500">Todas</span>
+              {% else %}
+                <span class="text-sm text-gray-900">
+                  {{ target_user.assigned_solutions.count }}
+                </span>
+              {% endif %}
+            </td>
+            
+            <!-- Estado -->
+            <td class="px-6 py-4 whitespace-nowrap">
+              {% if target_user.is_active %}
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                  Activo
+                </span>
+              {% else %}
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                  Inactivo
+                </span>
+              {% endif %}
+            </td>
+            
+            <!-- Acciones -->
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <div class="flex space-x-2">
+                <a href="{% url 'admin_user_detail' target_user.id %}" 
+                   class="text-blue-600 hover:text-blue-900 transition duration-150">
+                  Ver
                 </a>
-            </div>
-        </div>
-    </header>
+                {% if target_user.id != user.id %}
+                <button onclick="deleteUser({{ target_user.id }}, '{{ target_user.username }}')" 
+                        class="text-red-600 hover:text-red-900 transition duration-150">
+                  Eliminar
+                </button>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-12">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No hay usuarios</h3>
+      <p class="text-gray-500 mb-6">No se encontraron usuarios que coincidan con los criterios de búsqueda.</p>
+      <a href="{% url 'admin_create_user' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-150">
+        Crear primer usuario
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</main>
 
-    <!-- Sidebar -->
-    <aside class="admin-sidebar" id="admin-sidebar">
-        <div class="sidebar-header">
-            <h3 class="sidebar-title">DESS Admin</h3>
-        </div>
-        <nav class="sidebar-nav">
-            <a href="{% url 'admin_dashboard' %}" class="nav-item">
-                <i class="fas fa-tachometer-alt"></i>
-                <span>Panel Principal</span>
-            </a>
-            <a href="{% url 'admin_users' %}" class="nav-item active">
-                <i class="fas fa-users"></i>
-                <span>Gestión de Usuarios</span>
-            </a>
-            <a href="{% url 'admin_solutions' %}" class="nav-item">
-                <i class="fas fa-puzzle-piece"></i>
-                <span>Gestión de Soluciones</span>
-            </a>
-        </nav>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="admin-main layout-compact">
-        <div class="main-content">
-            <!-- Modern Page Header -->
-            <div class="modern-page-header">
-                <div class="breadcrumb-section">
-                    <a href="{% url 'admin_dashboard' %}" class="breadcrumb-link">
-                        <i class="fas fa-arrow-left"></i>
-                        Panel Principal
-                    </a>
-                    <span class="breadcrumb-separator">/</span>
-                    <span class="breadcrumb-current">Gestión de Usuarios</span>
-                </div>
-                <div class="page-actions">
-                    <div class="stats-badge">
-                        <i class="fas fa-users"></i>
-                        <span>{{ users|length }} usuario(s)</span>
-                    </div>
-                    <a href="{% url 'admin_create_user' %}" class="btn-primary-modern">
-                        <i class="fas fa-plus"></i>
-                        Crear Usuario
-                    </a>
-                </div>
-            </div>
-
-            <!-- Modern Users Table Card -->
-            <div class="management-card-modern">
-                <div class="card-header-modern">
-                    <div class="header-title-section">
-                        <h2 class="card-title-modern">
-                            <i class="fas fa-users"></i>
-                            Lista de Usuarios
-                        </h2>
-                        <p class="card-subtitle-modern">Gestiona todos los usuarios del sistema</p>
-                    </div>
-                    <div class="header-actions-section">
-                        <div class="search-filters-modern">
-                            <div class="search-box-modern">
-                                <i class="fas fa-search search-icon"></i>
-                                <input type="text" 
-                                       class="search-input-enhanced" 
-                                       placeholder="Buscar por nombre, usuario..."
-                                       value="{{ search }}">
-                            </div>
-                            <select class="filter-select-enhanced">
-                                <option value="">Todos los roles</option>
-                                <option value="super_admin" {% if role_filter == 'super_admin' %}selected{% endif %}>Super Admin</option>
-                                <option value="user" {% if role_filter == 'user' %}selected{% endif %}>Usuario</option>
-                            </select>
-                            <select class="filter-select-enhanced">
-                                <option value="">Todos los estados</option>
-                                <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Activo</option>
-                                <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactivo</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-content-modern">
-                    {% if users %}
-                        <div class="table-container-modern">
-                            <table class="enhanced-table">
-                                <thead class="table-head-enhanced">
-                                    <tr>
-                                        <th class="text-center">Avatar</th>
-                                        <th>Información de Usuario</th>
-                                        <th class="col-full-name">Nombre Completo</th>
-                                        <th>Rol del Sistema</th>
-                                        <th class="col-solutions">Soluciones</th>
-                                        <th>Estado</th>
-                                        <th class="text-center">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="table-body-enhanced">
-                                    {% for user_data in users %}
-                                    <tr class="table-row-enhanced">
-                                        <td class="avatar-container-modern">
-                                            <div class="user-avatar-enhanced">
-                                                {{ user_data.username|first|upper }}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="user-info-enhanced">
-                                                <span class="username-display">{{ user_data.username }}</span>
-                                                <span class="email-display">{{ user_data.email }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="col-full-name">
-                                            <span class="full-name-display">{{ user_data.full_name }}</span>
-                                        </td>
-                                        <td>
-                                            {% if user_data.role == 'super_admin' %}
-                                                <span class="role-badge-enhanced role-admin-enhanced">
-                                                    <i class="fas fa-crown"></i>
-                                                    Super Admin
-                                                </span>
-                                            {% else %}
-                                                <span class="role-badge-enhanced role-user-enhanced">
-                                                    <i class="fas fa-user"></i>
-                                                    Usuario
-                                                </span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="col-solutions">
-                                            <span class="solutions-badge-enhanced">
-                                                <i class="fas fa-puzzle-piece"></i>
-                                                {{ user_data.solutions_count|default:0 }} solución(es)
-                                            </span>
-                                        </td>
-                                        <td>
-                                            {% if user_data.is_active %}
-                                                <span class="status-badge-enhanced status-active-enhanced">
-                                                    <i class="fas fa-check-circle"></i>
-                                                    Activo
-                                                </span>
-                                            {% else %}
-                                                <span class="status-badge-enhanced status-inactive-enhanced">
-                                                    <i class="fas fa-times-circle"></i>
-                                                    Inactivo
-                                                </span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <div class="action-buttons-enhanced">
-                                                <a href="{% url 'admin_user_detail' user_data.id %}" 
-                                                   class="action-btn-enhanced btn-view-enhanced" 
-                                                   title="Ver Detalles">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <button class="action-btn-enhanced btn-edit-enhanced" 
-                                                        title="Editar Usuario" 
-                                                        onclick="editUser('{{ user_data.id }}')">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                {% if user_data.role != 'super_admin' %}
-                                                <button class="action-btn-enhanced btn-delete-enhanced" 
-                                                        title="Eliminar Usuario" 
-                                                        onclick="deleteUser('{{ user_data.id }}')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                                {% endif %}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="empty-state-modern">
-                            <div class="empty-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <h3 class="empty-title">No hay usuarios registrados</h3>
-                            <p class="empty-description">Comienza creando el primer usuario del sistema.</p>
-                            <a href="{% url 'admin_create_user' %}" class="btn-primary-modern">
-                                <i class="fas fa-plus"></i>
-                                Crear Primer Usuario
-                            </a>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </main>
+<!-- Modal de confirmación para eliminar usuario -->
+<div id="deleteUserModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div class="mt-3 text-center">
+      <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+        <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Eliminar Usuario</h3>
+      <div class="mt-2 px-7 py-3">
+        <p class="text-sm text-gray-500" id="deleteUserMessage">
+          ¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.
+        </p>
+      </div>
+      <div class="items-center px-4 py-3 space-x-2">
+        <button id="confirmDeleteUser" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">
+          Eliminar
+        </button>
+        <button id="cancelDeleteUser" class="px-4 py-2 bg-gray-300 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
+{% endblock %}
 
-<!-- Scripts -->
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Toggle sidebar
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    const sidebar = document.getElementById('admin-sidebar');
-    const adminMain = document.querySelector('.admin-main');
+    // Modal functionality
+    const modal = document.getElementById('deleteUserModal');
+    const confirmBtn = document.getElementById('confirmDeleteUser');
+    const cancelBtn = document.getElementById('cancelDeleteUser');
+    let userIdToDelete = null;
     
-    if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener('click', function() {
-            // En desktop, colapsa el sidebar
-            if (window.innerWidth > 1024) {
-                sidebar.classList.toggle('collapsed');
-                if (adminMain) {
-                    adminMain.classList.toggle('sidebar-collapsed');
-                }
-            } else {
-                // En móvil, muestra/oculta el sidebar
-                sidebar.classList.toggle('show');
-            }
-        });
+    if (cancelBtn) {
+        cancelBtn.onclick = function() { 
+            modal.classList.add('hidden');
+            userIdToDelete = null;
+        };
     }
     
-    // Cerrar sidebar en móvil al hacer clic fuera
-    document.addEventListener('click', function(e) {
-        if (window.innerWidth <= 1024) {
-            if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
-                sidebar.classList.remove('show');
+    if (confirmBtn) {
+        confirmBtn.onclick = function() {
+            if (userIdToDelete) {
+                performUserDeletion(userIdToDelete);
             }
-        }
-    });
-    
-    // Manejar cambios de tamaño de ventana
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 1024) {
-            sidebar.classList.remove('show');
-            sidebar.classList.remove('collapsed');
-            if (adminMain) {
-                adminMain.classList.remove('sidebar-collapsed');
-            }
-        }
-    });
-
-    // Funciones para gestión de usuarios
-    window.editUser = function(userId) {
-        // Implementar modal de edición o redirigir a página de edición
-        console.log('Editar usuario:', userId);
-        // TODO: Implementar modal de edición
-    };
-
-    window.deleteUser = function(userId) {
-        if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-            // Implementar eliminación
-            console.log('Eliminar usuario:', userId);
-            // TODO: Implementar eliminación via AJAX
-        }
-    };
-    
-    // Filtros de búsqueda
-    const searchInput = document.querySelector('.search-input-enhanced');
-    const roleFilter = document.querySelector('.filter-select-enhanced');
-    
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            // TODO: Implementar filtrado en tiempo real
-            console.log('Filtrar por:', this.value);
-        });
+        };
     }
     
-    if (roleFilter) {
-        roleFilter.addEventListener('change', function() {
-            // TODO: Implementar filtrado por rol
-            console.log('Filtrar por rol:', this.value);
-        });
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.classList.add('hidden');
+            userIdToDelete = null;
+        }
     }
 });
-</script>
-{% endblock %}
 
+function deleteUser(userId, username) {
+    userIdToDelete = userId;
+    document.getElementById('deleteUserMessage').textContent = 
+        `¿Estás seguro de que deseas eliminar al usuario "${username}"? Esta acción no se puede deshacer.`;
+    document.getElementById('deleteUserModal').classList.remove('hidden');
+}
+
+function performUserDeletion(userId) {
+    // Mostrar loading
+    const confirmBtn = document.getElementById('confirmDeleteUser');
+    const originalText = confirmBtn.textContent;
+    confirmBtn.textContent = 'Eliminando...';
+    confirmBtn.disabled = true;
+    
+    // Realizar petición AJAX
+    fetch('/api/admin/delete-user/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: `user_id=${userId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Ocultar modal
+            document.getElementById('deleteUserModal').classList.add('hidden');
+            
+            // Recargar página para mostrar cambios
+            window.location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al eliminar usuario');
+    })
+    .finally(() => {
+        // Restaurar botón
+        confirmBtn.textContent = originalText;
+        confirmBtn.disabled = false;
+    });
+}
+
+console.log('Gestión de usuarios con Tailwind CSS cargada correctamente');
+</script>
 {% endblock %}

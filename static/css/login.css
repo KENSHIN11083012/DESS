@@ -1,597 +1,486 @@
-/* 
- * Modern Login Page Styles for DESS
- * Inspired by contemporary design with DESS color palette
- */
+/* DESS Login - Rediseño Moderno y Profesional */
 
-/* Variables de colores DESS */
-:root {
-    --dess-primary: #1E3A5F;
-    --dess-secondary: #4A9EE0;
-    --dess-light: #7DB3E8;
-    --dess-gradient: linear-gradient(135deg, #4A9EE0 0%, #7DB3E8 100%);
-    --dess-gradient-reverse: linear-gradient(135deg, #7DB3E8 0%, #4A9EE0 100%);
-    --background-light: #f8f9fa;
-    --text-dark: #2c3e50;
-    --text-light: #6c757d;
-    --white: #ffffff;
-    --shadow: rgba(30, 58, 95, 0.1);
-    --shadow-strong: rgba(30, 58, 95, 0.2);
-}
-
-/* Ocultar navegación principal */
-.login-page .navbar {
-    display: none !important;
-}
-
-/* Eliminar padding del main contenedor */
-.login-page main {
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-/* Eliminar cualquier padding del container */
-.login-page .container,
-.login-page .container-fluid {
-    padding: 0 !important;
-    margin: 0 !important;
-    max-width: 100% !important;
-}
-
-/* Página principal */
-.login-page {
-    background: var(--dess-gradient);
-    min-height: 100vh;
-    height: 100vh;
-    position: relative;
-    overflow: hidden;
+/* Reset y configuración base */
+* {
     margin: 0;
     padding: 0;
-}
-
-/* Asegurar que body y html no tengan márgenes */
-.login-page,
-.login-page body,
-.login-page html {
-    margin: 0 !important;
-    padding: 0 !important;
     box-sizing: border-box;
-    height: 100% !important;
-    overflow: hidden !important;
 }
 
-/* Ocultar footer completamente */
-.login-page footer {
-    display: none !important;
-}
-
-/* Decoraciones de fondo */
-.login-decorations {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+body, html {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     height: 100%;
-    pointer-events: none;
-    z-index: 1;
+    overflow: hidden;
 }
 
-.decoration-icon {
-    position: absolute;
-    font-size: 2rem;
-    color: rgba(255, 255, 255, 0.1);
-    animation: float 6s ease-in-out infinite;
+/* Página principal con diseño moderno */
+.login-page {
+    min-height: 100vh;
+    background: #f8f9fa;
+    display: flex;
+    position: relative;
+    overflow: hidden;
 }
 
-.decoration-icon:nth-child(2) { animation-delay: -2s; }
-.decoration-icon:nth-child(3) { animation-delay: -4s; }
-.decoration-icon:nth-child(4) { animation-delay: -1s; }
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-}
-
-.decoration-line {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 2px;
-}
-
-.decoration-line-1 {
-    width: 200px;
-    height: 2px;
-    top: 25%;
-    right: 10%;
-    transform: rotate(45deg);
-}
-
-.decoration-line-2 {
-    width: 150px;
-    height: 2px;
-    bottom: 40%;
-    left: 5%;
-    transform: rotate(-30deg);
-}
-
-/* Container principal */
-.login-container {
+/* Panel izquierdo - Formulario */
+.login-left-panel {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background: white;
     position: relative;
     z-index: 2;
-    height: 100vh;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
+}
+
+/* Panel derecho - Ilustración */
+.login-right-panel {
+    flex: 1.2;
+    background: linear-gradient(135deg, #5B9BD5 0%, #4472C4 100%);
     display: flex;
-    flex-direction: column;
+    align-items: center;
     justify-content: center;
+    position: relative;
+    overflow: hidden;
 }
 
-/* Brand Header */
-.brand-header {
+/* Logo en el panel izquierdo */
+.login-logo-left {
     position: absolute;
-    top: 2rem;
-    left: 2rem;
-    z-index: 3;
-}
-
-.brand-logo {
+    top: 40px;
+    left: 40px;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    color: white;
-    font-size: 1.5rem;
-    font-weight: 700;
-    text-decoration: none;
+    gap: 12px;
 }
 
-.brand-logo i {
-    font-size: 2rem;
-    color: var(--dess-light);
-}
-
-/* Contenido principal */
-.login-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
+.login-logo-left .logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #5B9BD5 0%, #4472C4 100%);
+    border-radius: 10px;
+    display: flex;
     align-items: center;
-    width: 100%;
-    flex: 1;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
 }
 
-/* Sección del formulario */
-.login-form-section {
-    background: white;
-    border-radius: 24px;
-    padding: 3rem;
-    box-shadow: 0 20px 60px var(--shadow-strong);
-    max-width: 500px;
-    margin-left: auto;
-}
-
-.welcome-header {
-    margin-bottom: 3rem;
-}
-
-.welcome-title {
-    font-size: 2.5rem;
+.login-logo-left .logo-text {
+    font-size: 24px;
     font-weight: 700;
-    color: var(--dess-primary);
-    margin-bottom: 0.5rem;
-    letter-spacing: 1px;
+    color: #2c3e50;
+    letter-spacing: -0.5px;
 }
 
-.welcome-subtitle {
-    color: var(--text-light);
-    font-size: 0.95rem;
-    line-height: 1.4;
+/* Contenedor del formulario */
+.login-form-container {
+    width: 100%;
+    max-width: 400px;
 }
 
-/* Formulario */
+/* Título y subtítulo */
+.login-header {
+    margin-bottom: 40px;
+}
+
+.login-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.login-subtitle {
+    font-size: 16px;
+    color: #718096;
+    line-height: 1.5;
+}
+
+/* Formulario moderno */
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 24px;
 }
 
-.input-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.input-label {
-    color: var(--dess-primary);
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-.input-wrapper {
+/* Grupos de campos modernos */
+.form-group {
     position: relative;
+}
+
+.form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #4a5568;
+    margin-bottom: 8px;
+}
+
+.form-input-wrapper {
+    position: relative;
+}
+
+.form-input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0aec0;
+    font-size: 18px;
 }
 
 .form-input {
     width: 100%;
-    padding: 1rem 0 0.5rem 0;
-    border: none;
-    border-bottom: 2px solid #e1e5e9;
-    background: transparent;
-    font-size: 1rem;
-    color: var(--text-dark);
-    transition: border-color 0.3s ease;
+    padding: 12px 16px 12px 48px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 16px;
+    color: #2d3748;
+    background: #f7fafc;
+    transition: all 0.3s ease;
     outline: none;
 }
 
 .form-input:focus {
-    border-bottom-color: var(--dess-secondary);
+    border-color: #5B9BD5;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(91, 155, 213, 0.1);
 }
 
-.form-input:focus + .input-underline {
-    transform: scaleX(1);
-}
-
-.input-underline {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: var(--dess-gradient);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.3s ease;
-}
-
-.password-dots {
-    position: absolute;
-    top: 1rem;
-    left: 0;
-    color: var(--text-light);
-    font-size: 1.2rem;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.form-input[type="password"]:not(:placeholder-shown) + .input-underline + .password-dots {
-    opacity: 1;
-}
-
-/* Opciones del formulario */
+/* Opciones del formulario mejoradas */
 .form-options {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 1rem 0;
+    margin: 8px 0;
 }
 
-.checkbox-wrapper {
+.remember-me {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 8px;
     cursor: pointer;
 }
 
-.checkbox-wrapper input[type="checkbox"] {
-    display: none;
+.remember-checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: #5B9BD5;
+    cursor: pointer;
 }
 
-.checkmark {
-    width: 18px;
-    height: 18px;
-    border: 2px solid var(--text-light);
-    border-radius: 3px;
-    position: relative;
-    transition: all 0.3s ease;
-}
-
-.checkbox-wrapper input[type="checkbox"]:checked + .checkmark {
-    background: var(--dess-secondary);
-    border-color: var(--dess-secondary);
-}
-
-.checkbox-wrapper input[type="checkbox"]:checked + .checkmark::after {
-    content: '✓';
-    position: absolute;
-    top: -2px;
-    left: 2px;
-    color: white;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.checkbox-label {
-    color: var(--text-dark);
-    font-size: 0.9rem;
+.remember-label {
+    font-size: 14px;
+    color: #4a5568;
+    user-select: none;
 }
 
 .forgot-password {
-    color: var(--dess-secondary);
+    color: #5B9BD5;
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 14px;
     font-weight: 500;
+    transition: color 0.3s;
 }
 
 .forgot-password:hover {
-    text-decoration: underline;
+    color: #4472C4;
 }
 
-/* Botón de envío */
-.btn-submit {
-    background: var(--dess-gradient);
+/* Botón de login moderno */
+.login-button {
+    background: linear-gradient(135deg, #5B9BD5 0%, #4472C4 100%);
     color: white;
     border: none;
-    padding: 1rem 2rem;
-    border-radius: 12px;
-    font-size: 1rem;
+    padding: 14px 24px;
+    border-radius: 10px;
+    font-size: 16px;
     font-weight: 600;
-    letter-spacing: 1px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(74, 158, 224, 0.3);
-}
-
-.btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(74, 158, 224, 0.4);
-}
-
-.btn-submit:active {
-    transform: translateY(0);
-}
-
-/* Sección de ilustración */
-.login-illustration-section {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.illustration-container {
+    width: 100%;
+    margin-top: 8px;
     position: relative;
-    width: 400px;
-    height: 300px;
-}
-
-/* Ventana del navegador */
-.browser-window {
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 10px 40px var(--shadow);
     overflow: hidden;
-    margin-bottom: 2rem;
 }
 
-.browser-header {
-    background: #f8f9fa;
-    padding: 1rem;
-    display: flex;
-    align-items: center;
+.login-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: left 0.5s ease;
 }
 
-.browser-dots {
-    display: flex;
-    gap: 0.5rem;
+.login-button:hover::before {
+    left: 100%;
 }
 
-.dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #ddd;
+.login-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(91, 155, 213, 0.3);
 }
 
-.dot:nth-child(1) { background: #ff5f57; }
-.dot:nth-child(2) { background: #ffbd2e; }
-.dot:nth-child(3) { background: #28ca42; }
-
-.browser-content {
-    padding: 2rem;
-    background: var(--dess-gradient);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 200px;
-}
-
-.login-screen {
+/* Contenido del panel derecho */
+.right-panel-content {
     text-align: center;
     color: white;
+    position: relative;
+    z-index: 2;
 }
 
-.screen-lock-icon {
-    font-size: 3rem;
-    margin-bottom: 1.5rem;
+.right-panel-title {
+    font-size: 40px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.right-panel-subtitle {
+    font-size: 18px;
     opacity: 0.9;
+    margin-bottom: 40px;
+    max-width: 400px;
+    line-height: 1.6;
 }
 
-.screen-inputs {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.screen-input {
-    background: rgba(255, 255, 255, 0.2);
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
+/* Ilustración moderna */
+.modern-illustration {
+    width: 400px;
+    height: 300px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    min-width: 200px;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
-.screen-input i {
-    opacity: 0.8;
-}
-
-.screen-input span {
-    flex: 1;
-    text-align: left;
-    font-family: monospace;
-}
-
-/* Personajes */
-.character {
+/* Iconos flotantes animados */
+.floating-icon {
     position: absolute;
-    width: 60px;
-    height: 80px;
+    font-size: 24px;
+    animation: floatUpDown 3s ease-in-out infinite;
 }
 
-.character-1 {
-    bottom: 10px;
+.floating-icon:nth-child(1) {
+    top: 20px;
     left: 20px;
-    animation: bounce 2s ease-in-out infinite;
+    animation-delay: 0s;
 }
 
-.character-2 {
-    bottom: 10px;
+.floating-icon:nth-child(2) {
+    top: 20px;
     right: 20px;
-    animation: bounce 2s ease-in-out infinite;
-    animation-delay: -1s;
+    animation-delay: 1s;
 }
 
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+.floating-icon:nth-child(3) {
+    bottom: 20px;
+    left: 20px;
+    animation-delay: 2s;
 }
 
-.character-body {
-    width: 40px;
-    height: 50px;
-    background: #ffd700;
-    border-radius: 20px 20px 10px 10px;
-    margin: 0 auto;
+.floating-icon:nth-child(4) {
+    bottom: 20px;
+    right: 20px;
+    animation-delay: 0.5s;
 }
 
-.character-head {
-    width: 30px;
-    height: 30px;
-    background: #ffdbac;
+/* Dashboard preview */
+.dashboard-preview {
+    width: 300px;
+    height: 200px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    position: relative;
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.preview-logo {
+    font-size: 16px;
+    font-weight: bold;
+    color: #4472C4;
+}
+
+.preview-menu {
+    display: flex;
+    gap: 8px;
+}
+
+.menu-dot {
+    width: 8px;
+    height: 8px;
+    background: #e2e8f0;
     border-radius: 50%;
-    margin: -5px auto 0;
 }
 
-.character-phone,
-.character-laptop {
+.preview-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.preview-card {
+    height: 50px;
+    background: #f7fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Elementos decorativos */
+.decoration-circle {
     position: absolute;
-    top: 30px;
-    left: -10px;
-    font-size: 1.5rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
 }
 
-.character-laptop {
-    left: -15px;
+.circle-1 {
+    width: 200px;
+    height: 200px;
+    top: -100px;
+    right: -100px;
 }
 
-/* Alertas */
-.alert {
-    border-radius: 12px;
-    border: none;
-    padding: 1rem 1.5rem;
-    margin-bottom: 1.5rem;
+.circle-2 {
+    width: 150px;
+    height: 150px;
+    bottom: -75px;
+    left: -75px;
 }
 
-.alert-danger {
-    background: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
-    border-left: 4px solid #dc3545;
+.circle-3 {
+    width: 100px;
+    height: 100px;
+    top: 50%;
+    right: 10%;
+    animation: pulse 4s ease-in-out infinite;
 }
 
-.alert-success {
-    background: rgba(25, 135, 84, 0.1);
-    color: #198754;
-    border-left: 4px solid #198754;
+/* Animaciones */
+@keyframes floatUpDown {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
 }
 
-/* Responsive Design */
+@keyframes pulse {
+    0%, 100% { 
+        opacity: 0.1;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.2;
+        transform: scale(1.1);
+    }
+}
+
+/* Responsive design */
 @media (max-width: 1024px) {
-    .nav-links {
+    .login-page {
+        flex-direction: column;
+    }
+    
+    .login-right-panel {
         display: none;
     }
     
-    .login-content {
-        grid-template-columns: 1fr;
-        gap: 2rem;
+    .login-left-panel {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
     }
     
-    .login-illustration-section {
-        order: -1;
-    }
-    
-    .illustration-container {
-        width: 300px;
-        height: 200px;
-    }
-}
-
-@media (max-width: 768px) {
-    .login-container {
-        padding: 0 1rem;
-    }
-    
-    .login-form-section {
-        padding: 2rem;
-        margin: 0;
-    }
-    
-    .welcome-title {
-        font-size: 2rem;
-    }
-    
-    .login-nav {
-        padding: 1rem 0;
-    }
-    
-    .illustration-container {
-        width: 250px;
-        height: 150px;
-    }
-    
-    .character {
-        width: 40px;
-        height: 60px;
-    }
-    
-    .character-body {
-        width: 30px;
-        height: 40px;
-    }
-    
-    .character-head {
-        width: 20px;
-        height: 20px;
+    .login-logo-left .logo-icon {
+        background: linear-gradient(135deg, #5B9BD5 0%, #4472C4 100%);
     }
 }
 
 @media (max-width: 480px) {
-    .brand-header {
+    .login-left-panel {
+        padding: 20px;
+    }
+    
+    .login-logo-left {
         position: static;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    
-    .brand-logo {
+        margin-bottom: 40px;
         justify-content: center;
-        font-size: 1.25rem;
     }
     
-    .brand-logo i {
-        font-size: 1.5rem;
+    .login-title {
+        font-size: 28px;
     }
     
-    .login-form-section {
-        padding: 1.5rem;
-        border-radius: 16px;
+    .login-subtitle {
+        font-size: 14px;
     }
     
-    .welcome-title {
-        font-size: 1.8rem;
+    .form-input {
+        font-size: 14px;
+        padding: 10px 14px 10px 42px;
     }
-    
-    .form-options {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
-    }
+}
+
+/* Estados de error */
+.form-group.error .form-input {
+    border-color: #e53e3e;
+}
+
+.form-group.error .form-input:focus {
+    box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+}
+
+.error-message {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fee;
+    border: 1px solid #fcc;
+    color: #c53030;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.error-message::before {
+    content: "⚠️";
+    font-size: 16px;
+}
+
+/* Loading state */
+.login-button.loading {
+    color: transparent;
+}
+
+.login-button.loading::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid white;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spinner 0.8s linear infinite;
+}
+
+@keyframes spinner {
+    to { transform: rotate(360deg); }
 }

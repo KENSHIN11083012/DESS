@@ -1,0 +1,579 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar Solución - DESS Admin{% endblock %}
+
+{% block extra_css %}
+<!-- Sistema de diseño DESS -->
+<link rel="stylesheet" href="{% static 'css/dess-design-system.css' %}">
+<style>
+/* Layout horizontal con tabs - siguiendo el patrón del proyecto */
+.admin-header {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header-left h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 0.875rem;
+}
+
+.user-role {
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-logout {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-logout:hover {
+    background: #dc2626;
+    color: white;
+}
+
+/* Navegación horizontal con tabs */
+.nav-tabs {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 0 2rem;
+}
+
+.nav-tabs-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-tab {
+    padding: 1rem 0;
+    color: #64748b;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.nav-tab:hover {
+    color: #1e293b;
+}
+
+.nav-tab.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+}
+
+/* Contenido principal */
+.main-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.dess-action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dess-action-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.dess-action-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.dess-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.dess-btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.dess-btn-secondary:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.dess-btn-primary {
+    background: #2563eb;
+    color: white;
+}
+
+.dess-btn-primary:hover {
+    background: #1d4ed8;
+}
+
+.dess-card {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.dess-card-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.dess-card-icon {
+    width: 40px;
+    height: 40px;
+    background: #dbeafe;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2563eb;
+    font-size: 1.125rem;
+}
+
+.dess-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+}
+
+.dess-card-subtitle {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.dess-card-content {
+    padding: 1.5rem;
+}
+
+.dess-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.dess-form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.dess-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.dess-form-label {
+    font-weight: 500;
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.dess-form-input, .dess-form-textarea, .dess-form-select {
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.dess-form-input:focus, .dess-form-textarea:focus, .dess-form-select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.dess-form-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.dess-mb-0 {
+    margin-bottom: 0;
+}
+
+.page-info {
+    text-align: right;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.alert-danger {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dess-action-bar {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+    
+    .dess-form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .nav-tabs-container {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header principal -->
+<header class="admin-header">
+    <div class="header-content">
+        <div class="header-left">
+            <h1>Editar Solución</h1>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <span class="user-name">Administrador DESS</span>
+                <span class="user-role">Super Administrador</span>
+            </div>
+            <a href="{% url 'logout' %}" class="btn btn-logout">
+                <i class="fas fa-sign-out-alt"></i>
+                Cerrar Sesión
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- Navegación con tabs horizontales -->
+<nav class="nav-tabs">
+    <div class="nav-tabs-container">
+        <a href="{% url 'admin_dashboard' %}" class="nav-tab">Panel Principal</a>
+        <a href="{% url 'admin_users' %}" class="nav-tab">Gestión de Usuarios</a>
+        <a href="{% url 'admin_solutions' %}" class="nav-tab active">Gestión de Soluciones</a>
+    </div>
+</nav>
+
+<!-- Contenido principal -->
+<div class="main-content">
+    <!-- Barra de Acciones -->
+    <div class="dess-action-bar">
+        <div class="dess-action-left">
+            <a href="{% url 'admin_solution_detail' solution.id %}" class="dess-btn dess-btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Volver al Detalle
+            </a>
+        </div>
+        <div class="dess-action-right">
+            <div class="page-info">
+                <h1 class="dess-card-title dess-mb-0">Editar Solución</h1>
+                <span class="dess-card-subtitle">{{ solution.name }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de Edición -->
+    <div class="dess-card">
+        <div class="dess-card-header">
+            <div class="dess-card-icon">
+                <i class="fas fa-edit"></i>
+            </div>
+            <div>
+                <h3 class="dess-card-title">Información de la Solución</h3>
+                <p class="dess-card-subtitle">Modifica los datos según sea necesario</p>
+            </div>
+        </div>
+        <div class="dess-card-content">
+            {% if error %}
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="post" class="dess-form">
+                {% csrf_token %}
+                        
+                        <div class="dess-form-row">
+                            <div class="dess-form-col dess-form-col-2">
+                                <div class="dess-form-group">
+                                    <label for="name" class="dess-form-label dess-required">Nombre de la Solución</label>
+                                    <input 
+                                        type="text" 
+                                        id="name" 
+                                        name="name" 
+                                        class="dess-form-control" 
+                                        value="{{ solution.name }}"
+                                        required
+                                        maxlength="100"
+                                    >
+                                    <div class="dess-form-help">Nombre descriptivo de la solución empresarial</div>
+                                </div>
+                            </div>
+                            <div class="dess-form-col">
+                                <div class="dess-form-group">
+                                    <label for="solution_type" class="dess-form-label">Tipo de Solución</label>
+                                    <select id="solution_type" name="solution_type" class="dess-form-control">
+                                        <option value="web_app" {% if solution.solution_type == 'web_app' %}selected{% endif %}>Aplicación Web</option>
+                                        <option value="desktop_app" {% if solution.solution_type == 'desktop_app' %}selected{% endif %}>Aplicación de Escritorio</option>
+                                        <option value="mobile_app" {% if solution.solution_type == 'mobile_app' %}selected{% endif %}>Aplicación Móvil</option>
+                                        <option value="api" {% if solution.solution_type == 'api' %}selected{% endif %}>API/Servicio Web</option>
+                                        <option value="database" {% if solution.solution_type == 'database' %}selected{% endif %}>Base de Datos</option>
+                                        <option value="other" {% if solution.solution_type == 'other' %}selected{% endif %}>Otro</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dess-form-group">
+                            <label for="description" class="dess-form-label">Descripción</label>
+                            <textarea 
+                                id="description" 
+                                name="description" 
+                                class="dess-form-control"
+                                rows="4"
+                                placeholder="Describe brevemente qué hace esta solución..."
+                            >{{ solution.description }}</textarea>
+                            <div class="dess-form-help">Descripción detallada de la funcionalidad de la solución</div>
+                        </div>
+
+                        <div class="dess-form-row">
+                            <div class="dess-form-col dess-form-col-2">
+                                <div class="dess-form-group">
+                                    <label for="access_url" class="dess-form-label">URL de Acceso</label>
+                                    <input 
+                                        type="url" 
+                                        id="access_url" 
+                                        name="access_url" 
+                                        class="dess-form-control" 
+                                        value="{{ solution.access_url }}"
+                                        placeholder="https://app.empresa.com/solucion"
+                                    >
+                                    <div class="dess-form-help">URL donde los usuarios accederán a la solución</div>
+                                </div>
+                            </div>
+                            <div class="dess-form-col">
+                                <div class="dess-form-group">
+                                    <label for="version" class="dess-form-label">Versión</label>
+                                    <input 
+                                        type="text" 
+                                        id="version" 
+                                        name="version" 
+                                        class="dess-form-control" 
+                                        value="{{ solution.version }}"
+                                        placeholder="1.0.0"
+                                        maxlength="50"
+                                    >
+                                    <div class="dess-form-help">Versión actual de la solución</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dess-form-row">
+                            <div class="dess-form-col dess-form-col-2">
+                                <div class="dess-form-group">
+                                    <label for="repository_url" class="dess-form-label">URL del Repositorio</label>
+                                    <input 
+                                        type="url" 
+                                        id="repository_url" 
+                                        name="repository_url" 
+                                        class="dess-form-control" 
+                                        value="{{ solution.repository_url }}"
+                                        placeholder="https://github.com/empresa/proyecto"
+                                    >
+                                    <div class="dess-form-help">URL del repositorio Git de la solución</div>
+                                </div>
+                            </div>
+                            <div class="dess-form-col">
+                                <div class="dess-form-group">
+                                    <label for="status" class="dess-form-label dess-required">Estado</label>
+                                    <select id="status" name="status" class="dess-form-control" required>
+                                        <option value="active" {% if solution.status == 'active' %}selected{% endif %}>
+                                            🟢 Activa
+                                        </option>
+                                        <option value="inactive" {% if solution.status == 'inactive' %}selected{% endif %}>
+                                            🔴 Inactiva
+                                        </option>
+                                        <option value="maintenance" {% if solution.status == 'maintenance' %}selected{% endif %}>
+                                            🟡 En Mantenimiento
+                                        </option>
+                                    </select>
+                                    <div class="dess-form-help">Estado actual de la solución</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="dess-action-bar dess-mt-4">
+                            <div class="dess-action-left"></div>
+                            <div class="dess-action-right">
+                                <a href="{% url 'admin_solution_detail' solution.id %}" class="dess-btn dess-btn-secondary">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </a>
+                                <button type="submit" class="dess-btn dess-btn-primary dess-btn-lg">
+                                    <i class="fas fa-save"></i> Guardar Cambios
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DESS Edit Solution Page - v2.0');
+    
+    // Validación del formulario
+    const form = document.querySelector('form');
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const name = document.getElementById('name').value.trim();
+            const status = document.getElementById('status').value;
+            
+            if (!name) {
+                e.preventDefault();
+                DESSModal.warning(
+                    'El nombre de la solución es obligatorio',
+                    'Campo Requerido',
+                    function() {
+                        document.getElementById('name').focus();
+                    }
+                );
+                return false;
+            }
+            
+            if (!status) {
+                e.preventDefault();
+                DESSModal.warning(
+                    'Debes seleccionar un estado para la solución',
+                    'Campo Requerido',
+                    function() {
+                        document.getElementById('status').focus();
+                    }
+                );
+                return false;
+            }
+            
+            // Validar URL si se proporciona
+            const url = document.getElementById('access_url').value.trim();
+            if (url) {
+                try {
+                    new URL(url);
+                } catch (e) {
+                    DESSModal.error(
+                        'La URL de acceso no tiene un formato válido',
+                        'URL Inválida',
+                        function() {
+                            document.getElementById('access_url').focus();
+                        }
+                    );
+                    return false;
+                }
+            }
+        });
+    }
+    
+    // Contador de caracteres para el nombre
+    const nameInput = document.getElementById('name');
+    if (nameInput) {
+        nameInput.addEventListener('input', function() {
+            const remaining = 100 - this.value.length;
+            // Mostrar advertencia si quedan pocos caracteres
+            if (remaining < 20) {
+                this.style.borderColor = '#f59e0b';
+            } else {
+                this.style.borderColor = '#e5e7eb';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

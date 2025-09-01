@@ -37,7 +37,7 @@ class DatabaseConfigManager:
                 'ENGINE': 'django.db.backends.oracle',
                 'NAME': config('ORACLE_SERVICE_NAME', default='XEPDB1'),
                 'USER': config('ORACLE_USER', default='dess_user'),
-                'PASSWORD': config('ORACLE_PASSWORD'),
+                'PASSWORD': config('ORACLE_PASSWORD', default=''),
                 'HOST': config('ORACLE_HOST', default='localhost'),
                 'PORT': config('ORACLE_PORT', default='1521'),
                 'OPTIONS': {
@@ -46,7 +46,8 @@ class DatabaseConfigManager:
                 },
                 'TEST': {
                     'USER': f"test_{config('ORACLE_USER', default='dess_user')}",
-                },                'CONN_MAX_AGE': 0,  # No persistent connections with Oracle
+                },
+                'CONN_MAX_AGE': 0,  # No persistent connections with Oracle
             }
         }
     

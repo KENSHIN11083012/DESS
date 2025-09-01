@@ -221,6 +221,13 @@ class AuditHelper:
             assignment.save()
         
         return assignment, created
+    
+    @staticmethod
+    def log_admin_action(user, action, details=''):
+        """Registrar acción administrativa"""
+        import logging
+        logger = logging.getLogger('dess.admin')
+        logger.info(f'Admin Action - User: {user.username}, Action: {action}, Details: {details}')
 
 
 def create_api_response(
