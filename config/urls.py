@@ -17,7 +17,10 @@ urlpatterns = [
     path('', include('infrastructure.web.urls')),
 ]
 
-# Servir archivos estáticos en desarrollo
+# Servir archivos media (WhiteNoise maneja los archivos estáticos automáticamente)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Solo en desarrollo, servir archivos estáticos manualmente si es necesario
 if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+    urlpatterns += staticfiles_urlpatterns()

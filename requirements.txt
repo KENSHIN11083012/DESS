@@ -120,6 +120,26 @@ GitPython==3.1.40
 # Process Management
 psutil==5.9.6
 
+# ============================================================================
+# DEPENDENCIAS DE DESPLIEGUE Y CONTENEDORES
+# ============================================================================
+
+# Docker SDK para gestión de contenedores
+docker==7.0.0
+
+# CORS para APIs de webhook
+django-cors-headers==4.3.1
+
+# Servidor WSGI para producción
+gunicorn==21.2.0
+
+# Servir archivos estáticos en producción
+whitenoise==6.6.0
+
+# Cache con Redis
+django-redis==5.4.0
+redis==5.0.1
+
 # Oracle Database Driver (para ambiente de producción)
 
 # ============================================================================

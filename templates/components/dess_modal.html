@@ -1,0 +1,76 @@
+{% comment %}
+DESS Modal Component
+Uso: {% include 'components/dess_modal.html' with modal_id="miModal" title="Título del Modal" %}
+{% endcomment %}
+
+<div id="{{ modal_id|default:'dessModal' }}" class="dess-modal-overlay">
+  <div class="dess-modal" style="{% if width %}width: {{ width }};{% endif %} {% if max_width %}max-width: {{ max_width }};{% endif %}">
+    
+    <div class="dess-modal-header">
+      <h4 class="dess-modal-title">{{ title|default:'Modal' }}</h4>
+      <button type="button" class="dess-modal-close" onclick="closeModal('{{ modal_id|default:'dessModal' }}')">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="dess-modal-body">
+      {% if content %}
+        {{ content|safe }}
+      {% endif %}
+      
+      {% block modal_content %}{% endblock %}
+    </div>
+    
+    {% if show_footer %}
+    <div class="dess-modal-footer">
+      {% if footer_content %}
+        {{ footer_content|safe }}
+      {% endif %}
+      
+      {% if actions %}
+        {% for action in actions %}
+          <button type="button" 
+                  class="dess-btn dess-btn-{{ action.type|default:'primary' }}" 
+                  {% if action.onclick %}onclick="{{ action.onclick }}"{% endif %}
+                  {% if action.form %}form="{{ action.form }}"{% endif %}>
+            {{ action.label }}
+          </button>
+        {% endfor %}
+      {% else %}
+        <button type="button" class="dess-btn dess-btn-outline" onclick="closeModal('{{ modal_id|default:'dessModal' }}')">
+          Cancelar
+        </button>
+        <button type="button" class="dess-btn dess-btn-primary">
+          Confirmar
+        </button>
+      {% endif %}
+    </div>
+    {% endif %}
+    
+  </div>
+</div>
+
+<style>
+.dess-modal-close {
+  background: none;
+  border: none;
+  color: var(--dess-gray-500);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.dess-modal-close:hover {
+  color: var(--dess-gray-700);
+  background: var(--dess-gray-100);
+}
+
+.dess-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+</style>

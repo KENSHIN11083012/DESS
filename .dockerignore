@@ -1,0 +1,84 @@
+# Archivos de Git
+.git
+.gitignore
+README.md
+
+# Archivos de Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.pytest_cache/
+
+# Entornos virtuales
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Archivos temporales
+*.tmp
+temp/
+.temp/
+
+# Node modules (si los hubiera)
+node_modules/
+
+# Archivos de backup
+*.bak
+*.backup
+
+# Archivos de testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Archivos de deployment
+.deploy/
+
+# Archivos de documentación innecesarios para la imagen
+docs/
+*.md
+!requirements.txt
+
+# Logs
+logs/
+*.log
+
+# Archivos de desarrollo específicos
+debug_*.py
+test_*.py
+simulate_*.py
+check_*.py
+verify_*.py

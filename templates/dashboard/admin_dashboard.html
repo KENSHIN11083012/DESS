@@ -112,6 +112,24 @@
       </div>
     </div>
 
+    <!-- Gestión de Despliegues -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+        Gestión de Despliegues
+      </h2>
+      <div class="space-y-3">
+        <a href="{% url 'deployments_list' %}" class="block w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition duration-150 text-center">
+          Ver todos los despliegues
+        </a>
+        <a href="{% url 'create_deployment' %}" class="block text-center text-blue-600 hover:text-blue-800 py-2">
+          Crear nuevo despliegue
+        </a>
+        <a href="#" class="block text-center text-blue-600 hover:text-blue-800 py-2" onclick="deploySolutions()">
+          Gestionar webhooks
+        </a>
+      </div>
+    </div>
+
     <!-- Administración del Sistema -->
     <div class="bg-white rounded-lg shadow p-6">
       <h2 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
@@ -231,7 +249,7 @@ function createSolution() {
 }
 
 function deploySolutions() {
-    showModal('Gestionar Despliegues', 'Funcionalidad de gestión de despliegues en desarrollo.');
+    showModal('Gestión de Webhooks', 'Configura webhooks de GitHub para despliegue automático. Ve a la lista de despliegues para configurar webhooks específicos.');
 }
 
 function generateReport() {
@@ -252,51 +270,7 @@ function hideModal() {
     document.getElementById('actionModal').classList.add('hidden');
 }
 
-// Auto-refresh de estadísticas cada 30 segundos
-setInterval(function() {
-    fetch('/api/admin/stats/')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(result => {
-            if (result.success && result.data) {
-                updateDashboardStats(result.data);
-                console.log('Estadísticas actualizadas correctamente');
-            } else {
-                console.warn('No se pudieron obtener estadísticas válidas');
-            }
-        })
-        .catch(error => {
-            console.warn('Error actualizando estadísticas:', error.message);
-        });
-}, 30000);
-
-function updateDashboardStats(data) {
-    console.log('Actualizando estadísticas del dashboard:', data);
-    
-    const updateElement = (selector, value) => {
-        const element = document.querySelector(selector);
-        if (element) {
-            const newValue = value || 0;
-            if (element.textContent !== newValue.toString()) {
-                element.style.transition = 'all 0.3s ease';
-                element.style.transform = 'scale(1.1)';
-                element.textContent = newValue;
-                setTimeout(() => {
-                    element.style.transform = 'scale(1)';
-                }, 300);
-            }
-        }
-    };
-    
-    // Actualizar estadísticas principales usando las nuevas clases de Tailwind
-    updateElement('.admin-stat-card:nth-child(1) .text-3xl', data.total_users);
-    updateElement('.admin-stat-card:nth-child(2) .text-3xl', data.total_solutions);
-    updateElement('.admin-stat-card:nth-child(3) .text-3xl', data.total_assignments);
-}
+// Sistema de estadísticas eliminado
 
 console.log('Dashboard con Tailwind CSS cargado correctamente');
 </script>

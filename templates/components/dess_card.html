@@ -1,0 +1,43 @@
+{% comment %}
+DESS Card Component
+Uso: {% include 'components/dess_card.html' with title="Título" content="Contenido" %}
+{% endcomment %}
+
+<div class="dess-card {% if hover %}hover:transform hover:shadow-xl{% endif %} {% if extra_classes %}{{ extra_classes }}{% endif %}">
+  {% if title or header_content %}
+  <div class="dess-card-header">
+    {% if title %}
+      <h3 class="dess-card-title">{{ title }}</h3>
+    {% endif %}
+    {% if header_content %}
+      {{ header_content|safe }}
+    {% endif %}
+  </div>
+  {% endif %}
+  
+  <div class="dess-card-body">
+    {% if content %}
+      {{ content|safe }}
+    {% endif %}
+    
+    {% block card_content %}{% endblock %}
+  </div>
+  
+  {% if footer_content or actions %}
+  <div class="dess-card-footer">
+    {% if footer_content %}
+      {{ footer_content|safe }}
+    {% endif %}
+    
+    {% if actions %}
+      <div class="dess-card-actions">
+        {% for action in actions %}
+          <a href="{{ action.url }}" class="dess-btn dess-btn-{{ action.type|default:'primary' }}">
+            {{ action.label }}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>

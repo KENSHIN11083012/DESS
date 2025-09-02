@@ -1,6 +1,10 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 import json
+from .managers import SolutionManager, DESSUserManager, UserSolutionAssignmentManager, UserSolutionAccessManager
+
+# Importar modelos de deployment
+from .models_package.deployment import Deployment, DeploymentLog, WebhookEvent
 
 
 class Solution(models.Model):
@@ -67,12 +71,21 @@ class Solution(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    objects = SolutionManager()
 
     class Meta:
         db_table = 'dess_solutions'
         verbose_name = 'Solución'
         verbose_name_plural = 'Soluciones'
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status'], name='idx_solution_status'),
+            models.Index(fields=['solution_type'], name='idx_solution_type'),
+            models.Index(fields=['created_by'], name='idx_solution_created_by'),
+            models.Index(fields=['-created_at'], name='idx_solution_created_at'),
+            models.Index(fields=['name', 'status'], name='idx_solution_name_status'),
+        ]
 
     def is_accessible(self):
         """Verificar si la solución está accesible"""
@@ -109,11 +122,19 @@ class DESSUser(AbstractUser):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    objects = DESSUserManager()
 
     class Meta:
         db_table = 'dess_users'
         verbose_name = 'Usuario DESS'
         verbose_name_plural = 'Usuarios DESS'
+        indexes = [
+            models.Index(fields=['role'], name='idx_user_role'),
+            models.Index(fields=['email'], name='idx_user_email'),
+            models.Index(fields=['username', 'role'], name='idx_user_username_role'),
+            models.Index(fields=['is_active'], name='idx_user_is_active'),
+        ]
 
     def is_super_admin(self):
         """Verificar si el usuario es super administrador"""
@@ -152,12 +173,20 @@ class UserSolutionAssignment(models.Model):
         default=True,
         help_text="Si la asignación está activa"
     )
+    
+    objects = UserSolutionAssignmentManager()
 
     class Meta:
         db_table = 'dess_user_solution_assignments'
         verbose_name = 'Asignación de Solución'
         verbose_name_plural = 'Asignaciones de Soluciones'
         unique_together = ['user', 'solution']
+        indexes = [
+            models.Index(fields=['user', 'is_active'], name='idx_assignment_user_active'),
+            models.Index(fields=['solution', 'is_active'], name='idx_assignment_solution_active'),
+            models.Index(fields=['assigned_by'], name='idx_assignment_assigned_by'),
+            models.Index(fields=['-assigned_at'], name='idx_assignment_assigned_at'),
+        ]
     def __str__(self):
         status = "Activa" if self.is_active else "Inactiva"
         return f"{self.user.username} -> {self.solution.name} ({status})"
@@ -171,11 +200,18 @@ class UserSolutionAccess(models.Model):
     solution = models.ForeignKey(Solution, on_delete=models.CASCADE)
     accessed_at = models.DateTimeField(auto_now_add=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
+    
+    objects = UserSolutionAccessManager()
 
     class Meta:
         db_table = 'dess_user_solution_access'
         verbose_name = 'Acceso a Solución'
         verbose_name_plural = 'Accesos a Soluciones'
+        indexes = [
+            models.Index(fields=['user', '-accessed_at'], name='idx_access_user_time'),
+            models.Index(fields=['solution', '-accessed_at'], name='idx_access_solution_time'),
+            models.Index(fields=['-accessed_at'], name='idx_access_time'),
+        ]
 
     def __str__(self):
         return f"{self.user.username} -> {self.solution.name} at {self.accessed_at}"

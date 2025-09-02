@@ -1,0 +1,93 @@
+{% comment %}
+DESS Stats Card Component
+Uso: {% include 'components/dess_stats_card.html' with title="Usuarios" value=120 icon="users" color="blue" %}
+{% endcomment %}
+
+<div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 {% if extra_classes %}{{ extra_classes }}{% endif %}">
+  <div class="flex items-center">
+    <div class="flex-shrink-0">
+      <div class="w-12 h-12 bg-{{ color|default:'blue' }}-100 rounded-lg flex items-center justify-center">
+        {% if icon == 'users' %}
+          <svg class="w-6 h-6 text-{{ color|default:'blue' }}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+        {% elif icon == 'solutions' %}
+          <svg class="w-6 h-6 text-{{ color|default:'purple' }}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+          </svg>
+        {% elif icon == 'assignments' %}
+          <svg class="w-6 h-6 text-{{ color|default:'green' }}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+          </svg>
+        {% elif icon == 'activity' %}
+          <svg class="w-6 h-6 text-{{ color|default:'orange' }}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+          </svg>
+        {% else %}
+          <div class="text-{{ color|default:'blue' }}-600 text-xl">{{ custom_icon|default:'📊' }}</div>
+        {% endif %}
+      </div>
+    </div>
+    
+    <div class="ml-5">
+      <p class="text-3xl font-bold text-gray-900" {% if animate %}id="stat-{{ id|default:'value' }}"{% endif %}>
+        {{ value|default:0 }}
+      </p>
+      <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">
+        {{ title|default:'Estadística' }}
+      </p>
+      
+      {% if subtitle %}
+        <p class="text-xs text-gray-400 mt-1">{{ subtitle }}</p>
+      {% endif %}
+    </div>
+    
+    {% if trend %}
+    <div class="ml-auto">
+      <div class="flex items-center text-sm {% if trend.direction == 'up' %}text-green-600{% elif trend.direction == 'down' %}text-red-600{% else %}text-gray-500{% endif %}">
+        {% if trend.direction == 'up' %}
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path>
+          </svg>
+        {% elif trend.direction == 'down' %}
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"></path>
+          </svg>
+        {% endif %}
+        {{ trend.value }}%
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% if animate %}
+<script>
+// Animación de conteo para estadísticas
+function animateCounter(id, finalValue, duration = 1000) {
+  const element = document.getElementById(id);
+  if (!element) return;
+  
+  const startValue = 0;
+  const increment = finalValue / (duration / 16); // 60 FPS
+  let currentValue = startValue;
+  
+  const timer = setInterval(() => {
+    currentValue += increment;
+    if (currentValue >= finalValue) {
+      currentValue = finalValue;
+      clearInterval(timer);
+    }
+    element.textContent = Math.floor(currentValue);
+  }, 16);
+}
+
+// Auto-ejecutar animación cuando se carga el componente
+document.addEventListener('DOMContentLoaded', function() {
+  const statElement = document.getElementById('stat-{{ id|default:'value' }}');
+  if (statElement && {{ animate|yesno:"true,false" }}) {
+    animateCounter('stat-{{ id|default:'value' }}', {{ value|default:0 }});
+  }
+});
+</script>
+{% endif %}

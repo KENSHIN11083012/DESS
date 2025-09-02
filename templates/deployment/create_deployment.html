@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Crear Nuevo Despliegue - DESS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-field-error {
+        border-color: #ef4444;
+        background-color: #fef2f2;
+    }
+    .form-field-success {
+        border-color: #22c55e;
+        background-color: #f0fdf4;
+    }
+    .deployment-preview {
+        background-color: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 24px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Contenedor principal -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  
+  <!-- Header con breadcrumb y acciones -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div class="flex justify-between items-center flex-wrap gap-4">
+      <!-- Breadcrumb -->
+      <div class="flex items-center space-x-2 text-sm">
+        <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-800">Panel Principal</a>
+        <span class="text-gray-400">/</span>
+        <a href="{% url 'deployments_list' %}" class="text-blue-600 hover:text-blue-800">Gestión de Despliegues</a>
+        <span class="text-gray-400">/</span>
+        <span class="text-gray-600">Crear Nuevo Despliegue</span>
+      </div>
+      
+      <!-- Título y descripción -->
+      <div class="flex-1">
+        <h1 class="text-lg font-semibold text-gray-900">Crear Nuevo Despliegue</h1>
+        <p class="text-sm text-gray-600">Despliega automáticamente tu proyecto desde GitHub</p>
+      </div>
+      
+      <!-- Acción de volver -->
+      <div class="flex items-center space-x-4">
+        <a href="{% url 'deployments_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition duration-150">
+          Volver
+        </a>
+      </div>
+    </div>
+  </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Formulario Principal -->
+        <div class="lg:col-span-2">
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Configuración del Despliegue</h2>
+                    <p class="text-sm text-gray-600">Complete los campos para crear un nuevo despliegue</p>
+                </div>
+
+                <form id="deploymentForm" class="p-6 space-y-6" method="post" action="{% url 'create_deployment' %}">
+                    {% csrf_token %}
+                    
+                    <!-- Información Básica -->
+                    <div class="space-y-4">
+                        <h3 class="text-md font-medium text-gray-900 border-b pb-2">Información Básica</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Nombre del Despliegue *
+                                </label>
+                                <input type="text" id="name" name="name" required
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       placeholder="mi-aplicacion-web">
+                                <p class="mt-1 text-xs text-gray-500">Nombre único para identificar el despliegue</p>
+                            </div>
+
+                            <div>
+                                <label for="branch" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Rama *
+                                </label>
+                                <input type="text" id="branch" name="branch" value="main" required
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       placeholder="main">
+                                <p class="mt-1 text-xs text-gray-500">Rama del repositorio a desplegar</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                                Descripción
+                            </label>
+                            <textarea id="description" name="description" rows="3"
+                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                     placeholder="Descripción del proyecto y características..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Repositorio -->
+                    <div class="space-y-4">
+                        <h3 class="text-md font-medium text-gray-900 border-b pb-2">Repositorio GitHub</h3>
+                        
+                        <div class="relative">
+                            <label for="github_url" class="block text-sm font-medium text-gray-700 mb-2">
+                                URL del Repositorio *
+                            </label>
+                            <div class="flex rounded-md shadow-sm">
+                                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                                    </svg>
+                                </span>
+                                <input type="url" id="github_url" name="github_url" required
+                                       class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                                       placeholder="https://github.com/usuario/mi-proyecto.git">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">URL del repositorio público de GitHub</p>
+                            <div id="repo-status" class="mt-2 hidden">
+                                <div class="flex items-center text-sm">
+                                    <div id="repo-loading" class="hidden flex items-center text-blue-600">
+                                        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                                        Analizando repositorio...
+                                    </div>
+                                    <div id="repo-success" class="hidden flex items-center text-green-600">
+                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        Repositorio válido
+                                    </div>
+                                    <div id="repo-error" class="hidden flex items-center text-red-600">
+                                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        <span id="repo-error-text">Error al validar repositorio</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tipo de Proyecto -->
+                    <div class="space-y-4">
+                        <h3 class="text-md font-medium text-gray-900 border-b pb-2">Configuración del Proyecto</h3>
+                        
+                        <div>
+                            <label for="project_type" class="block text-sm font-medium text-gray-700 mb-2">
+                                Tipo de Proyecto
+                            </label>
+                            <select id="project_type" name="project_type" 
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Auto-detectar desde repositorio</option>
+                                <option value="django">Django</option>
+                                <option value="react">React</option>
+                                <option value="node">Node.js</option>
+                                <option value="nextjs">Next.js</option>
+                                <option value="flask">Flask</option>
+                                <option value="fastapi">FastAPI</option>
+                                <option value="static">Sitio Estático</option>
+                                <option value="docker">Docker (Dockerfile personalizado)</option>
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500">El sistema intentará detectar automáticamente el tipo de proyecto</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="port" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Puerto (Opcional)
+                                </label>
+                                <input type="number" id="port" name="port" min="1000" max="65535"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       placeholder="Auto-asignar">
+                                <p class="mt-1 text-xs text-gray-500">Puerto personalizado o auto-asignar</p>
+                            </div>
+
+                            <div>
+                                <label for="dockerfile_path" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Ruta al Dockerfile
+                                </label>
+                                <input type="text" id="dockerfile_path" name="dockerfile_path" value="Dockerfile"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       placeholder="Dockerfile">
+                                <p class="mt-1 text-xs text-gray-500">Ruta relativa al Dockerfile en el repositorio</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Variables de Entorno -->
+                    <div class="space-y-4">
+                        <h3 class="text-md font-medium text-gray-900 border-b pb-2">Variables de Entorno</h3>
+                        
+                        <div id="env-vars-container">
+                            <div class="env-var-row flex space-x-2 mb-2">
+                                <input type="text" name="env_key[]" placeholder="VARIABLE_NAME" 
+                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <input type="text" name="env_value[]" placeholder="valor" 
+                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <button type="button" onclick="removeEnvVar(this)" 
+                                        class="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <button type="button" onclick="addEnvVar()" 
+                                class="inline-flex items-center px-3 py-2 border border-dashed border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors duration-200">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                            </svg>
+                            Agregar Variable
+                        </button>
+                    </div>
+
+                    <!-- Configuración de Webhook -->
+                    <div class="space-y-4">
+                        <h3 class="text-md font-medium text-gray-900 border-b pb-2">Configuración de Webhook</h3>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="auto_deploy" name="auto_deploy" 
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="auto_deploy" class="ml-2 block text-sm text-gray-900">
+                                Activar despliegue automático en push
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-500 ml-6">Se configurará un webhook para redesplegar automáticamente cuando se haga push a la rama especificada</p>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                        <button type="button" onclick="window.history.back()" 
+                                class="px-6 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                            Cancelar
+                        </button>
+                        <button type="submit" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition duration-150">
+                            <span id="submit-text">Crear Despliegue</span>
+                            <span id="submit-loading" class="hidden">
+                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block mr-2"></div>
+                                Creando...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Panel de Vista Previa -->
+        <div class="lg:col-span-1">
+            <div class="sticky top-8">
+                <!-- Vista Previa del Despliegue -->
+                <div class="deployment-preview mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Vista Previa</h3>
+                    <div class="space-y-3 text-sm">
+                        <div>
+                            <span class="text-gray-500">Nombre:</span>
+                            <div id="preview-name" class="font-medium text-gray-900">mi-aplicacion-web</div>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Tipo:</span>
+                            <div id="preview-type" class="font-medium text-gray-900">Auto-detectar</div>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Rama:</span>
+                            <div id="preview-branch" class="font-medium text-gray-900">main</div>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">Puerto:</span>
+                            <div id="preview-port" class="font-medium text-gray-900">Auto-asignar</div>
+                        </div>
+                        <div>
+                            <span class="text-gray-500">URL de Acceso:</span>
+                            <div id="preview-url" class="font-medium text-blue-600">Se generará automáticamente</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Guía Rápida -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Guía Rápida</h3>
+                    <div class="space-y-3 text-sm text-gray-600">
+                        <div class="flex items-start space-x-2">
+                            <span class="text-blue-500 font-bold">1.</span>
+                            <span>Proporciona la URL de tu repositorio GitHub</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span class="text-blue-500 font-bold">2.</span>
+                            <span>El sistema detectará automáticamente el tipo de proyecto</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span class="text-blue-500 font-bold">3.</span>
+                            <span>Configura variables de entorno si es necesario</span>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <span class="text-blue-500 font-bold">4.</span>
+                            <span>Activa webhooks para despliegue automático</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('deploymentForm');
+    const nameInput = document.getElementById('name');
+    const projectTypeSelect = document.getElementById('project_type');
+    const branchInput = document.getElementById('branch');
+    const portInput = document.getElementById('port');
+
+    function updatePreview() {
+        if (nameInput && projectTypeSelect && branchInput && portInput) {
+            document.getElementById('preview-name').textContent = nameInput.value || 'mi-aplicacion-web';
+            document.getElementById('preview-type').textContent = projectTypeSelect.options[projectTypeSelect.selectedIndex].text;
+            document.getElementById('preview-branch').textContent = branchInput.value || 'main';
+            document.getElementById('preview-port').textContent = portInput.value || 'Auto-asignar';
+            
+            const port = portInput.value || 'XXXX';
+            document.getElementById('preview-url').textContent = 'http://localhost:' + port;
+        }
+    }
+
+    if (nameInput) nameInput.addEventListener('input', updatePreview);
+    if (projectTypeSelect) projectTypeSelect.addEventListener('change', updatePreview);
+    if (branchInput) branchInput.addEventListener('input', updatePreview);
+    if (portInput) portInput.addEventListener('input', updatePreview);
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('=== FORMULARIO DE DESPLIEGUE ENVIADO ===');
+            console.log('Form action:', form.action);
+            console.log('Form method:', form.method);
+            
+            // Log de todos los datos del formulario
+            const formData = new FormData(form);
+            console.log('FormData entries:');
+            for (let [key, value] of formData.entries()) {
+                console.log(`  ${key}: ${value}`);
+            }
+            
+            const submitText = document.getElementById('submit-text');
+            const submitLoading = document.getElementById('submit-loading');
+            
+            console.log('Cambiando estado del botón...');
+            if (submitText) {
+                submitText.classList.add('hidden');
+                console.log('Submit text hidden');
+            }
+            if (submitLoading) {
+                submitLoading.classList.remove('hidden');
+                console.log('Loading state shown');
+            }
+            
+            console.log('Permitiendo envío del formulario...');
+        });
+    }
+
+    updatePreview();
+});
+
+function addEnvVar() {
+    const container = document.getElementById('env-vars-container');
+    const newRow = document.createElement('div');
+    newRow.className = 'env-var-row flex space-x-2 mb-2';
+    newRow.innerHTML = '<input type="text" name="env_key[]" placeholder="VARIABLE_NAME" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"><input type="text" name="env_value[]" placeholder="valor" class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"><button type="button" onclick="removeEnvVar(this)" class="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors duration-200">Eliminar</button>';
+    container.appendChild(newRow);
+}
+
+function removeEnvVar(button) {
+    button.closest('.env-var-row').remove();
+}
+</script>
+{% endblock %}

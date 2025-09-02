@@ -103,11 +103,12 @@ class DashboardContextBuilder:
     def add_assignment_stats(self) -> 'DashboardContextBuilder':
         """Agregar estadísticas de asignaciones al contexto"""
         try:
-            from infrastructure.database.models import SolutionAssignment
+            from infrastructure.database.models import UserSolutionAssignment
             
-            total_assignments = SolutionAssignment.objects.count()
-            recent_assignments = SolutionAssignment.objects.filter(
-                assigned_at__gte=timezone.now() - timedelta(days=7)
+            total_assignments = UserSolutionAssignment.objects.filter(is_active=True).count()
+            recent_assignments = UserSolutionAssignment.objects.filter(
+                assigned_at__gte=timezone.now() - timedelta(days=7),
+                is_active=True
             ).count()
             
             if 'stats' not in self.context:
@@ -245,9 +246,10 @@ class DashboardContextBuilder:
                 })
             
             # Actividades de asignaciones recientes
-            from infrastructure.database.models import SolutionAssignment
-            recent_assignments = SolutionAssignment.objects.filter(
-                assigned_at__gte=timezone.now() - timedelta(days=7)
+            from infrastructure.database.models import UserSolutionAssignment
+            recent_assignments = UserSolutionAssignment.objects.filter(
+                assigned_at__gte=timezone.now() - timedelta(days=7),
+                is_active=True
             ).select_related('user', 'solution').order_by('-assigned_at')[:5]
             
             for assignment in recent_assignments:

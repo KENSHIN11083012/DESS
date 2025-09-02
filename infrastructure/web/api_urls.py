@@ -28,7 +28,7 @@ from .api_solution_views import (
 )
 
 # Importar vista de estadísticas de admin
-from .dashboard_views import admin_stats_api
+from .views.api_views import admin_stats_api
 
 # URLs para usuarios
 user_patterns = [

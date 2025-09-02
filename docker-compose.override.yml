@@ -1,0 +1,50 @@
+# Docker Compose override para desarrollo
+# Este archivo se combina automáticamente con docker-compose.yml
+
+# Docker Compose override para desarrollo
+
+services:
+  dess:
+    # Usar archivo de entorno específico para Docker
+    env_file:
+      - .env.docker
+    
+    # Montar código fuente para desarrollo con hot-reload
+    volumes:
+      - .:/app
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./logs:/app/logs
+      - ./media:/app/media
+    
+    # Configuración de desarrollo
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DJANGO_SETTINGS_MODULE=config.settings
+      - PYTHONDONTWRITEBYTECODE=1
+    
+    # Comando para desarrollo con auto-reload
+    command: python manage.py runserver 0.0.0.0:8000
+    
+    # Expose additional ports for debugging
+    ports:
+      - "8000:8000"
+      - "8001:8001"  # Para debugging si se necesita
+    
+    # Recursos limitados para desarrollo
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  redis:
+    # Configuración específica para desarrollo
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru --save ""
+    
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M

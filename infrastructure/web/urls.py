@@ -4,7 +4,7 @@ Estructura modular organizada por funcionalidad
 """
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import home_view, api_status
+from . import base_views
 
 # Router para ViewSets (futuro)
 router = DefaultRouter()
@@ -12,10 +12,10 @@ router = DefaultRouter()
 # URLs principales organizadas por módulos
 urlpatterns = [
     # Página de inicio
-    path('', home_view, name='home'),
+    path('', base_views.home_view, name='home'),
     
     # Estado del sistema
-    path('status/', api_status, name='api_status'),
+    path('status/', base_views.api_status, name='api_status'),
     
     # URLs de autenticación (login, logout, JWT)
     path('', include('infrastructure.web.urls_auth')),

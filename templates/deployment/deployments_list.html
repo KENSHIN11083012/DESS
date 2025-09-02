@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Despliegues - DESS{% endblock %}
+
+{% block extra_css %}
+<style>
+.deployment-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-pending { @apply bg-yellow-100 text-yellow-800 border border-yellow-200; }
+.status-cloning { @apply bg-blue-100 text-blue-800 border border-blue-200; }
+.status-analyzing { @apply bg-purple-100 text-purple-800 border border-purple-200; }
+.status-building { @apply bg-orange-100 text-orange-800 border border-orange-200; }
+.status-deploying { @apply bg-indigo-100 text-indigo-800 border border-indigo-200; }
+.status-running { @apply bg-green-100 text-green-800 border border-green-200; }
+.status-failed { @apply bg-red-100 text-red-800 border border-red-200; }
+.status-stopped { @apply bg-gray-100 text-gray-800 border border-gray-200; }
+
+.project-type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    background-color: #f3f4f6;
+    color: #374151;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Contenedor principal -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  
+  <!-- Header con breadcrumb y acciones -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div class="flex justify-between items-center flex-wrap gap-4">
+      <!-- Breadcrumb -->
+      <div class="flex items-center space-x-2 text-sm">
+        <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-800">Panel Principal</a>
+        <span class="text-gray-400">/</span>
+        <span class="text-gray-600">Gestión de Despliegues</span>
+      </div>
+      
+      <!-- Título y descripción -->
+      <div class="flex-1">
+        <h1 class="text-lg font-semibold text-gray-900">Gestión de Despliegues</h1>
+        <p class="text-sm text-gray-600">Administra y monitorea despliegues automatizados</p>
+      </div>
+      
+      <!-- Acción principal -->
+      <div class="flex items-center space-x-4">
+        <a href="{% url 'create_deployment' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition duration-150">
+          Nuevo Despliegue
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros de búsqueda -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <form method="GET" class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Búsqueda -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Buscar por nombre, descripción...</label>
+          <input type="text" name="search" value="{{ current_search|default:'' }}" 
+                 placeholder="Buscar despliegues..." 
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        
+        <!-- Filtro por estado -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por estado</label>
+          <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="all">Todos los estados</option>
+            {% for value, label in status_choices %}
+              <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <!-- Filtro por tipo -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por tipo</label>
+          <select name="type" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="all">Todos los tipos</option>
+            {% for value, label in type_choices %}
+              <option value="{{ value }}" {% if current_type == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      
+      <div class="flex justify-end">
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-150">
+          Buscar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Lista de Despliegues -->
+  <div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-semibold text-gray-900">Lista de Despliegues</h2>
+      <p class="text-sm text-gray-600">Gestiona todos los despliegues del sistema</p>
+    </div>
+        {% if deployments %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proyecto</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Creado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for deployment in deployments %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4">
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">{{ deployment.name }}</div>
+                                    <div class="text-sm text-gray-500">{{ deployment.description|truncatechars:60 }}</div>
+                                    <div class="text-xs text-gray-400 mt-1">
+                                        <a href="{{ deployment.github_url }}" target="_blank" class="hover:text-blue-600">
+                                            {{ deployment.github_url|truncatechars:40 }}
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                {% if deployment.project_type %}
+                                    <span class="project-type-badge">{{ deployment.get_project_type_display }}</span>
+                                {% else %}
+                                    <span class="text-gray-400 text-sm">No detectado</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="deployment-status-badge status-{{ deployment.status }}">
+                                    {{ deployment.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                {% if deployment.deploy_url %}
+                                    <a href="{{ deployment.deploy_url }}" target="_blank" 
+                                       class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                        Puerto {{ deployment.port }}
+                                        <svg class="w-3 h-3 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2"></path>
+                                        </svg>
+                                    </a>
+                                {% else %}
+                                    <span class="text-gray-400 text-sm">No disponible</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-500">
+                                <div>{{ deployment.created_at|date:"d/m/Y" }}</div>
+                                <div class="text-xs">{{ deployment.created_at|time:"H:i" }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center space-x-2">
+                                    <a href="{% url 'deployment_detail' deployment.id %}" 
+                                       class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                        Ver
+                                    </a>
+                                    
+                                    {% if deployment.status == 'stopped' or deployment.status == 'failed' %}
+                                        <button onclick="deployProject('{{ deployment.id }}')" 
+                                                class="text-green-600 hover:text-green-800 text-sm font-medium">
+                                            Desplegar
+                                        </button>
+                                    {% endif %}
+                                    
+                                    {% if deployment.status == 'running' %}
+                                        <button onclick="stopDeployment('{{ deployment.id }}')" 
+                                                class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                            Detener
+                                        </button>
+                                        <button onclick="restartDeployment('{{ deployment.id }}')" 
+                                                class="text-yellow-600 hover:text-yellow-800 text-sm font-medium">
+                                            Reiniciar
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            {% if deployments.has_other_pages %}
+            <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                <div class="flex-1 flex justify-between sm:hidden">
+                    {% if deployments.has_previous %}
+                        <a href="?page={{ deployments.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Anterior
+                        </a>
+                    {% endif %}
+                    {% if deployments.has_next %}
+                        <a href="?page={{ deployments.next_page_number }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Siguiente
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700">
+                            Mostrando página <span class="font-medium">{{ deployments.number }}</span> de <span class="font-medium">{{ deployments.paginator.num_pages }}</span>
+                            ({{ deployments.paginator.count }} despliegues total)
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                            {% if deployments.has_previous %}
+                                <a href="?page=1" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">Primera</a>
+                                <a href="?page={{ deployments.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">Anterior</a>
+                            {% endif %}
+                            
+                            <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                                {{ deployments.number }}
+                            </span>
+                            
+                            {% if deployments.has_next %}
+                                <a href="?page={{ deployments.next_page_number }}" class="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">Siguiente</a>
+                                <a href="?page={{ deployments.paginator.num_pages }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">Última</a>
+                            {% endif %}
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No hay despliegues</h3>
+                <p class="mt-1 text-sm text-gray-500">Comienza creando tu primer despliegue automatizado.</p>
+                <div class="mt-6">
+                    <a href="{% url 'create_deployment' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md font-medium transition duration-150">
+                        Crear Despliegue
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</main>
+
+<!-- Modal de Loading -->
+<div id="deploymentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
+                <svg class="animate-spin h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4" id="modalTitle">Procesando...</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-500" id="modalContent">Ejecutando operación de despliegue...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showDeploymentModal(title, content) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalContent').textContent = content;
+    document.getElementById('deploymentModal').classList.remove('hidden');
+}
+
+function hideDeploymentModal() {
+    document.getElementById('deploymentModal').classList.add('hidden');
+}
+
+function deployProject(deploymentId) {
+    showDeploymentModal('Iniciando Despliegue', 'Preparando el despliegue del proyecto...');
+    
+    fetch(`/api/deployments/${deploymentId}/deploy/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideDeploymentModal();
+        if (data.success) {
+            showNotification('Despliegue iniciado exitosamente', 'success');
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            showNotification(data.message || 'Error en el despliegue', 'error');
+        }
+    })
+    .catch(error => {
+        hideDeploymentModal();
+        showNotification('Error de conexión', 'error');
+        console.error('Error:', error);
+    });
+}
+
+function stopDeployment(deploymentId) {
+    if (!confirm('¿Estás seguro de detener este despliegue?')) return;
+    
+    showDeploymentModal('Deteniendo Despliegue', 'Deteniendo el contenedor...');
+    
+    fetch(`/api/deployments/${deploymentId}/stop/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideDeploymentModal();
+        if (data.success) {
+            showNotification('Despliegue detenido exitosamente', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showNotification(data.message || 'Error deteniendo despliegue', 'error');
+        }
+    });
+}
+
+function restartDeployment(deploymentId) {
+    showDeploymentModal('Reiniciando Despliegue', 'Reiniciando el contenedor...');
+    
+    fetch(`/api/deployments/${deploymentId}/restart/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideDeploymentModal();
+        if (data.success) {
+            showNotification('Despliegue reiniciado exitosamente', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showNotification(data.message || 'Error reiniciando despliegue', 'error');
+        }
+    });
+}
+
+// Función de notificaciones (usa el sistema DESS si está disponible)
+function showNotification(message, type) {
+    if (typeof DESSNotifications !== 'undefined') {
+        DESSNotifications[type](message);
+    } else {
+        alert(message);
+    }
+}
+</script>
+{% endblock %}

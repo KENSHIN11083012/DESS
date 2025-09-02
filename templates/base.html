@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}DESS - Desarrollador de Ecosistemas de Soluciones Empresariales{% endblock %}</title>
     
-    <!-- Tailwind CSS -->
+    {% load static %}
+    
+    <!-- DESS Design System -->
+    <link rel="stylesheet" href="{% static 'css/dess-design-system.css' %}" type="text/css">
+    
+    <!-- Tailwind CSS (como respaldo) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Tailwind Configuration -->
@@ -23,12 +28,12 @@
         }
     </script>
     
-    {% load static %}
+    
     {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-gray-50">
     <!-- Navigation for regular users -->
-    {% if user.is_authenticated and 'admin_' not in request.resolver_match.url_name %}
+    {% if user.is_authenticated and 'admin_' not in request.resolver_match.url_name and 'deployments_' not in request.resolver_match.url_name and 'deployment_' not in request.resolver_match.url_name and request.resolver_match.url_name != 'create_deployment' %}
     <nav class="bg-dess-primary shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
@@ -85,7 +90,7 @@
     {% endif %}
 
     <!-- Admin Header -->
-    {% if 'admin_' in request.resolver_match.url_name %}
+    {% if 'admin_' in request.resolver_match.url_name or 'deployments_' in request.resolver_match.url_name or 'deployment_' in request.resolver_match.url_name or request.resolver_match.url_name == 'create_deployment' %}
     <header class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -117,13 +122,16 @@
                 <a href="{% url 'admin_solutions' %}" class="border-b-2 {% if request.resolver_match.url_name == 'admin_solutions' %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} py-4 px-1 text-sm font-medium transition duration-150">
                     Gestión de Soluciones
                 </a>
+                <a href="{% url 'deployments_list' %}" class="border-b-2 {% if 'deployments_' in request.resolver_match.url_name or 'deployment_' in request.resolver_match.url_name or request.resolver_match.url_name == 'create_deployment' %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} py-4 px-1 text-sm font-medium transition duration-150">
+                    Gestión de Despliegues
+                </a>
             </div>
         </nav>
     </div>
     {% endif %}
     
     <!-- Main Content -->
-    <main class="{% if 'admin_' not in request.resolver_match.url_name %}py-8{% endif %}">
+    <main class="{% if 'admin_' not in request.resolver_match.url_name and 'deployments_' not in request.resolver_match.url_name and 'deployment_' not in request.resolver_match.url_name and request.resolver_match.url_name != 'create_deployment' %}py-8{% endif %}">
         {% block content %}{% endblock %}
     </main>
     
@@ -139,6 +147,7 @@
     {% endif %}
     
     <!-- DESS JavaScript Components -->
+    <script src="{% static 'js/dess-components.js' %}"></script>
     <script src="{% static 'js/dess-modals.js' %}"></script>
     
     <script>

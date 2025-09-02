@@ -8,13 +8,13 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
-from . import dashboard_views
+from .views import auth_views
 
 # URLs de autenticación web y API
 urlpatterns = [
     # Autenticación web
-    path('login/', dashboard_views.login_view, name='login'),
-    path('logout/', dashboard_views.logout_view, name='logout'),
+    path('login/', auth_views.login_view, name='login'),
+    path('logout/', auth_views.logout_view, name='logout'),
     
     # Autenticación API (JWT)
     path('api/auth/login/', TokenObtainPairView.as_view(), name='api_auth_login'),

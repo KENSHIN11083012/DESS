@@ -1,0 +1,93 @@
+# Docker Compose para DESS
+
+services:
+  # Aplicación principal DESS
+  dess:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dess-app
+    ports:
+      - "8000:8000"
+    volumes:
+      # Montar socket de Docker para permitir despliegues
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Montar directorio para logs
+      - ./logs:/app/logs
+      # Montar directorio para media files
+      - ./media:/app/media
+      # Para desarrollo: montar código fuente (comentar en producción)
+      - .:/app
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=dev-secret-key-change-in-production
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+      - DATABASE_URL=sqlite:///app/db.sqlite3
+      - DJANGO_SUPERUSER_USERNAME=admin
+      - DJANGO_SUPERUSER_PASSWORD=admin123
+      - DJANGO_SUPERUSER_EMAIL=admin@dess.local
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+    networks:
+      - dess-network
+    restart: unless-stopped
+
+  # Redis para caché y sesiones
+  redis:
+    image: redis:7-alpine
+    container_name: dess-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - dess-network
+    restart: unless-stopped
+
+  # Nginx para proxy reverso (opcional, para producción)
+  nginx:
+    image: nginx:alpine
+    container_name: dess-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./static:/app/static:ro
+      - ./media:/app/media:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - dess
+    networks:
+      - dess-network
+    restart: unless-stopped
+    profiles:
+      - production
+
+  # PostgreSQL para producción (opcional)
+  postgres:
+    image: postgres:15-alpine
+    container_name: dess-postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=dess
+      - POSTGRES_USER=dess_user
+      - POSTGRES_PASSWORD=dess_password
+    networks:
+      - dess-network
+    restart: unless-stopped
+    profiles:
+      - production
+
+volumes:
+  redis_data:
+  postgres_data:
+
+networks:
+  dess-network:
+    driver: bridge

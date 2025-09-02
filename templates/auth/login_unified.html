@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Iniciar Sesión - DESS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}" type="text/css">
+{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <!-- Panel izquierdo - Formulario -->
+    <div class="login-left-panel">
+        <!-- Logo en el panel izquierdo -->
+        <div class="login-logo-left">
+            <div class="logo-icon">📊</div>
+            <div class="logo-text">DESS</div>
+        </div>
+        
+        <!-- Contenedor del formulario -->
+        <div class="login-form-container">
+            <!-- Header -->
+            <div class="login-header">
+                <h1 class="login-title">Bienvenido</h1>
+                <p class="login-subtitle">Desarrollador de Ecosistemas de Soluciones Empresariales</p>
+            </div>
+
+            <!-- Formulario de login -->
+            <form method="post" class="login-form">
+                {% csrf_token %}
+                
+                <!-- Mostrar errores si los hay -->
+                {% if form.errors %}
+                    <div class="error-message">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                {{ error }}
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label for="username" class="form-label">Usuario</label>
+                    <div class="form-input-wrapper">
+                        <div class="form-input-icon">👤</div>
+                        <input type="text" 
+                               id="username" 
+                               name="username" 
+                               class="form-input" 
+                               required 
+                               autocomplete="username"
+                               value="{{ form.username.value|default:'' }}">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <div class="form-input-wrapper">
+                        <div class="form-input-icon">🔒</div>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               class="form-input" 
+                               required 
+                               autocomplete="current-password">
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember" class="remember-checkbox">
+                        <span class="remember-label">Recordar</span>
+                    </label>
+                    <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+                </div>
+                
+                <button type="submit" class="login-button">
+                    INGRESAR
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Panel derecho - Ilustración -->
+    <div class="login-right-panel">
+        <!-- Elementos decorativos -->
+        <div class="decoration-circle circle-1"></div>
+        <div class="decoration-circle circle-2"></div>
+        <div class="decoration-circle circle-3"></div>
+        
+        <!-- Contenido del panel -->
+        <div class="right-panel-content">
+            <h2 class="right-panel-title">DESS</h2>
+            <p class="right-panel-subtitle">
+                Sistema integral para la gestión de ecosistemas empresariales
+            </p>
+            
+            <!-- Ilustración moderna -->
+            <div class="modern-illustration">
+                <!-- Iconos flotantes -->
+                <div class="floating-icon">☁️</div>
+                <div class="floating-icon">📊</div>
+                <div class="floating-icon">🔧</div>
+                <div class="floating-icon">🚀</div>
+                
+                <!-- Preview del dashboard -->
+                <div class="dashboard-preview">
+                    <div class="preview-header">
+                        <div class="preview-logo">DESS</div>
+                        <div class="preview-menu">
+                            <div class="menu-dot"></div>
+                            <div class="menu-dot"></div>
+                            <div class="menu-dot"></div>
+                        </div>
+                    </div>
+                    <div class="preview-content">
+                        <div class="preview-card"></div>
+                        <div class="preview-card"></div>
+                        <div class="preview-card"></div>
+                        <div class="preview-card"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
