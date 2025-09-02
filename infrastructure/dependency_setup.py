@@ -21,9 +21,11 @@ from core.use_cases.solution_use_cases import (
     UpdateSolutionUseCase,
     DeleteSolutionUseCase,
     ListSolutionsUseCase,
+    DeploySolutionUseCase
+)
+from core.use_cases.user_solution_use_cases import (
     AssignSolutionToUserUseCase,
     UnassignSolutionFromUserUseCase,
-    DeploySolutionUseCase,
     GetUserSolutionsUseCase
 )
 from core.use_cases.profile_use_cases import (

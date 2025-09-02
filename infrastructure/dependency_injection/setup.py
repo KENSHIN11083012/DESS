@@ -21,7 +21,7 @@ def setup_dependencies():
             SolutionRepository, 
             SolutionAssignmentRepository
         )
-        from infrastructure.repositories import (
+        from infrastructure.database.repositories import (
             DjangoUserRepository,
             DjangoSolutionRepository, 
             DjangoSolutionAssignmentRepository

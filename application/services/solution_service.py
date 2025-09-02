@@ -8,7 +8,9 @@ from core.use_cases.solution_use_cases import (
     CreateSolutionUseCase,
     GetSolutionUseCase,
     ListSolutionsUseCase,
-    UpdateSolutionUseCase,
+    UpdateSolutionUseCase
+)
+from core.use_cases.user_solution_use_cases import (
     AssignSolutionToUserUseCase,
     GetUserSolutionsUseCase
 )
