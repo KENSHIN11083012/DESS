@@ -59,11 +59,11 @@ MIDDLEWARE = [
     # 7. Autenticación (requerido para middlewares personalizados)
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     
-    # 8. Middleware de unificación DESS (requiere auth)
-    'infrastructure.web.middleware.interface_unify.UnifyInterfacesMiddleware',
-    
-    # 9. Mensajes (después de auth para mostrar mensajes)
+    # 8. Mensajes (después de auth, antes de middlewares que usen mensajes)
     'django.contrib.messages.middleware.MessageMiddleware',
+    
+    # 9. Middleware de unificación DESS (requiere auth y mensajes)
+    'infrastructure.web.middleware.interface_unify.UnifyInterfacesMiddleware',
     
     # 10. Logging de APIs (para monitoreo)
     'infrastructure.web.middleware.api_logging.APILoggingMiddleware',
