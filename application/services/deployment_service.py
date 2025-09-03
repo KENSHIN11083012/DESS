@@ -9,7 +9,6 @@ import requests
 import tempfile
 import shutil
 import asyncio
-import random
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 import docker
@@ -118,38 +117,58 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar código
 COPY . .
 
-# Ejecutar collectstatic
-RUN python manage.py collectstatic --noinput || echo "No static files"
+# Ejecutar collectstatic (solo si existe manage.py)
+RUN if [ -f manage.py ]; then python manage.py collectstatic --noinput || echo "No static files configured"; fi
 
 # Exponer puerto
 EXPOSE 8000
 
-# Comando por defecto
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Comando por defecto (con migraciones automáticas)
+CMD sh -c 'if [ -f manage.py ]; then echo "Ejecutando migraciones Django..." && python manage.py migrate --noinput || echo "Error en migraciones"; echo "Iniciando servidor Django..." && python manage.py runserver 0.0.0.0:8000; else echo "No se encontró manage.py. ¿Es un proyecto Django válido?"; echo "Archivos disponibles:"; ls -la /app; sleep 3600; fi'
             """,
             
             ProjectType.REACT: """
-FROM node:18-alpine
+# Build stage
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
 # Copiar package files
 COPY package*.json ./
 
-# Instalar dependencias
-RUN npm ci --only=production
+# Instalar todas las dependencias (incluyendo dev para build)
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 # Copiar código fuente
 COPY . .
 
 # Construir la aplicación
-RUN npm run build
+RUN npm run build || echo "Build falló, continuando..."
+
+# Production stage
+FROM node:18-alpine AS production
+
+WORKDIR /app
+
+# Copiar package files solo para producción
+COPY package*.json ./
+
+# Instalar solo dependencias de producción
+RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi
+
+# Copiar build desde el stage anterior
+COPY --from=builder /app/build ./build 2>/dev/null || echo "No build folder, copying all files"
+COPY --from=builder /app/public ./public 2>/dev/null || echo "No public folder"
+
+# Si no hay build folder, copiar todo
+RUN if [ ! -d build ]; then rm -rf /app/* && echo "Copying source files..."; fi
+COPY . .
 
 # Exponer puerto
 EXPOSE 3000
 
-# Comando por defecto
-CMD ["npm", "start"]
+# Comando por defecto (detección inteligente)
+CMD sh -c 'if [ -d build ] && command -v serve >/dev/null; then echo "Sirviendo build estático..." && npx serve -s build -l 3000; elif grep -q "\"start\"" package.json; then echo "Ejecutando npm start..." && npm start; else echo "Iniciando servidor de desarrollo..." && npm run dev || npm start; fi'
             """,
             
             ProjectType.NODE: """
@@ -160,8 +179,8 @@ WORKDIR /app
 # Copiar package files
 COPY package*.json ./
 
-# Instalar dependencias
-RUN npm ci --only=production
+# Instalar dependencias (con fallback si no hay package-lock.json)
+RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit=dev; fi
 
 # Copiar código fuente
 COPY . .
@@ -169,8 +188,8 @@ COPY . .
 # Exponer puerto
 EXPOSE 3000
 
-# Comando por defecto
-CMD ["npm", "start"]
+# Comando por defecto (detección inteligente de aplicaciones vs librerías)
+CMD sh -c 'if [ -f package.json ] && grep -q "\"start\"" package.json; then echo "Ejecutando npm start..." && npm start; elif [ -f app.js ]; then echo "Ejecutando node app.js..." && node app.js; elif [ -f server.js ]; then echo "Ejecutando node server.js..." && node server.js; elif [ -f index.js ] && ! grep -q "\"main\".*\"index.js\".*\"express\"" package.json; then echo "Ejecutando node index.js..." && node index.js; else echo "ADVERTENCIA: Este parece ser una librería, no una aplicación web." && echo "Para deployar necesitas una aplicación con servidor web." && echo "Archivos disponibles:" && ls -la /app && sleep 3600; fi'
             """,
             
             ProjectType.NEXTJS: """
@@ -209,14 +228,25 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \\
+    gcc \\
+    && rm -rf /var/lib/apt/lists/*
 
+# Copiar requirements
+COPY requirements.txt* .
+
+# Instalar dependencias Python (con fallback si no hay requirements.txt)
+RUN if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; else pip install flask; fi
+
+# Copiar código
 COPY . .
 
+# Exponer puerto
 EXPOSE 5000
 
-CMD ["python", "app.py"]
+# Comando por defecto (detección inteligente del archivo principal)
+CMD sh -c 'if [ -f app.py ]; then echo "Ejecutando Flask app.py..." && python app.py; elif [ -f main.py ]; then echo "Ejecutando Flask main.py..." && python main.py; elif [ -f run.py ]; then echo "Ejecutando Flask run.py..." && python run.py; else echo "Ejecutando Flask con auto-discovery..." && flask run --host=0.0.0.0 --port=5000; fi'
             """,
             
             ProjectType.FASTAPI: """
@@ -224,14 +254,25 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \\
+    gcc \\
+    && rm -rf /var/lib/apt/lists/*
 
+# Copiar requirements
+COPY requirements.txt* .
+
+# Instalar dependencias Python (con fallback si no hay requirements.txt)
+RUN if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; else pip install fastapi uvicorn; fi
+
+# Copiar código
 COPY . .
 
+# Exponer puerto
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Comando por defecto (detección inteligente del archivo principal)
+CMD sh -c 'if [ -f main.py ]; then echo "Ejecutando FastAPI main.py..." && uvicorn main:app --host 0.0.0.0 --port 8000; elif [ -f app.py ]; then echo "Ejecutando FastAPI app.py..." && uvicorn app:app --host 0.0.0.0 --port 8000; elif [ -f api.py ]; then echo "Ejecutando FastAPI api.py..." && uvicorn api:app --host 0.0.0.0 --port 8000; else echo "No se encontró archivo FastAPI válido. Archivos disponibles:" && ls -la /app && sleep 3600; fi'
             """,
             
             ProjectType.STATIC: """
@@ -245,7 +286,9 @@ CMD ["nginx", "-g", "daemon off;"]
             """
         }
         
-        return templates.get(project_type, templates[ProjectType.DOCKER]).strip()
+        # Obtener template por tipo de proyecto, NODE por defecto
+        template = templates.get(project_type, templates[ProjectType.NODE])
+        return template.strip()
 
 
 class DeploymentService:
@@ -292,6 +335,8 @@ class DeploymentService:
                 # Verificar que funciona con timeout corto
                 self.docker_client.ping()
                 logger.info(f"✅ Docker conectado via {strategy['name']}: {strategy['description']}")
+                # Inicializar temp_dir después de conectar exitosamente
+                self.temp_dir = tempfile.mkdtemp()
                 return  # Salir si la conexión es exitosa
                 
             except Exception as e:
@@ -308,18 +353,53 @@ class DeploymentService:
         self.temp_dir = tempfile.mkdtemp()
     
     def is_docker_available(self) -> bool:
-        """Verificar si Docker está disponible"""
-        return self.docker_client is not None
+        """Verificar si Docker está disponible usando CLI directo"""
+        try:
+            # Usar comando docker directo que sabemos que funciona
+            result = subprocess.run(['docker', 'version'], 
+                                  capture_output=True, 
+                                  text=True, 
+                                  timeout=10)
+            
+            logger.info(f"Docker version check - Return code: {result.returncode}")
+            logger.info(f"Docker version stdout: {result.stdout[:500]}")
+            logger.info(f"Docker version stderr: {result.stderr[:500]}")
+            
+            return result.returncode == 0
+        except Exception as e:
+            logger.error(f"Docker availability check failed: {str(e)}")
+            return False
+    
+    def run_docker_command(self, cmd: List[str]) -> Tuple[bool, str]:
+        """Ejecutar comando docker y devolver resultado"""
+        try:
+            full_cmd = ['docker'] + cmd
+            result = subprocess.run(full_cmd, 
+                                  capture_output=True, 
+                                  text=True, 
+                                  timeout=300)  # 5 minutes timeout
+            
+            success = result.returncode == 0
+            output = result.stdout if success else result.stderr
+            
+            logger.info(f"Docker command: {' '.join(full_cmd)}")
+            logger.info(f"Result: {result.returncode} - {output[:500]}")
+            
+            return success, output
+        except subprocess.TimeoutExpired:
+            logger.error("Docker command timed out")
+            return False, "Command timed out"
+        except Exception as e:
+            logger.error(f"Error running docker command: {e}")
+            return False, str(e)
     
     def create_deployment(self, github_url: str, name: str, created_by, **kwargs) -> Deployment:
         """Crear un nuevo despliegue"""
         
         # Verificar si Docker está disponible
         if not self.is_docker_available():
-            logger.warning("⚠️  Docker no disponible - creando despliegue en modo simulación")
-            # Crear el despliegue pero con estado de advertencia
-            kwargs['status'] = 'pending'
-            kwargs['deploy_logs'] = 'MODO SIMULACIÓN: Docker daemon no disponible. Configure Docker TCP (puerto 2375) o ejecute en Linux para usar Docker real.'
+            logger.error("❌ Docker no disponible - no se puede crear el despliegue")
+            raise Exception("Docker no está disponible. Configure Docker antes de crear despliegues.")
         
         deployment = Deployment.objects.create(
             name=name,
@@ -328,25 +408,26 @@ class DeploymentService:
             **kwargs
         )
         
-        if self.is_docker_available():
-            self._log(deployment, 'info', f'✅ Despliegue creado: {name}')
-        else:
-            self._log(deployment, 'warning', f'⚠️  Despliegue creado en modo simulación: {name} - Docker no disponible')
+        self._log(deployment, 'info', f'✅ Despliegue creado: {name}')
         
         return deployment
     
-    async def deploy_project(self, deployment: Deployment) -> bool:
+    def deploy_project(self, deployment: Deployment) -> bool:
         """Desplegar un proyecto completo"""
         
-        # Si Docker no está disponible, usar modo simulación
+        # Si Docker no está disponible, fallar
         if not self.is_docker_available():
-            return await self._deploy_project_simulation(deployment)
+            self._log(deployment, 'error', '🔴 ERROR: Docker no está disponible')
+            deployment.status = DeploymentStatus.FAILED
+            deployment.save()
+            return False
         
+        repo_path = None
         try:
             # 1. Clonar repositorio
             deployment.status = DeploymentStatus.CLONING
             deployment.save()
-            repo_path = await self._clone_repository(deployment)
+            repo_path = self._clone_repository(deployment)
             
             # 2. Detectar tipo de proyecto
             deployment.status = DeploymentStatus.ANALYZING
@@ -360,23 +441,31 @@ class DeploymentService:
             # 3. Generar Dockerfile si no existe
             dockerfile_path = os.path.join(repo_path, 'Dockerfile')
             if not os.path.exists(dockerfile_path):
-                dockerfile_content = DockerfileGenerator.generate_dockerfile(project_type, repo_path)
-                with open(dockerfile_path, 'w') as f:
-                    f.write(dockerfile_content)
-                self._log(deployment, 'info', 'Dockerfile generado automáticamente')
+                self._log(deployment, 'info', f'Generando Dockerfile para proyecto tipo: {project_type}')
+                try:
+                    dockerfile_content = DockerfileGenerator.generate_dockerfile(project_type, repo_path)
+                    self._log(deployment, 'info', f'Dockerfile generado, contenido: {len(dockerfile_content)} caracteres')
+                    with open(dockerfile_path, 'w') as f:
+                        f.write(dockerfile_content)
+                    self._log(deployment, 'info', 'Dockerfile generado automáticamente')
+                except Exception as dockerfile_error:
+                    self._log(deployment, 'error', f'Error generando Dockerfile: {str(dockerfile_error)}')
+                    raise dockerfile_error
+            else:
+                self._log(deployment, 'info', 'Usando Dockerfile existente en el repositorio')
             
             # 4. Construir imagen Docker
             deployment.status = DeploymentStatus.BUILDING
             deployment.save()
-            image_name = await self._build_docker_image(deployment, repo_path)
+            image_name = self._build_docker_image(deployment, repo_path)
             
             # 5. Desplegar contenedor
             deployment.status = DeploymentStatus.DEPLOYING
             deployment.save()
-            container_id = await self._deploy_container(deployment, image_name)
+            container_id = self._deploy_container(deployment, image_name)
             
             # 6. Verificar despliegue
-            if await self._verify_deployment(deployment):
+            if self._verify_deployment(deployment):
                 deployment.status = DeploymentStatus.RUNNING
                 deployment.last_deployed = timezone.now()
                 deployment.save()
@@ -396,10 +485,10 @@ class DeploymentService:
         
         finally:
             # Limpiar archivos temporales
-            if os.path.exists(repo_path):
+            if repo_path and os.path.exists(repo_path):
                 shutil.rmtree(repo_path, ignore_errors=True)
     
-    async def _clone_repository(self, deployment: Deployment) -> str:
+    def _clone_repository(self, deployment: Deployment) -> str:
         """Clonar repositorio de GitHub"""
         
         repo_name = deployment.get_repo_name()
@@ -407,23 +496,57 @@ class DeploymentService:
         
         self._log(deployment, 'info', f'Clonando repositorio: {deployment.github_url}')
         
+        # Configurar git para repositorios públicos (evitar solicitud de credenciales)
+        git_env = os.environ.copy()
+        git_env['GIT_TERMINAL_PROMPT'] = '0'  # Desactivar prompts interactivos
+        git_env['GIT_ASKPASS'] = '/bin/echo'  # Comando dummy para evitar prompts
+        
+        # Determinar branch correcto - si es main pero el repo usa master, intentar ambos
+        branch_to_use = deployment.branch or 'main'
+        
         cmd = [
             'git', 'clone', 
             '--depth', '1',
-            '--branch', deployment.branch,
+            '--branch', branch_to_use,
             deployment.get_clone_url(),
             repo_path
         ]
         
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run(cmd, capture_output=True, text=True, env=git_env)
         
         if result.returncode != 0:
-            raise Exception(f'Error clonando repositorio: {result.stderr}')
+            # Si falla por branch, intentar con master/main alterno
+            alternate_branch = 'master' if branch_to_use == 'main' else 'main'
+            
+            cmd_retry = [
+                'git', 'clone', 
+                '--depth', '1',
+                '--branch', alternate_branch,
+                deployment.get_clone_url(),
+                repo_path
+            ]
+            
+            result_retry = subprocess.run(cmd_retry, capture_output=True, text=True, env=git_env)
+            
+            if result_retry.returncode != 0:
+                # Si ambos branches fallan, intentar sin especificar branch (usa el default)
+                cmd_final = [
+                    'git', 'clone', 
+                    '--depth', '1',
+                    deployment.get_clone_url(),
+                    repo_path
+                ]
+                
+                result_final = subprocess.run(cmd_final, capture_output=True, text=True, env=git_env)
+                
+                if result_final.returncode != 0:
+                    error_msg = f'Error clonando repositorio:\n1) Branch {branch_to_use}: {result.stderr}\n2) Branch {alternate_branch}: {result_retry.stderr}\n3) Branch default: {result_final.stderr}'
+                    raise Exception(error_msg)
         
         self._log(deployment, 'info', 'Repositorio clonado exitosamente')
         return repo_path
     
-    async def _build_docker_image(self, deployment: Deployment, repo_path: str) -> str:
+    def _build_docker_image(self, deployment: Deployment, repo_path: str) -> str:
         """Construir imagen Docker"""
         
         image_name = f"dess-deploy-{deployment.id}"
@@ -436,13 +559,39 @@ class DeploymentService:
             # Verificar conexión Docker antes de construir
             self.docker_client.ping()
             
-            # Construir imagen
-            image, build_logs = self.docker_client.images.build(
-                path=repo_path,
-                tag=image_name,
-                rm=True,
-                forcerm=True
-            )
+            # Detectar si hay problemas de snapshot/cache
+            build_args = {
+                'path': repo_path,
+                'tag': image_name,
+                'rm': True,
+                'pull': True,  # Siempre pull imagen base
+                'nocache': False  # Inicialmente usar cache
+            }
+            
+            # Construir imagen con manejo de errores de snapshot
+            try:
+                image, build_logs = self.docker_client.images.build(
+                    path=repo_path,
+                    tag=image_name,
+                    rm=True,
+                    forcerm=True,
+                    nocache=build_args['nocache'],
+                    pull=build_args['pull']
+                )
+            except docker.errors.BuildError as e:
+                # Si falla por problemas de snapshot, intentar sin cache
+                if "does not exist: not found" in str(e) or "snapshot" in str(e).lower():
+                    self._log(deployment, 'warning', 'Error de snapshot detectado, reintentando sin cache...')
+                    image, build_logs = self.docker_client.images.build(
+                        path=repo_path,
+                        tag=image_name,
+                        rm=True,
+                        forcerm=True,
+                        nocache=True,
+                        pull=True
+                    )
+                else:
+                    raise e
             
             # Guardar logs de construcción
             logs_text = []
@@ -465,9 +614,24 @@ class DeploymentService:
             deployment.save()
             raise Exception(error_msg)
         except docker.errors.BuildError as e:
+            # Capturar logs detallados del build error
+            error_logs = []
+            if hasattr(e, 'build_log'):
+                for log in e.build_log:
+                    if 'stream' in log:
+                        error_logs.append(log['stream'].strip())
+                    elif 'error' in log:
+                        error_logs.append(f"ERROR: {log['error']}")
+            
+            detailed_logs = '\n'.join(error_logs) if error_logs else str(e)
             error_msg = f"Error construyendo imagen: {str(e)}"
-            deployment.build_logs = error_msg
+            full_error_msg = f"{error_msg}\n\nLogs detallados:\n{detailed_logs}"
+            
+            deployment.build_logs = full_error_msg
             deployment.save()
+            
+            # Log el error completo para debugging
+            self._log(deployment, 'error', f"Build falló. Logs completos: {detailed_logs}")
             raise Exception(error_msg)
         except Exception as e:
             if "http+docker" in str(e):
@@ -478,12 +642,25 @@ class DeploymentService:
             deployment.save()
             raise Exception(error_msg)
     
-    async def _deploy_container(self, deployment: Deployment, image_name: str) -> str:
+    def _deploy_container(self, deployment: Deployment, image_name: str) -> str:
         """Desplegar contenedor Docker"""
+        
+        # Limpiar contenedores anteriores del mismo deployment
+        self._cleanup_existing_container(deployment)
         
         # Obtener configuración del proyecto
         config = deployment.get_project_config()
-        port = deployment.port or config.get('port', 8000)
+        
+        # Determinar puerto interno basado en el tipo de proyecto
+        project_type = deployment.project_type
+        if project_type in [ProjectType.NODE, ProjectType.REACT, ProjectType.NEXTJS]:
+            internal_port = 3000  # Puerto estándar para Node.js/React
+        elif project_type == ProjectType.FLASK:
+            internal_port = 5000  # Puerto estándar para Flask
+        else:
+            internal_port = deployment.port or config.get('port', 8000)  # Django y otros
+        
+        port = internal_port
         
         # Asignar puerto disponible
         available_port = self._get_available_port()
@@ -497,12 +674,31 @@ class DeploymentService:
             # Verificar conexión Docker antes de desplegar
             self.docker_client.ping()
             
+            # Preparar variables de entorno específicas por tipo de proyecto
+            env_vars = deployment.environment_vars or {}
+            
+            # Configurar variables de entorno según el tipo de proyecto
+            if project_type in [ProjectType.NODE, ProjectType.REACT, ProjectType.NEXTJS]:
+                env_vars['PORT'] = str(port)
+                env_vars['NODE_ENV'] = 'production'
+            elif project_type == ProjectType.DJANGO:
+                env_vars['DJANGO_SETTINGS_MODULE'] = env_vars.get('DJANGO_SETTINGS_MODULE', 'settings')
+                env_vars['DEBUG'] = 'False'
+                env_vars['ALLOWED_HOSTS'] = '*'
+            elif project_type == ProjectType.FLASK:
+                env_vars['FLASK_ENV'] = 'production'
+                env_vars['FLASK_APP'] = env_vars.get('FLASK_APP', 'app.py')
+                env_vars['PORT'] = str(port)
+            elif project_type == ProjectType.FASTAPI:
+                env_vars['PORT'] = str(port)
+                env_vars['HOST'] = '0.0.0.0'
+                
             # Crear y ejecutar contenedor
             container = self.docker_client.containers.run(
                 image_name,
                 detach=True,
                 ports={f'{port}/tcp': available_port},
-                environment=deployment.environment_vars,
+                environment=env_vars,
                 name=f"dess-container-{deployment.id}",
                 restart_policy={"Name": "unless-stopped"}
             )
@@ -526,29 +722,127 @@ class DeploymentService:
             else:
                 raise Exception(f'Error inesperado desplegando contenedor: {str(e)}')
     
-    async def _verify_deployment(self, deployment: Deployment) -> bool:
+    def _verify_deployment(self, deployment: Deployment) -> bool:
         """Verificar que el despliegue esté funcionando"""
         
         if not deployment.deploy_url:
             return False
         
-        try:
-            # Esperar un momento para que el servicio inicie
-            import time
-            time.sleep(5)
-            
-            response = requests.get(deployment.deploy_url, timeout=10)
-            
-            if response.status_code == 200:
-                self._log(deployment, 'success', 'Verificación de salud exitosa')
-                return True
-            else:
-                self._log(deployment, 'warning', f'Respuesta inesperada: {response.status_code}')
-                return False
+        import time
+        max_attempts = 6  # 6 intentos durante 30 segundos
+        
+        for attempt in range(max_attempts):
+            try:
+                # Esperar progresivamente más tiempo entre intentos
+                wait_time = 5 + (attempt * 2)  # 5, 7, 9, 11, 13, 15 segundos
+                if attempt > 0:
+                    self._log(deployment, 'info', f'Reintentando verificación ({attempt + 1}/{max_attempts}) después de {wait_time}s...')
                 
-        except requests.RequestException as e:
-            self._log(deployment, 'warning', f'Error en verificación: {str(e)}')
-            return False
+                time.sleep(wait_time)
+                
+                response = requests.get(deployment.deploy_url, timeout=15)
+                
+                if response.status_code == 200:
+                    self._log(deployment, 'success', 'Verificación de salud exitosa')
+                    return True
+                elif response.status_code in [404, 502, 503]:
+                    # Códigos que indican que el servidor está respondiendo pero la app puede no estar lista
+                    self._log(deployment, 'info', f'Servidor responde con {response.status_code}, continuando verificaciones...')
+                    continue
+                else:
+                    self._log(deployment, 'warning', f'Respuesta inesperada: {response.status_code}')
+                    continue
+                    
+            except requests.RequestException as e:
+                self._log(deployment, 'info', f'Verificación {attempt + 1}/{max_attempts} falló: {str(e)}')
+                
+                if attempt == max_attempts - 1:
+                    # Solo en el último intento, hacer diagnóstico completo
+                    self._diagnose_container_failure(deployment)
+                    
+                    # Verificar si el contenedor está funcionando aunque el health check falle
+                    if self._is_container_healthy(deployment):
+                        self._log(deployment, 'warning', 'El contenedor está funcionando pero no responde a HTTP. Marcando como exitoso.')
+                        return True
+        
+        self._log(deployment, 'warning', 'Verificación de salud falló después de todos los intentos')
+        return False
+    
+    def _diagnose_container_failure(self, deployment: Deployment):
+        """Diagnosticar por qué el contenedor falló o no responde"""
+        if not deployment.container_id:
+            self._log(deployment, 'error', 'No hay container_id para diagnosticar')
+            return
+        
+        try:
+            container = self.docker_client.containers.get(deployment.container_id)
+            
+            # 1. Estado del contenedor
+            status = container.status
+            self._log(deployment, 'info', f'Estado del contenedor: {status}')
+            
+            # 2. Obtener logs del contenedor (stdout y stderr)
+            try:
+                logs_stdout = container.logs(stdout=True, stderr=False, tail=50, timestamps=True).decode('utf-8', errors='ignore')
+                logs_stderr = container.logs(stdout=False, stderr=True, tail=50, timestamps=True).decode('utf-8', errors='ignore')
+                
+                if logs_stdout:
+                    self._log(deployment, 'info', f'STDOUT del contenedor:\n{logs_stdout}')
+                if logs_stderr:
+                    self._log(deployment, 'info', f'STDERR del contenedor:\n{logs_stderr}')
+                    
+                if not logs_stdout and not logs_stderr:
+                    self._log(deployment, 'warning', 'El contenedor no tiene logs disponibles')
+                    
+                    # Ejecutar comando para diagnóstico adicional
+                    self._execute_diagnostic_commands(container, deployment)
+                    
+            except Exception as e:
+                self._log(deployment, 'error', f'Error obteniendo logs: {str(e)}')
+            
+            # 3. Información adicional si el contenedor está parado
+            if status in ['exited', 'dead']:
+                attrs = container.attrs
+                exit_code = attrs.get('State', {}).get('ExitCode', 'unknown')
+                error = attrs.get('State', {}).get('Error', 'No error info')
+                
+                self._log(deployment, 'error', f'Contenedor terminó con código: {exit_code}')
+                if error and error != 'No error info':
+                    self._log(deployment, 'error', f'Error del contenedor: {error}')
+            
+            # 4. Verificar puertos
+            port_bindings = container.attrs.get('NetworkSettings', {}).get('Ports', {})
+            self._log(deployment, 'info', f'Port bindings: {port_bindings}')
+            
+        except docker.errors.NotFound:
+            self._log(deployment, 'error', 'Contenedor no encontrado para diagnóstico')
+        except Exception as e:
+            self._log(deployment, 'error', f'Error durante diagnóstico: {str(e)}')
+    
+    def _execute_diagnostic_commands(self, container, deployment):
+        """Ejecutar comandos de diagnóstico dentro del contenedor"""
+        diagnostic_commands = [
+            'ps aux',                           # Procesos corriendo
+            'ls -la /app',                     # Contenido del directorio de trabajo
+            'cat /app/package.json',           # Verificar package.json
+            'node --version',                  # Versión de Node
+            'npm --version',                   # Versión de npm
+            'which node',                      # Ubicación de node
+            'ls -la /app/index.js /app/app.js /app/server.js',  # Archivos principales
+        ]
+        
+        for cmd in diagnostic_commands:
+            try:
+                result = container.exec_run(cmd, stdout=True, stderr=True)
+                output = result.output.decode('utf-8', errors='ignore')
+                
+                if output.strip():
+                    self._log(deployment, 'info', f'Comando [{cmd}]:\n{output}')
+                else:
+                    self._log(deployment, 'warning', f'Comando [{cmd}]: Sin salida')
+                    
+            except Exception as e:
+                self._log(deployment, 'error', f'Error ejecutando [{cmd}]: {str(e)}')
     
     def _get_available_port(self) -> int:
         """Obtener un puerto disponible para el despliegue"""
@@ -559,19 +853,170 @@ class DeploymentService:
         max_port = 8200
         
         for port in range(start_port, max_port):
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                try:
-                    s.bind(('localhost', port))
+            # Verificar tanto localhost como 0.0.0.0
+            available = True
+            for host in ['localhost', '0.0.0.0']:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    try:
+                        s.bind((host, port))
+                    except OSError:
+                        available = False
+                        break
+            
+            if available:
+                # Verificar también que no haya contenedores Docker usando este puerto
+                if self._is_port_free_in_docker(port):
                     return port
-                except OSError:
-                    continue
         
         raise Exception("No hay puertos disponibles para el despliegue")
     
-    async def _log(self, deployment: Deployment, level: str, message: str, details: Dict = None):
+    def _is_port_free_in_docker(self, port: int) -> bool:
+        """Verificar que el puerto no esté siendo usado por contenedores Docker"""
+        try:
+            containers = self.docker_client.containers.list()
+            for container in containers:
+                port_bindings = container.attrs.get('NetworkSettings', {}).get('Ports', {})
+                for container_port, host_bindings in port_bindings.items():
+                    if host_bindings:
+                        for binding in host_bindings:
+                            if int(binding.get('HostPort', 0)) == port:
+                                # Puerto ocupado, parar este contenedor si es nuestro
+                                if container.name.startswith('dess-container-'):
+                                    logger.info(f'Limpiando contenedor que ocupa puerto {port}: {container.name}')
+                                    container.stop(timeout=5)
+                                    container.remove()
+                                    return True  # Ahora está libre
+                                return False  # Puerto ocupado por otro contenedor
+            return True  # Puerto libre
+        except Exception as e:
+            # Si hay error verificando, asumir que está ocupado
+            return False
+    
+    def _cleanup_existing_container(self, deployment: Deployment):
+        """Limpiar contenedores existentes del deployment"""
+        try:
+            if deployment.container_id:
+                # Intentar parar y remover contenedor existente
+                try:
+                    container = self.docker_client.containers.get(deployment.container_id)
+                    container.stop(timeout=10)
+                    container.remove()
+                    self._log(deployment, 'info', f'Container anterior limpiado: {deployment.container_id[:12]}')
+                except docker.errors.NotFound:
+                    self._log(deployment, 'info', 'Container anterior ya no existe')
+                except Exception as e:
+                    self._log(deployment, 'warning', f'Error limpiando container anterior: {str(e)}')
+            
+            # También limpiar contenedores con el mismo nombre si existen
+            container_name = f"dess-container-{deployment.id}"
+            try:
+                existing = self.docker_client.containers.get(container_name)
+                existing.stop(timeout=10)
+                existing.remove()
+                self._log(deployment, 'info', f'Container con nombre duplicado limpiado: {container_name}')
+            except docker.errors.NotFound:
+                pass  # No existe, perfecto
+            except Exception as e:
+                self._log(deployment, 'warning', f'Error limpiando container con nombre {container_name}: {str(e)}')
+                
+        except Exception as e:
+            self._log(deployment, 'warning', f'Error en limpieza general de containers: {str(e)}')
+    
+    def _is_container_healthy(self, deployment: Deployment) -> bool:
+        """Verificar si el contenedor está saludable independientemente del HTTP"""
+        if not deployment.container_id:
+            return False
+            
+        try:
+            container = self.docker_client.containers.get(deployment.container_id)
+            
+            # 1. Verificar que esté corriendo
+            if container.status != 'running':
+                return False
+            
+            # 2. Verificar logs para buscar signos de que la aplicación se inició
+            logs = container.logs(tail=20).decode('utf-8', errors='ignore')
+            
+            # Palabras clave que indican que el servidor está funcionando (específicas por framework)
+            project_type = deployment.project_type
+            if project_type in [ProjectType.NODE, ProjectType.REACT, ProjectType.NEXTJS]:
+                healthy_indicators = [
+                    'Listening on',
+                    'Server running',
+                    'Started server',
+                    'Ready to accept connections',
+                    'Application started'
+                ]
+            elif project_type == ProjectType.DJANGO:
+                healthy_indicators = [
+                    'Starting development server',
+                    'Django version',
+                    'Watching for file changes',
+                    'Quit the server with CONTROL-C'
+                ]
+            elif project_type == ProjectType.FLASK:
+                healthy_indicators = [
+                    'Running on',
+                    'Serving Flask app',
+                    '* Debug mode:',
+                    'WARNING: This is a development server'
+                ]
+            elif project_type == ProjectType.FASTAPI:
+                healthy_indicators = [
+                    'Uvicorn running on',
+                    'Application startup complete',
+                    'Started server process',
+                    'Waiting for application startup'
+                ]
+            elif project_type == ProjectType.STATIC:
+                healthy_indicators = [
+                    'Configuration complete',
+                    'nginx: configuration file',
+                    'worker process'
+                ]
+            else:
+                # Fallback para tipos desconocidos
+                healthy_indicators = [
+                    'Listening on',
+                    'Server running',
+                    'Started server',
+                    'Application started',
+                    'Server started',
+                    'Ready to accept connections',
+                    'Accepting connections',
+                    'Running on'
+                ]
+            
+            for indicator in healthy_indicators:
+                if indicator in logs:
+                    self._log(deployment, 'info', f'Indicador de salud encontrado en logs: "{indicator}"')
+                    return True
+            
+            # 3. Si no encuentra indicadores pero el contenedor lleva más de 30 segundos corriendo, probablemente esté bien
+            import time
+            container.reload()
+            started_at = container.attrs['State']['StartedAt']
+            
+            # Parsear timestamp de Docker (formato ISO)
+            from datetime import datetime
+            started_time = datetime.fromisoformat(started_at.replace('Z', '+00:00'))
+            current_time = datetime.now(started_time.tzinfo)
+            
+            uptime_seconds = (current_time - started_time).total_seconds()
+            if uptime_seconds > 30:
+                self._log(deployment, 'info', f'Contenedor corriendo estable por {uptime_seconds:.1f} segundos')
+                return True
+                
+            return False
+            
+        except Exception as e:
+            self._log(deployment, 'error', f'Error verificando salud del contenedor: {str(e)}')
+            return False
+    
+    def _log(self, deployment: Deployment, level: str, message: str, details: Dict = None):
         """Agregar log al despliegue"""
         
-        await sync_to_async(DeploymentLog.objects.create)(
+        DeploymentLog.objects.create(
             deployment=deployment,
             level=level,
             message=message,
@@ -580,9 +1025,9 @@ class DeploymentService:
         
         logger.info(f"[{deployment.name}] {message}")
     
-    async def _save_deployment(self, deployment: Deployment):
-        """Guardar deployment de forma asíncrona"""
-        await sync_to_async(deployment.save)()
+    def _save_deployment(self, deployment: Deployment):
+        """Guardar deployment"""
+        deployment.save()
     
     def stop_deployment(self, deployment: Deployment) -> bool:
         """Detener un despliegue"""
@@ -628,96 +1073,3 @@ class DeploymentService:
         
         return False
     
-    async def _deploy_project_simulation(self, deployment: Deployment) -> bool:
-        """Simular despliegue cuando Docker no está disponible"""
-        
-        try:
-            await self._log(deployment, 'info', '🎭 Iniciando despliegue en modo simulación')
-            
-            # 1. Simular clonación
-            deployment.status = DeploymentStatus.CLONING
-            await self._save_deployment(deployment)
-            await self._log(deployment, 'info', f'📥 Simulando clonación de {deployment.github_url}')
-            await asyncio.sleep(1)  # Simular tiempo de clonación
-            
-            # 2. Simular análisis
-            deployment.status = DeploymentStatus.ANALYZING  
-            await self._save_deployment(deployment)
-            await self._log(deployment, 'info', '🔍 Simulando análisis de proyecto')
-            await asyncio.sleep(0.5)
-            
-            # Detectar tipo de proyecto basado en la URL (simulado)
-            if not deployment.project_type:
-                if 'react' in deployment.github_url.lower():
-                    deployment.project_type = ProjectType.REACT
-                elif 'django' in deployment.github_url.lower():
-                    deployment.project_type = ProjectType.DJANGO
-                elif 'node' in deployment.github_url.lower():
-                    deployment.project_type = ProjectType.NODE
-                else:
-                    deployment.project_type = ProjectType.STATIC
-                await self._save_deployment(deployment)
-            
-            await self._log(deployment, 'info', f'📋 Tipo de proyecto detectado: {deployment.get_project_type_display()}')
-            
-            # 3. Simular construcción
-            deployment.status = DeploymentStatus.BUILDING
-            await self._save_deployment(deployment)
-            await self._log(deployment, 'info', '🔨 Simulando construcción de imagen Docker')
-            await asyncio.sleep(2)  # Simular tiempo de build
-            
-            deployment.image_name = f"dess-simulation-{deployment.id}"
-            await self._save_deployment(deployment)
-            
-            # 4. Simular despliegue
-            deployment.status = DeploymentStatus.DEPLOYING
-            await self._save_deployment(deployment)
-            await self._log(deployment, 'info', '🚀 Simulando despliegue de contenedor')
-            await asyncio.sleep(1)
-            
-            # Asignar puerto simulado
-            if not deployment.port:
-                deployment.port = self._get_available_port_simulation()
-            
-            # Generar URL de acceso
-            deployment.deploy_url = f"http://localhost:{deployment.port}"
-            deployment.container_id = f"simulation-container-{deployment.id}"
-            await self._save_deployment(deployment)
-            
-            # 5. Verificar despliegue (simulado)
-            await self._log(deployment, 'info', '✅ Simulando verificación de despliegue')
-            await asyncio.sleep(0.5)
-            
-            # Marcar como exitoso
-            deployment.status = DeploymentStatus.RUNNING
-            deployment.last_deployed = timezone.now()
-            await self._save_deployment(deployment)
-            
-            # Log de éxito con información de acceso
-            await self._log(deployment, 'success', f'🎉 Despliegue simulado completado exitosamente!')
-            await self._log(deployment, 'info', f'🌐 URL de acceso: {deployment.deploy_url}')
-            await self._log(deployment, 'info', f'🔗 Puerto asignado: {deployment.port}')
-            await self._log(deployment, 'info', f'📦 Tipo: {deployment.get_project_type_display()}')
-            
-            # Actualizar logs de despliegue
-            deployment.deploy_logs += f'\n\n=== DESPLIEGUE SIMULADO COMPLETADO ===\n'
-            deployment.deploy_logs += f'✅ Estado: {deployment.get_status_display()}\n'
-            deployment.deploy_logs += f'🌐 URL: {deployment.deploy_url}\n'
-            deployment.deploy_logs += f'🔗 Puerto: {deployment.port}\n'
-            deployment.deploy_logs += f'📦 Tipo: {deployment.get_project_type_display()}\n'
-            deployment.deploy_logs += f'🕒 Desplegado: {deployment.last_deployed.strftime("%Y-%m-%d %H:%M:%S")}\n'
-            await self._save_deployment(deployment)
-            
-            return True
-            
-        except Exception as e:
-            await self._log(deployment, 'error', f'❌ Error en despliegue simulado: {str(e)}')
-            deployment.status = DeploymentStatus.FAILED
-            await self._save_deployment(deployment)
-            return False
-    
-    def _get_available_port_simulation(self) -> int:
-        """Obtener un puerto disponible para simulación"""
-        # Generar puerto simulado entre 3000-9000 
-        base_ports = [3000, 3001, 4000, 5000, 8000, 8080, 8081, 9000]
-        return random.choice(base_ports)

@@ -113,6 +113,8 @@ class Deployment(models.Model):
     
     def get_clone_url(self):
         """URL para clonar el repositorio"""
+        if self.github_url.endswith('.git'):
+            return self.github_url
         return f"{self.github_url}.git"
     
     def add_log(self, log_type, message):

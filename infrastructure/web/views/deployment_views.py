@@ -178,30 +178,46 @@ def deploy_project_action(request, deployment_id):
     deployment = get_object_or_404(Deployment, id=deployment_id)
     
     try:
+        logger.info(f"Iniciando deployment para {deployment_id}")
         deployment_service = DeploymentService()
         
-        # Ejecutar despliegue de forma asíncrona
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        # Ejecutar despliegue con timeout usando threading
+        import threading
+        from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
         
-        success = loop.run_until_complete(
-            deployment_service.deploy_project(deployment)
-        )
+        def run_deployment():
+            """Función para ejecutar deployment en thread separado"""
+            return deployment_service.deploy_project(deployment)
         
-        if success:
-            return JsonResponse({
-                'success': True,
-                'message': 'Despliegue iniciado exitosamente',
-                'deploy_url': deployment.deploy_url
-            })
-        else:
+        try:
+            # Ejecutar con timeout de 5 minutos usando ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(run_deployment)
+                success = future.result(timeout=300)  # 5 minutos
+            
+            if success:
+                logger.info(f"Deployment {deployment_id} completado exitosamente")
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Despliegue completado exitosamente',
+                    'deploy_url': deployment.deploy_url or 'URL no disponible'
+                })
+            else:
+                logger.warning(f"Deployment {deployment_id} falló")
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Error en el despliegue. Revisa los logs para más detalles.'
+                })
+                
+        except FuturesTimeoutError:
+            logger.error(f"Deployment {deployment_id} timeout después de 5 minutos")
             return JsonResponse({
                 'success': False,
-                'message': 'Error en el despliegue. Revisa los logs.'
+                'message': 'Despliegue timeout después de 5 minutos. El proceso puede continuar en segundo plano.'
             })
             
     except Exception as e:
-        logger.error(f"Error en despliegue {deployment_id}: {str(e)}")
+        logger.error(f"Error en despliegue {deployment_id}: {str(e)}", exc_info=True)
         return JsonResponse({
             'success': False,
             'message': f'Error ejecutando despliegue: {str(e)}'
@@ -346,11 +362,7 @@ def github_webhook_view(request, deployment_id):
                     import threading
                     
                     def deploy_async():
-                        loop = asyncio.new_event_loop()
-                        asyncio.set_event_loop(loop)
-                        loop.run_until_complete(
-                            deployment_service.deploy_project(deployment)
-                        )
+                        deployment_service.deploy_project(deployment)
                     
                     thread = threading.Thread(target=deploy_async)
                     thread.start()
