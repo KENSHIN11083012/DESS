@@ -29,7 +29,10 @@ def user_solutions_view(request):
     status = request.GET.get('status', '').strip()
     
     # Consulta base optimizada - soluciones asignadas al usuario
-    assignments_query = UserSolutionAssignment.objects.for_user(request.user).active().with_related_info()
+    assignments_query = UserSolutionAssignment.objects.filter(
+        user=request.user,
+        is_active=True
+    ).select_related('solution', 'assigned_by')
     
     # Aplicar filtros de búsqueda
     if search:

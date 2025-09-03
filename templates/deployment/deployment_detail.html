@@ -72,6 +72,7 @@
 {% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <!-- Contenedor principal -->
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   
@@ -254,10 +255,10 @@
                         <div class="mt-8 pt-6 border-t border-gray-200">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">Acciones</h3>
                             <div class="flex flex-wrap gap-3">
-                                {% if deployment.status == 'stopped' or deployment.status == 'failed' %}
+                                {% if deployment.status == 'pending' or deployment.status == 'stopped' or deployment.status == 'failed' %}
                                 <button onclick="deployProject('{{ deployment.id }}')" 
                                         class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition duration-150">
-                                    Desplegar
+                                    {% if deployment.status == 'pending' %}Iniciar Despliegue{% else %}Redesplegar{% endif %}
                                 </button>
                                 {% elif deployment.status == 'running' %}
                                 <button onclick="restartDeployment('{{ deployment.id }}')" 
@@ -490,6 +491,10 @@
 
 {% block extra_js %}
 <script>
+// Global variables for modal
+let currentAction = null;
+let currentDeploymentId = null;
+
 document.addEventListener('DOMContentLoaded', function() {
     // Tab functionality
     const tabButtons = document.querySelectorAll('.tab-button');
@@ -522,8 +527,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('confirmModal');
     const cancelBtn = document.getElementById('cancelModal');
     const confirmBtn = document.getElementById('confirmAction');
-    let currentAction = null;
-    let currentDeploymentId = null;
     
     cancelBtn.onclick = function() {
         modal.classList.add('hidden');

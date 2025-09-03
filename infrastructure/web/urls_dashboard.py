@@ -32,6 +32,9 @@ urlpatterns = [
     path('admin-panel/deployments/', deployment_views.deployments_list_view, name='deployments_list'),
     path('admin-panel/deployments/create/', deployment_views.create_deployment_view, name='create_deployment'),
     path('admin-panel/deployments/<uuid:deployment_id>/', deployment_views.deployment_detail_view, name='deployment_detail'),
+    path('admin-panel/deployments/<uuid:deployment_id>/deploy/', deployment_views.deploy_project_action, name='deploy_project'),
+    path('admin-panel/deployments/<uuid:deployment_id>/stop/', deployment_views.stop_deployment_action, name='stop_deployment'),
+    path('admin-panel/deployments/<uuid:deployment_id>/restart/', deployment_views.restart_deployment_action, name='restart_deployment'),
     
     # URLs de perfil
     # path('', include('infrastructure.web.profile_urls')),

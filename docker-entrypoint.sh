@@ -139,9 +139,17 @@ check_system() {
     
     # Verificar Docker socket si vamos a hacer despliegues
     if [ -S /var/run/docker.sock ]; then
-        log_success "Docker socket is available for deployments"
+        log_success "Docker socket is available"
+        # Verificar permisos y conectividad
+        if docker version > /dev/null 2>&1; then
+            log_success "Docker CLI working correctly for deployments"
+        else
+            log_error "Docker socket exists but CLI cannot connect. Checking permissions..."
+            ls -la /var/run/docker.sock
+            groups
+        fi
     else
-        log_warning "Docker socket not available. Deployment functionality may be limited."
+        log_warning "Docker socket not available. Deployment functionality will be disabled."
     fi
     
     # Verificar conectividad a Redis si está configurado

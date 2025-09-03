@@ -32,7 +32,7 @@
           </div>
         </div>
         <div class="ml-5">
-          <p class="text-3xl font-bold text-gray-900">{{ stats.total_users|default:3 }}</p>
+          <p class="text-3xl font-bold text-gray-900">{{ stats.total_users|default:0 }}</p>
           <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Usuarios Totales</p>
         </div>
       </div>
@@ -49,7 +49,7 @@
           </div>
         </div>
         <div class="ml-5">
-          <p class="text-3xl font-bold text-gray-900">{{ stats.total_solutions|default:1 }}</p>
+          <p class="text-3xl font-bold text-gray-900">{{ stats.total_solutions|default:0 }}</p>
           <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Soluciones</p>
         </div>
       </div>
@@ -66,7 +66,7 @@
           </div>
         </div>
         <div class="ml-5">
-          <p class="text-3xl font-bold text-gray-900">{{ stats.total_assignments|default:2 }}</p>
+          <p class="text-3xl font-bold text-gray-900">{{ stats.total_assignments|default:0 }}</p>
           <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Asignaciones</p>
         </div>
       </div>

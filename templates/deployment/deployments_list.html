@@ -284,6 +284,22 @@
 
 {% block extra_js %}
 <script>
+// Función global para obtener cookies CSRF
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 function showDeploymentModal(title, content) {
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalContent').textContent = content;
@@ -297,10 +313,12 @@ function hideDeploymentModal() {
 function deployProject(deploymentId) {
     showDeploymentModal('Iniciando Despliegue', 'Preparando el despliegue del proyecto...');
     
-    fetch(`/api/deployments/${deploymentId}/deploy/`, {
+    const csrfToken = getCookie('csrftoken');
+    
+    fetch(`/admin-panel/deployments/${deploymentId}/deploy/`, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-CSRFToken': csrfToken,
             'Content-Type': 'application/json',
         },
     })
@@ -326,10 +344,12 @@ function stopDeployment(deploymentId) {
     
     showDeploymentModal('Deteniendo Despliegue', 'Deteniendo el contenedor...');
     
-    fetch(`/api/deployments/${deploymentId}/stop/`, {
+    const csrfToken = getCookie('csrftoken');
+    
+    fetch(`/admin-panel/deployments/${deploymentId}/stop/`, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-CSRFToken': csrfToken,
             'Content-Type': 'application/json',
         },
     })
@@ -348,10 +368,12 @@ function stopDeployment(deploymentId) {
 function restartDeployment(deploymentId) {
     showDeploymentModal('Reiniciando Despliegue', 'Reiniciando el contenedor...');
     
-    fetch(`/api/deployments/${deploymentId}/restart/`, {
+    const csrfToken = getCookie('csrftoken');
+    
+    fetch(`/admin-panel/deployments/${deploymentId}/restart/`, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-CSRFToken': csrfToken,
             'Content-Type': 'application/json',
         },
     })

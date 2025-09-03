@@ -17,11 +17,10 @@ ENV DJANGO_SETTINGS_MODULE=config.settings
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Crear usuario no-root desde el inicio para seguridad
-# Agregar usuario dess al grupo docker para acceso al socket de Docker
+# Agregar usuario dess al grupo root para acceso al socket de Docker en Windows
 RUN groupadd --gid 1000 dess \
     && useradd --uid 1000 --gid dess --shell /bin/bash --create-home dess \
-    && groupadd docker \
-    && usermod -aG docker dess
+    && usermod -aG root dess
 
 # Crear directorio de trabajo
 WORKDIR /app
