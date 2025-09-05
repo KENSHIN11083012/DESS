@@ -33,7 +33,7 @@
       <div class="flex items-center space-x-2 text-sm">
         <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-800">Panel Principal</a>
         <span class="text-gray-400">/</span>
-        <a href="{% url 'deployments_list' %}" class="text-blue-600 hover:text-blue-800">Gestión de Despliegues</a>
+        <a href="{% url 'admin_deployments' %}" class="text-dess-secondary hover:text-dess-primary transition duration-150">Gestión de Despliegues</a>
         <span class="text-gray-400">/</span>
         <span class="text-gray-600">Crear Nuevo Despliegue</span>
       </div>
@@ -46,7 +46,7 @@
       
       <!-- Acción de volver -->
       <div class="flex items-center space-x-4">
-        <a href="{% url 'deployments_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition duration-150">
+        <a href="{% url 'admin_deployments' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition duration-150 shadow-md hover:shadow-lg">
           Volver
         </a>
       </div>
@@ -62,7 +62,7 @@
                     <p class="text-sm text-gray-600">Complete los campos para crear un nuevo despliegue</p>
                 </div>
 
-                <form id="deploymentForm" class="p-6 space-y-6" method="post" action="{% url 'create_deployment' %}">
+                <form id="deploymentForm" class="p-6 space-y-6" method="post" action="{% url 'admin_create_deployment' %}">
                     {% csrf_token %}
                     
                     <!-- Información Básica -->
@@ -234,12 +234,17 @@
                     <!-- Botones de Acción -->
                     <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
                         <button type="button" onclick="window.history.back()" 
-                                class="px-6 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                                class="px-6 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200 shadow-md hover:shadow-lg">
                             Cancelar
                         </button>
                         <button type="submit" 
-                                class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition duration-150">
-                            <span id="submit-text">Crear Despliegue</span>
+                                class="bg-dess-secondary hover:bg-dess-primary text-white font-medium py-2 px-6 rounded-lg transition duration-150 shadow-md hover:shadow-lg">
+                            <span id="submit-text">
+                                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Crear Despliegue
+                            </span>
                             <span id="submit-loading" class="hidden">
                                 <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block mr-2"></div>
                                 Creando...

@@ -108,16 +108,16 @@
     <div class="border-b border-gray-200">
         <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex space-x-8">
-                <a href="{% url 'admin_dashboard' %}" class="border-b-2 {% if request.resolver_match.url_name == 'admin_dashboard' %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} py-4 px-1 text-sm font-medium transition duration-150">
+                <a href="{% url 'admin_dashboard' %}" class="border-b-2 {% if request.resolver_match.url_name == 'admin_dashboard' %}border-dess-secondary text-dess-primary{% else %}border-transparent text-gray-500 hover:text-dess-primary hover:border-dess-secondary{% endif %} py-4 px-1 text-sm font-medium transition duration-150">
                     Panel Principal
                 </a>
-                <a href="{% url 'admin_users' %}" class="border-b-2 {% if request.resolver_match.url_name == 'admin_users' %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} py-4 px-1 text-sm font-medium transition duration-150">
+                <a href="{% url 'admin_users' %}" class="border-b-2 {% if request.resolver_match.url_name == 'admin_users' %}border-dess-secondary text-dess-primary{% else %}border-transparent text-gray-500 hover:text-dess-primary hover:border-dess-secondary{% endif %} py-4 px-1 text-sm font-medium transition duration-150">
                     Gestión de Usuarios
                 </a>
-                <a href="{% url 'admin_solutions' %}" class="border-b-2 {% if request.resolver_match.url_name == 'admin_solutions' %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} py-4 px-1 text-sm font-medium transition duration-150">
+                <a href="{% url 'admin_solutions' %}" class="border-b-2 {% if request.resolver_match.url_name == 'admin_solutions' %}border-dess-secondary text-dess-primary{% else %}border-transparent text-gray-500 hover:text-dess-primary hover:border-dess-secondary{% endif %} py-4 px-1 text-sm font-medium transition duration-150">
                     Gestión de Soluciones
                 </a>
-                <a href="{% url 'deployments_list' %}" class="border-b-2 {% if 'deployment' in request.resolver_match.url_name %}border-blue-500 text-blue-600{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %} py-4 px-1 text-sm font-medium transition duration-150">
+                <a href="{% url 'admin_deployments' %}" class="border-b-2 {% if 'admin_deployment' in request.resolver_match.url_name %}border-dess-secondary text-dess-primary{% else %}border-transparent text-gray-500 hover:text-dess-primary hover:border-dess-secondary{% endif %} py-4 px-1 text-sm font-medium transition duration-150">
                     Despliegues
                 </a>
             </div>

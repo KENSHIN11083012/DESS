@@ -5,12 +5,14 @@
 
 {% block extra_css %}
 <style>
+    /* DESS Deployment Detail Styles */
     .deployment-header {
-        background-color: #f9fafb;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border: 1px solid #cbd5e0;
+        border-radius: 12px;
         padding: 24px;
         margin-bottom: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
     .status-indicator {
         width: 12px;
@@ -19,12 +21,13 @@
         display: inline-block;
         margin-right: 8px;
         animation: pulse 2s infinite;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     }
-    .status-running { background-color: #22c55e; }
-    .status-building { background-color: #eab308; }
+    .status-running { background-color: #198754; } /* dess-accent */
+    .status-building { background-color: #4A9EE0; } /* dess-secondary */
     .status-failed { background-color: #ef4444; }
     .status-stopped { background-color: #6b7280; }
-    .status-pending { background-color: #3b82f6; }
+    .status-pending { background-color: #1E3A5F; } /* dess-primary */
     
     .log-container {
         background-color: #1f2937;
@@ -51,15 +54,20 @@
     
     .metric-card {
         background: white;
-        border-radius: 8px;
-        padding: 16px;
+        border-radius: 12px;
+        padding: 20px;
         text-align: center;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+    }
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
     .metric-value {
-        font-size: 24px;
+        font-size: 28px;
         font-weight: bold;
-        color: #1f2937;
+        color: #1E3A5F; /* dess-primary */
         margin-bottom: 4px;
     }
     .metric-label {
@@ -67,6 +75,12 @@
         color: #6b7280;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+    }
+    
+    /* Hover effects para cards */
+    .dess-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
 </style>
 {% endblock %}
@@ -76,14 +90,14 @@
 <!-- Contenedor principal -->
 <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   
-  <!-- Header con breadcrumb y acciones -->
-  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+  <!-- Header con breadcrumb y acciones - Estilo DESS -->
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8 hover:shadow-lg transition-shadow duration-300 dess-card">
     <div class="flex justify-between items-center flex-wrap gap-4">
       <!-- Breadcrumb -->
       <div class="flex items-center space-x-2 text-sm">
-        <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-800">Panel Principal</a>
+        <a href="{% url 'admin_dashboard' %}" class="text-dess-secondary hover:text-dess-primary transition duration-150">Panel Principal</a>
         <span class="text-gray-400">/</span>
-        <a href="{% url 'deployments_list' %}" class="text-blue-600 hover:text-blue-800">Gestión de Despliegues</a>
+        <a href="{% url 'admin_deployments' %}" class="text-dess-secondary hover:text-dess-primary transition duration-150">Gestión de Despliegues</a>
         <span class="text-gray-400">/</span>
         <span class="text-gray-600">{{ deployment.name }}</span>
       </div>
@@ -92,7 +106,10 @@
       <div class="flex-1">
         <div class="flex items-center mb-2">
           <span class="status-indicator status-{{ deployment.status }}"></span>
-          <h1 class="text-lg font-semibold text-gray-900">{{ deployment.name }}</h1>
+          <svg class="w-6 h-6 text-dess-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+          </svg>
+          <h1 class="text-2xl font-bold text-dess-primary">{{ deployment.name }}</h1>
         </div>
         <p class="text-sm text-gray-600">{{ deployment.description|default:"Sin descripción" }}</p>
         <div class="flex items-center mt-2 space-x-4 text-sm text-gray-500">
@@ -112,7 +129,7 @@
           Ver Aplicación
         </a>
         {% endif %}
-        <a href="{% url 'deployments_list' %}" 
+        <a href="{% url 'admin_deployments' %}" 
            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition duration-150">
           Volver
         </a>

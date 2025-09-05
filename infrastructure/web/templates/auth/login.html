@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Iniciar Sesión - DESS{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <!-- Panel Izquierdo - Formulario -->
+    <div class="login-left-panel">
+        <!-- Logo -->
+        <div class="login-logo-left">
+            <div class="logo-icon">☁</div>
+            <div class="logo-text">DESS</div>
+        </div>
+
+        <!-- Formulario -->
+        <div class="login-form-container">
+            <div class="login-header">
+                <h1 class="login-title">Bienvenido de vuelta</h1>
+                <p class="login-subtitle">Accede al ecosistema de soluciones empresariales</p>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="error-message">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if form.errors %}
+                <div class="error-message">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            {{ error }}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" class="login-form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="username" class="form-label">Usuario</label>
+                    <div class="form-input-wrapper">
+                        <span class="form-input-icon">👤</span>
+                        <input type="text" 
+                               id="username" 
+                               name="username" 
+                               class="form-input" 
+                               placeholder="Ingresa tu usuario"
+                               value="{{ form.username.value|default:'' }}"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <div class="form-input-wrapper">
+                        <span class="form-input-icon">🔒</span>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               class="form-input" 
+                               placeholder="Ingresa tu contraseña"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" 
+                               name="remember" 
+                               class="remember-checkbox">
+                        <span class="remember-label">Recordar sesión</span>
+                    </label>
+                    <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+                </div>
+
+                <button type="submit" class="login-button">
+                    INICIAR SESIÓN
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Panel Derecho - Ilustración -->
+    <div class="login-right-panel">
+        <!-- Círculos decorativos -->
+        <div class="decoration-circle circle-1"></div>
+        <div class="decoration-circle circle-2"></div>
+        <div class="decoration-circle circle-3"></div>
+
+        <div class="right-panel-content">
+            <h2 class="right-panel-title">DESS</h2>
+            <p class="right-panel-subtitle">
+                Centraliza y gestiona todas tus soluciones empresariales en un solo lugar
+            </p>
+
+            <!-- Ilustración moderna -->
+            <div class="modern-illustration">
+                <!-- Iconos flotantes -->
+                <div class="floating-icon">📊</div>
+                <div class="floating-icon">🔧</div>
+                <div class="floating-icon">📈</div>
+                <div class="floating-icon">⚡</div>
+
+                <!-- Dashboard preview -->
+                <div class="dashboard-preview">
+                    <div class="preview-header">
+                        <div class="preview-logo">DESS</div>
+                        <div class="preview-menu">
+                            <div class="menu-dot"></div>
+                            <div class="menu-dot"></div>
+                            <div class="menu-dot"></div>
+                        </div>
+                    </div>
+                    <div class="preview-content">
+                        <div class="preview-card"></div>
+                        <div class="preview-card"></div>
+                        <div class="preview-card"></div>
+                        <div class="preview-card"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Agregar efecto de loading al botón
+document.querySelector('.login-form').addEventListener('submit', function(e) {
+    const button = document.querySelector('.login-button');
+    button.classList.add('loading');
+    button.disabled = true;
+});
+
+// Animación suave para los inputs
+document.querySelectorAll('.form-input').forEach(input => {
+    input.addEventListener('focus', function() {
+        this.parentElement.parentElement.classList.add('focused');
+    });
+    
+    input.addEventListener('blur', function() {
+        this.parentElement.parentElement.classList.remove('focused');
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,153 @@
+<!-- Ejemplo de uso de los modales DESS -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Modales DESS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">Demo - Sistema de Modales DESS</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Confirmación -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Modal de Confirmación</h3>
+                <button onclick="testConfirm()" 
+                        class="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-150">
+                    Mostrar Confirmación
+                </button>
+            </div>
+            
+            <!-- Success -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Modal de Éxito</h3>
+                <button onclick="testSuccess()" 
+                        class="w-full px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-150">
+                    Mostrar Éxito
+                </button>
+            </div>
+            
+            <!-- Error -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Modal de Error</h3>
+                <button onclick="testError()" 
+                        class="w-full px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-150">
+                    Mostrar Error
+                </button>
+            </div>
+            
+            <!-- Warning -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Modal de Advertencia</h3>
+                <button onclick="testWarning()" 
+                        class="w-full px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition duration-150">
+                    Mostrar Advertencia
+                </button>
+            </div>
+            
+            <!-- Info -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Modal de Información</h3>
+                <button onclick="testInfo()" 
+                        class="w-full px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition duration-150">
+                    Mostrar Información
+                </button>
+            </div>
+            
+            <!-- Toast -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Notificación Toast</h3>
+                <button onclick="testToast()" 
+                        class="w-full px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition duration-150">
+                    Mostrar Toast
+                </button>
+            </div>
+        </div>
+        
+        <!-- Código de ejemplo -->
+        <div class="mt-12 bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Ejemplos de Código</h3>
+            <div class="space-y-4">
+                <div>
+                    <h4 class="font-medium text-gray-700">Confirmación:</h4>
+                    <pre class="bg-gray-100 p-3 rounded text-sm"><code>const confirmed = await DESSModal.confirm('¿Seguro que quieres continuar?', 'Confirmar Acción');
+if (confirmed) {
+    console.log('Usuario confirmó');
+}</code></pre>
+                </div>
+                
+                <div>
+                    <h4 class="font-medium text-gray-700">Alerta de éxito:</h4>
+                    <pre class="bg-gray-100 p-3 rounded text-sm"><code>await DESSModal.success('Operación completada exitosamente');</code></pre>
+                </div>
+                
+                <div>
+                    <h4 class="font-medium text-gray-700">Toast de información:</h4>
+                    <pre class="bg-gray-100 p-3 rounded text-sm"><code>DESSModal.toast('Información guardada', 'info', 3000);</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cargar sistema de modales -->
+    <script src="../static/js/dess-modals.js"></script>
+    
+    <script>
+        async function testConfirm() {
+            const confirmed = await DESSModal.confirm(
+                '¿Está seguro de que desea eliminar este elemento? Esta acción no se puede deshacer.',
+                'Confirmar Eliminación'
+            );
+            
+            if (confirmed) {
+                DESSModal.success('Elemento eliminado correctamente');
+            } else {
+                DESSModal.info('Operación cancelada');
+            }
+        }
+        
+        async function testSuccess() {
+            await DESSModal.success(
+                'La solución ha sido añadida al catálogo exitosamente. Los usuarios podrán acceder a ella inmediatamente.',
+                'Solución Añadida'
+            );
+        }
+        
+        async function testError() {
+            await DESSModal.error(
+                'No se pudo conectar con el servidor. Verifique su conexión a internet e intente nuevamente.',
+                'Error de Conexión'
+            );
+        }
+        
+        async function testWarning() {
+            await DESSModal.warning(
+                'Esta acción modificará los permisos de usuario. Asegúrese de revisar los cambios antes de continuar.',
+                'Modificación de Permisos'
+            );
+        }
+        
+        async function testInfo() {
+            await DESSModal.info(
+                'El sistema se actualizará automáticamente esta noche a las 2:00 AM. El tiempo de inactividad estimado es de 30 minutos.',
+                'Mantenimiento Programado'
+            );
+        }
+        
+        function testToast() {
+            DESSModal.toast('Configuración guardada correctamente', 'success', 3000);
+            
+            setTimeout(() => {
+                DESSModal.toast('Nueva notificación recibida', 'info', 4000);
+            }, 1000);
+            
+            setTimeout(() => {
+                DESSModal.toast('Advertencia: Espacio en disco bajo', 'warning', 5000);
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

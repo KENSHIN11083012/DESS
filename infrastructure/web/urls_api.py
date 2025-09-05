@@ -4,10 +4,14 @@ Rutas para APIs internas (AJAX) y REST API completa
 """
 from django.urls import path, include
 from .views import api_views, deployment_views
+from . import base_views
 from .api_urls import urlpatterns as rest_api_patterns
 
 # APIs AJAX internas para el dashboard
 urlpatterns = [
+    # Estado del sistema
+    path('api/status/', base_views.api_status, name='api_status_endpoint'),
+    
     path('api/user/profile/', api_views.api_user_profile, name='api_user_profile'),
     path('api/admin/remove-assignment/', api_views.api_remove_assignment, name='api_remove_assignment'),
     path('api/admin/delete-user/', api_views.api_delete_user, name='api_delete_user'),

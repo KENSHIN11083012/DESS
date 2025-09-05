@@ -398,13 +398,13 @@ sequenceDiagram
 
 ## 🎭 CASOS DE USO
 
-Los casos de uso representan las funcionalidades del sistema desde la perspectiva de los usuarios finales, describiendo las interacciones entre los actores (usuarios) y el sistema para lograr objetivos específicos. Esta sección documenta tanto los casos de uso principales como sus relaciones, extensiones y dependencias.
+Los casos de uso representan las acciones específicas que cada tipo de usuario puede realizar en el sistema, sin incluir los procesos internos o la lógica de negocio. Se enfocan únicamente en las funcionalidades disponibles para cada actor desde su perspectiva de uso.
 
-El sistema DESS tiene tres tipos de actores principales: Super Administradores (con acceso completo al sistema), Usuarios Regulares (con acceso limitado a sus soluciones asignadas) y Sistemas Externos (que consumen la API REST). Cada actor tiene un conjunto específico de casos de uso que puede ejecutar según sus permisos y rol.
+El sistema DESS tiene tres tipos de actores principales: Super Administradores (con acceso completo al sistema), Usuarios Regulares (con acceso limitado a sus soluciones asignadas) y Sistemas Externos (que consumen la API REST). Cada actor puede ejecutar un conjunto específico de acciones según sus permisos y rol.
 
 ### Diagrama de Casos de Uso - Sistema General
 
-Este diagrama UML presenta una vista completa de todos los casos de uso del sistema DESS, mostrando las relaciones entre actores y funcionalidades. Las líneas sólidas indican asociaciones directas, mientras que las líneas punteadas representan relaciones de extensión e inclusión entre casos de uso.
+Este diagrama UML presenta una vista simplificada de las acciones que puede realizar cada usuario en el sistema DESS, enfocándose únicamente en las funciones disponibles para cada actor.
 
 ```plantuml
 @startuml
@@ -413,73 +413,67 @@ actor "Super Administrador" as SuperAdmin
 actor "Usuario Regular" as RegularUser
 actor "Sistema Externo" as ExternalSystem
 
-rectangle "DESS - Sistema de Gestión" {
+rectangle "Sistema DESS" {
     
-    usecase "Gestionar Usuarios" as ManageUsers
     usecase "Crear Usuario" as CreateUser
     usecase "Editar Usuario" as EditUser
     usecase "Eliminar Usuario" as DeleteUser
-    usecase "Ver Estadísticas" as ViewStats
+    usecase "Ver Estadísticas Usuarios" as ViewUserStats
     
-    usecase "Gestionar Soluciones" as ManageSolutions
     usecase "Crear Solución" as CreateSolution
     usecase "Editar Solución" as EditSolution
     usecase "Eliminar Solución" as DeleteSolution
-    usecase "Asignar Solución" as AssignSolution
+    usecase "Asignar Solución a Usuario" as AssignSolution
     
-    usecase "Autenticarse" as Authenticate
-    usecase "Ver Perfil" as ViewProfile
-    usecase "Actualizar Perfil" as UpdateProfile
-    usecase "Ver Soluciones Asignadas" as ViewAssignedSolutions
-    usecase "Acceder Solución" as AccessSolution
+    usecase "Crear Deployment" as CreateDeployment
+    usecase "Ejecutar Deployment" as ExecuteDeployment
+    usecase "Ver Logs Deployment" as ViewDeploymentLogs
+    
+    usecase "Iniciar Sesión" as Login
+    usecase "Ver Mi Perfil" as ViewProfile
+    usecase "Actualizar Mi Perfil" as UpdateProfile
+    usecase "Ver Mis Soluciones" as ViewMySolutions
+    usecase "Acceder a Solución" as AccessSolution
     
     usecase "Consultar API" as QueryAPI
-    usecase "Obtener Estadísticas" as GetStats
-    usecase "Exportar Datos" as ExportData
+    usecase "Obtener Estado del Sistema" as GetSystemStatus
 }
 
-' Relaciones Super Administrador
-SuperAdmin --> ManageUsers
+' Super Administrador - Gestión completa
 SuperAdmin --> CreateUser
 SuperAdmin --> EditUser  
 SuperAdmin --> DeleteUser
-SuperAdmin --> ViewStats
+SuperAdmin --> ViewUserStats
 
-SuperAdmin --> ManageSolutions
 SuperAdmin --> CreateSolution
 SuperAdmin --> EditSolution
 SuperAdmin --> DeleteSolution
 SuperAdmin --> AssignSolution
 
-SuperAdmin --> Authenticate
+SuperAdmin --> CreateDeployment
+SuperAdmin --> ExecuteDeployment
+SuperAdmin --> ViewDeploymentLogs
+
+SuperAdmin --> Login
 SuperAdmin --> ViewProfile
 SuperAdmin --> UpdateProfile
 
-' Relaciones Usuario Regular
-RegularUser --> Authenticate
+' Usuario Regular - Acceso limitado
+RegularUser --> Login
 RegularUser --> ViewProfile
 RegularUser --> UpdateProfile
-RegularUser --> ViewAssignedSolutions
+RegularUser --> ViewMySolutions
 RegularUser --> AccessSolution
 
-' Relaciones Sistema Externo
+' Sistema Externo - APIs
 ExternalSystem --> QueryAPI
-ExternalSystem --> GetStats
-ExternalSystem --> ExportData
+ExternalSystem --> GetSystemStatus
 
-' Extensiones y dependencias
-ManageUsers ..> CreateUser : <<extends>>
-ManageUsers ..> EditUser : <<extends>>
-ManageUsers ..> DeleteUser : <<extends>>
-
-ManageSolutions ..> CreateSolution : <<extends>>
-ManageSolutions ..> EditSolution : <<extends>>
-ManageSolutions ..> DeleteSolution : <<extends>>
-ManageSolutions ..> AssignSolution : <<extends>>
-
-AccessSolution ..> Authenticate : <<requires>>
-ViewAssignedSolutions ..> Authenticate : <<requires>>
-ViewProfile ..> Authenticate : <<requires>>
+' Relaciones de inclusión
+ViewMySolutions ..> Login : <<include>>
+AccessSolution ..> Login : <<include>>
+ViewProfile ..> Login : <<include>>
+UpdateProfile ..> Login : <<include>>
 
 @enduml
 ```
@@ -533,9 +527,9 @@ Estos casos de uso sirven como especificaciones funcionales para el desarrollo, 
 
 ## 🔄 FLUJOS DE TRABAJO
 
-Los flujos de trabajo describen los procesos de negocio del sistema DESS, mostrando la secuencia de pasos, decisiones y acciones que ocurren para completar una funcionalidad específica. Estos diagramas de flujo proporcionan una vista operacional del sistema, complementando la vista estructural de la arquitectura.
+Los flujos de trabajo describen los procesos internos del sistema DESS, mostrando la secuencia de pasos, decisiones y validaciones que ocurren internamente para completar una funcionalidad específica. A diferencia de los casos de uso (que muestran QUÉ puede hacer el usuario), estos diagramas muestran CÓMO el sistema procesa internamente cada acción.
 
-Cada flujo incluye puntos de decisión, manejo de errores, validaciones y diferentes caminos que puede tomar el usuario según las condiciones del sistema y las acciones realizadas. Estos flujos son esenciales para entender el comportamiento dinámico del sistema.
+Cada flujo incluye puntos de decisión, manejo de errores, validaciones del sistema y diferentes caminos que puede tomar el proceso según las condiciones y reglas de negocio. Estos flujos son esenciales para entender el comportamiento dinámico interno del sistema y son útiles para desarrollo, testing y mantenimiento.
 
 ### Flujo de Autenticación
 
@@ -1082,6 +1076,82 @@ Las validaciones de seguridad implementan múltiples capas de protección contra
 
 ---
 
+## 🎨 SISTEMA DE DISEÑO DESS
+
+DESS implementa un sistema de diseño coherente y profesional basado en Tailwind CSS con colores corporativos personalizados. El diseño está optimizado para usabilidad, accesibilidad y consistencia visual en toda la aplicación.
+
+### Paleta de Colores DESS
+
+La paleta de colores corporativa de DESS está diseñada para transmitir profesionalismo, confianza y modernidad:
+
+```css
+:root {
+  --dess-primary: #1E3A5F;    /* Azul corporativo principal */
+  --dess-secondary: #4A9EE0;   /* Azul secundario (acciones) */
+  --dess-accent: #198754;      /* Verde (éxito/confirmaciones) */
+  --dess-gray-50: #f9fafb;     /* Fondo claro */
+  --dess-gray-100: #f3f4f6;    /* Fondo alternativo */
+}
+```
+
+### Componentes de Interfaz
+
+#### Navegación Principal
+- **Color de fondo**: `dess-primary` (#1E3A5F)
+- **Texto**: Blanco con transiciones suaves
+- **Hover states**: Gris 200 con duración de 150ms
+- **Logo**: Icono SVG con texto "DESS"
+
+#### Navigation Tabs (Admin)
+- **Indicador activo**: Borde inferior `dess-secondary`
+- **Texto activo**: `dess-primary`
+- **Hover**: Transición a `dess-primary` y `dess-secondary`
+- **Estados inactivos**: Gris 500 transparente
+
+#### Botones
+```css
+/* Botón primario */
+.btn-primary {
+  background: #1E3A5F;
+  hover: opacity-90;
+  text: white;
+}
+
+/* Botón secundario */
+.btn-secondary {
+  background: #4A9EE0;
+  hover: brightness-110;
+  text: white;
+}
+
+/* Botón de éxito */
+.btn-success {
+  background: #198754;
+  hover: brightness-110;
+  text: white;
+}
+```
+
+### Responsive Design
+
+El sistema utiliza las clases responsive de Tailwind CSS:
+- **sm:** `640px` - Tablets pequeñas
+- **md:** `768px` - Tablets
+- **lg:** `1024px` - Desktop pequeño
+- **xl:** `1280px` - Desktop
+- **2xl:** `1536px` - Desktop grande
+
+### Consistencia Visual
+
+Se ha implementado consistencia en:
+- **Navegación**: Mismo diseño entre paneles admin y usuario
+- **Formularios**: Campos estandarizados con validación visual
+- **Alertas**: Sistema unificado de mensajes de estado
+- **Iconografía**: Librería Heroicons SVG consistente
+- **Spacing**: Sistema de espaciado uniforme (4px baseline)
+
+---
+
 ## 🚀 DEPLOYMENT
 
 El deployment de DESS está diseñado para ser flexible y escalable, soportando desde entornos de desarrollo local hasta implementaciones de producción con alta disponibilidad. Esta sección proporciona guías completas para diferentes escenarios de implementación, desde instalación local hasta containerización con Docker.
@@ -1158,20 +1228,27 @@ python manage.py runserver
 
 La configuración de producción implementa las mejores prácticas para entornos empresariales, incluyendo containerización con Docker, bases de datos robustas, balanceadores de carga, SSL/TLS, y monitoreo. Esta configuración está diseñada para alta disponibilidad, escalabilidad y seguridad.
 
-#### Docker Compose
+#### Docker Compose Actualizado
 ```yaml
 version: '3.8'
 services:
-  web:
-    build: .
+  dess-app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
     environment:
       - DEBUG=False
       - DATABASE_URL=postgresql://user:pass@db:5432/dess
+      - ALLOWED_HOSTS=localhost,127.0.0.1,yourdomain.com
     depends_on:
       - db
       - redis
+    volumes:
+      - ./logs:/app/logs
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
       
   db:
     image: postgres:13
@@ -1181,9 +1258,13 @@ services:
       POSTGRES_PASSWORD: secure_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
       
   redis:
     image: redis:6-alpine
+    ports:
+      - "6379:6379"
     
   nginx:
     image: nginx:alpine
@@ -1193,14 +1274,30 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
       - ./ssl:/etc/ssl
+      - static_volume:/var/www/static
+      - media_volume:/var/www/media
     depends_on:
-      - web
+      - dess-app
+
+  # Contenedor para deployments dinámicos
+  deployment-runner:
+    image: docker:dind
+    privileged: true
+    volumes:
+      - docker_socket:/var/run/docker.sock
+      - deployment_data:/deployments
+    environment:
+      - DOCKER_TLS_CERTDIR=/certs
 
 volumes:
   postgres_data:
+  static_volume:
+  media_volume:
+  docker_socket:
+  deployment_data:
 ```
 
-#### Variables de Entorno
+#### Variables de Entorno Actualizadas
 ```bash
 # .env de producción
 DEBUG=False
@@ -1208,6 +1305,23 @@ SECRET_KEY=your-very-secret-key-here
 DATABASE_URL=postgresql://user:password@localhost:5432/dess_prod
 ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
 REDIS_URL=redis://localhost:6379/1
+
+# Variables para sistema de deployment
+DOCKER_HOST=unix:///var/run/docker.sock
+DEPLOYMENT_BASE_PORT=3000
+DEPLOYMENT_MAX_INSTANCES=10
+GITHUB_WEBHOOK_SECRET=your-webhook-secret
+
+# Variables de Oracle (opcional)
+ORACLE_HOST=localhost
+ORACLE_PORT=1521
+ORACLE_SERVICE=XEPDB1
+ORACLE_USER=dess_user
+ORACLE_PASSWORD=oracle_password
+
+# WhiteNoise para archivos estáticos
+STATICFILES_STORAGE=whitenoise.storage.CompressedManifestStaticFilesStorage
+WHITENOISE_USE_FINDERS=True
 ```
 
 #### Nginx Configuration
@@ -1561,23 +1675,92 @@ deploy:
 
 ---
 
+## 🔧 MEJORAS Y CORRECCIONES RECIENTES
+
+### Septiembre 2025 - Versión 1.1.0
+
+#### Correcciones de Bugs
+- **✅ Error 404 en /api/status/**: Corregido endpoint de health check que retornaba 404
+  - Problema: Import incorrecto en `urls_api.py` (`api_views.api_status` → `base_views.api_status`)
+  - Solución: Actualización de imports y verificación de funcionalidad
+  - Impacto: Eliminación de errores 404 en logs del sistema
+
+- **✅ Inconsistencia en diseño Admin**: Solucionado diseño inconsistente en panel admin
+  - Problema: Navegación admin no seguía el sistema de colores DESS
+  - Solución: Actualización de clases CSS para usar `dess-primary` y `dess-secondary`
+  - Ubicación: `templates/base.html:120` - Enlaces de navegación admin
+
+- **✅ Dependencias Docker**: Resueltos problemas de dependencias en containerización
+  - Problema: `ModuleNotFoundError: No module named 'whitenoise'`
+  - Solución: Instalación correcta de dependencias con `pip install -r requirements.txt`
+  - Mejora: Configuración optimizada de WhiteNoise para archivos estáticos
+
+#### Nuevas Funcionalidades
+- **🚀 Sistema de Deployment Completo**: Implementación full-stack
+  - Detección automática de tipos de proyecto (React, Vue, Django, etc.)
+  - Configuración Docker automática
+  - Interface web para gestión de deployments
+  - APIs REST para control programático
+  - Webhooks de GitHub para deployment automático
+
+- **📊 Health Check API**: Endpoint de monitoreo del sistema
+  - Endpoint: `GET /api/status/`
+  - Información: proyecto, versión, estado, endpoints disponibles
+  - Sin autenticación requerida para facilitar monitoreo
+
+- **🎨 Sistema de Diseño DESS Refinado**: Mejoras en consistencia visual
+  - Paleta de colores corporativos estandarizada
+  - Componentes de navegación unificados
+  - Transiciones y estados hover mejorados
+
+#### Mejoras en Arquitectura
+- **🐳 Configuración Docker Mejorada**: 
+  - `docker-compose.yml` actualizado con servicios optimizados
+  - Volúmenes persistentes para logs y archivos estáticos
+  - Contenedor especializado para deployments dinámicos
+  - Variables de entorno organizadas por función
+
+- **📦 Gestión de Dependencias**: 
+  - Soporte para Oracle Database (`oracledb==1.4.0`)
+  - WhiteNoise para archivos estáticos (`whitenoise==6.9.0`)
+  - Limpieza de archivos obsoletos y optimización
+
+#### Documentación y Mantenimiento
+- **📚 Documentación Técnica Actualizada**: 
+  - Nueva sección de Sistema de Deployment
+  - Documentación de APIs de health check
+  - Guías de configuración Docker actualizadas
+  - Sistema de diseño DESS documentado
+
+---
+
 ## 📈 ROADMAP Y MEJORAS FUTURAS
 
-### Versión 1.1 (Q1 2025)
+### Versión 1.1 (Q3 2025) - ✅ COMPLETADA
+- [x] Sistema de deployment automatizado multi-framework
+- [x] Health check API endpoints
+- [x] Diseño DESS consistente en toda la interfaz
+- [x] Configuración Docker completa con docker-compose
+- [x] Integración con WhiteNoise para archivos estáticos
+- [x] Soporte para Oracle Database
+- [x] Webhooks de GitHub para deployment automático
+- [x] Panel administrativo para gestión de deployments
+
+### Versión 1.2 (Q4 2025)
 - [ ] Notificaciones en tiempo real (WebSockets)
 - [ ] Exportación avanzada de reportes (PDF, Excel)
 - [ ] Implementación completa de rate limiting
 - [ ] Dashboard con gráficos interactivos
 - [ ] API versioning avanzado
 
-### Versión 1.2 (Q2 2025)  
+### Versión 1.3 (Q1 2026)  
 - [ ] Autenticación con OAuth2/SAML
 - [ ] Gestión de permisos granulares
 - [ ] Auditoría avanzada con búsqueda
 - [ ] Implementación de microservicios
 - [ ] Containerización con Kubernetes
 
-### Versión 2.0 (Q3 2025)
+### Versión 2.0 (Q2 2026)
 - [ ] Interface completamente nueva (React/Vue.js)
 - [ ] API GraphQL
 - [ ] Machine Learning para recomendaciones
