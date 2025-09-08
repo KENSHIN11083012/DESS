@@ -470,6 +470,9 @@ class DeploymentService:
                 deployment.last_deployed = timezone.now()
                 deployment.save()
                 
+                # 7. Crear Solution automáticamente para que usuarios puedan acceder
+                self._create_solution_from_deployment(deployment)
+                
                 self._log(deployment, 'success', 'Despliegue completado exitosamente')
                 return True
             else:
@@ -1025,6 +1028,76 @@ class DeploymentService:
         
         logger.info(f"[{deployment.name}] {message}")
     
+    def _create_solution_from_deployment(self, deployment: Deployment):
+        """Crear Solution automáticamente desde un deployment exitoso"""
+        try:
+            # Importar aquí para evitar importaciones circulares
+            from infrastructure.database.models import Solution
+            
+            # Verificar si ya existe una solution para este deployment
+            existing_solution = Solution.objects.filter(
+                name=deployment.name
+            ).first()
+            
+            if existing_solution:
+                # Si existe, actualizar su información
+                existing_solution.access_url = deployment.deploy_url
+                existing_solution.status = 'active'
+                existing_solution.repository_url = deployment.github_url
+                existing_solution.version = getattr(deployment, 'version', '1.0.0')
+                existing_solution.solution_type = self._map_project_type_to_solution_type(deployment.project_type)
+                existing_solution.save()
+                
+                self._log(deployment, 'info', f'Solution existente actualizada: {existing_solution.name}')
+            else:
+                # Crear nueva solution
+                solution = Solution.objects.create(
+                    name=deployment.name,
+                    description=deployment.description or f'Aplicación desplegada automáticamente desde {deployment.get_repo_name()}',
+                    repository_url=deployment.github_url,
+                    status='active',
+                    solution_type=self._map_project_type_to_solution_type(deployment.project_type),
+                    access_url=deployment.deploy_url,
+                    version='1.0.0',
+                    created_by=deployment.created_by
+                )
+                
+                self._log(deployment, 'success', f'Solution creada automáticamente: {solution.name} - {solution.access_url}')
+                
+        except Exception as e:
+            self._log(deployment, 'error', f'Error creando Solution automática: {str(e)}')
+    
+    def _map_project_type_to_solution_type(self, project_type: ProjectType) -> str:
+        """Mapear ProjectType a solution_type"""
+        mapping = {
+            ProjectType.DJANGO: 'web_app',
+            ProjectType.REACT: 'web_app',
+            ProjectType.NODE: 'web_app',
+            ProjectType.NEXTJS: 'web_app',
+            ProjectType.FLASK: 'web_app',
+            ProjectType.FASTAPI: 'api',
+            ProjectType.STATIC: 'web_app',
+            ProjectType.DOCKER: 'web_app',
+        }
+        return mapping.get(project_type, 'web_app')
+    
+    def _update_solution_status(self, deployment: Deployment, status: str):
+        """Actualizar estado de la Solution asociada"""
+        try:
+            from infrastructure.database.models import Solution
+            
+            solution = Solution.objects.filter(name=deployment.name).first()
+            if solution:
+                solution.status = status
+                if status == 'inactive':
+                    solution.access_url = None
+                solution.save()
+                
+                self._log(deployment, 'info', f'Solution {solution.name} marcada como {status}')
+                
+        except Exception as e:
+            self._log(deployment, 'error', f'Error actualizando estado de Solution: {str(e)}')
+    
     def _save_deployment(self, deployment: Deployment):
         """Guardar deployment"""
         deployment.save()
@@ -1042,6 +1115,9 @@ class DeploymentService:
                 deployment.container_id = ''
                 deployment.save()
                 
+                # Actualizar Solution asociada
+                self._update_solution_status(deployment, 'inactive')
+                
                 self._log(deployment, 'info', 'Despliegue detenido')
                 return True
                 
@@ -1049,6 +1125,9 @@ class DeploymentService:
                 self._log(deployment, 'warning', 'Contenedor no encontrado')
                 deployment.status = DeploymentStatus.STOPPED
                 deployment.save()
+                
+                # Actualizar Solution asociada
+                self._update_solution_status(deployment, 'inactive')
                 return True
             except Exception as e:
                 self._log(deployment, 'error', f'Error deteniendo despliegue: {str(e)}')

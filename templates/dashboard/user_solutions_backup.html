@@ -623,6 +623,242 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Archivo JavaScript separado para mejor organización -->
-<script src="{% static 'js/user-solutions.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard de usuario con Tailwind CSS cargado correctamente');
+});
+
+function showSolutionInfo(solutionId, solutionName) {
+    const modal = document.getElementById('solutionInfoModal');
+    const title = document.getElementById('solutionInfoTitle');
+    const content = document.getElementById('solutionInfoContent');
+    
+    title.textContent = solutionName;
+    content.innerHTML = `
+        <div class="space-y-3">
+            <div class="flex items-center text-sm">
+                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span class="font-medium">ID de Solución:</span> ${solutionId}
+            </div>
+            <div class="flex items-center text-sm">
+                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <span class="font-medium">Estado:</span> Disponible para uso
+            </div>
+            <div class="flex items-center text-sm">
+                <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a4 4 0 118 0v4m-4 12a4 4 0 100-8 4 4 0 000 8z"></path>
+                </svg>
+                <span class="font-medium">Acceso:</span> Autorizado para tu cuenta
+            </div>
+            <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p class="text-sm text-blue-800">
+                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Si tienes problemas para acceder a esta solución, contacta a tu administrador.
+                </p>
+            </div>
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+}
+
+function closeSolutionInfo() {
+    const modal = document.getElementById('solutionInfoModal');
+    modal.classList.add('hidden');
+}
+
+// Cerrar modal al hacer clic fuera de él
+window.onclick = function(event) {
+    const modal = document.getElementById('solutionInfoModal');
+    if (event.target == modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+// Configurar filtrado dinámico
+function setupDynamicFiltering() {
+    const searchInput = document.querySelector('input[name="search"]');
+    const typeSelect = document.querySelector('select[name="type"]');
+    const statusSelect = document.querySelector('select[name="status"]');
+    const form = document.querySelector('form');
+    const searchBtn = document.getElementById('searchBtn');
+    const searchIcon = document.getElementById('searchIcon');
+    const searchText = document.getElementById('searchText');
+    
+    // Función para mostrar estado de carga en el formulario
+    function showFormLoading() {
+        if (searchBtn && searchIcon && searchText) {
+            searchBtn.disabled = true;
+            searchBtn.classList.add('opacity-75');
+            searchIcon.innerHTML = '<animate attributeName="transform" attributeType="XML" values="0 12 12;360 12 12" dur="1s" repeatCount="indefinite"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>';
+            searchText.textContent = 'Buscando...';
+        }
+    }
+    
+    // Auto-submit en cambio de selects con indicador de carga
+    if (typeSelect) {
+        typeSelect.addEventListener('change', function() {
+            showFormLoading();
+            form.submit();
+        });
+    }
+    
+    if (statusSelect) {
+        statusSelect.addEventListener('change', function() {
+            showFormLoading();
+            form.submit();
+        });
+    }
+    
+    // Debounced search para evitar demasiadas peticiones
+    if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() {
+                showFormLoading();
+                form.submit();
+            }, 800); // Esperar 800ms después de que el usuario pare de escribir
+        });
+        
+        // Permitir búsqueda instantánea con Enter
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchTimeout);
+                showFormLoading();
+                form.submit();
+            }
+        });
+    }
+    
+    // Submit del formulario con indicador de carga
+    if (form) {
+        form.addEventListener('submit', function() {
+            showFormLoading();
+        });
+    }
+}
+
+// Función para alternar favoritos
+function toggleFavorite(solutionId) {
+    const btn = event.target.closest('.favorite-btn');
+    
+    // Obtener token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    // Llamada AJAX al endpoint
+    fetch('{% url "api_toggle_favorite" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken,
+        },
+        body: `solution_id=${solutionId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Actualizar UI basado en la respuesta
+            const svg = btn.querySelector('svg');
+            if (data.is_favorite) {
+                btn.classList.add('active');
+                svg.setAttribute('fill', 'currentColor');
+                btn.setAttribute('title', 'Remover de favoritos');
+            } else {
+                btn.classList.remove('active');
+                svg.setAttribute('fill', 'none');
+                btn.setAttribute('title', 'Agregar a favoritos');
+            }
+            
+            // Mostrar mensaje temporal usando la función personalizada
+            showTemporaryMessage(data.message, 'success');
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al procesar la solicitud');
+    });
+}
+
+// Configurar cambio de elementos por página
+function setupPaginationSettings() {
+    const itemsPerPageSelect = document.getElementById('itemsPerPageSelect');
+    
+    if (itemsPerPageSelect) {
+        itemsPerPageSelect.addEventListener('change', function() {
+            const selectedValue = this.value;
+            
+            // Obtener token CSRF
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            
+            // Llamada AJAX para actualizar preferencias
+            fetch('{% url "api_update_pagination" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': csrfToken,
+                },
+                body: `items_per_page=${selectedValue}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Recargar la página con la primera página para aplicar el cambio
+                    const url = new URL(window.location);
+                    url.searchParams.set('page', '1'); // Ir a la primera página
+                    window.location = url.toString();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al actualizar configuración de paginación');
+            });
+        });
+    }
+}
+
+// Función para mostrar un mensaje temporal
+function showTemporaryMessage(message, type = 'success') {
+    const messageDiv = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+    
+    messageDiv.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded-md shadow-lg z-50 transform transition-all duration-300 opacity-0 translate-x-full`;
+    messageDiv.textContent = message;
+    
+    document.body.appendChild(messageDiv);
+    
+    // Animación de entrada
+    setTimeout(() => {
+        messageDiv.classList.remove('opacity-0', 'translate-x-full');
+    }, 100);
+    
+    // Remover mensaje después de 3 segundos
+    setTimeout(() => {
+        messageDiv.classList.add('opacity-0', 'translate-x-full');
+        setTimeout(() => {
+            if (document.body.contains(messageDiv)) {
+                document.body.removeChild(messageDiv);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Configurar loading states para paginación
+function setupPaginationLoading() {
+    const paginationLinks = document.querySelectorAll('a[href*=\"page=\"]');
+    
+    paginationLinks.forEach(link => {
+        link.addEventListener('click', function() {\n            // Agregar clase de loading a todos los enlaces\n            paginationLinks.forEach(l => l.classList.add('pagination-loading'));\n            \n            // Mostrar mensaje de carga temporal\n            showTemporaryMessage('Cargando página...', 'info');\n        });\n    });\n}\n\n// Configurar tooltips para botones de estado\nfunction setupTooltips() {\n    const buttons = document.querySelectorAll('[title]');\n    \n    buttons.forEach(button => {\n        button.addEventListener('mouseenter', function(e) {\n            const tooltip = document.createElement('div');\n            tooltip.className = 'absolute z-50 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded shadow-lg opacity-0 transition-opacity duration-200';\n            tooltip.textContent = this.getAttribute('title');\n            tooltip.id = 'tooltip-' + Math.random().toString(36).substr(2, 9);\n            \n            document.body.appendChild(tooltip);\n            \n            const rect = this.getBoundingClientRect();\n            tooltip.style.left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) + 'px';\n            tooltip.style.top = rect.bottom + 5 + 'px';\n            \n            setTimeout(() => tooltip.classList.remove('opacity-0'), 100);\n            \n            this.addEventListener('mouseleave', function() {\n                if (document.getElementById(tooltip.id)) {\n                    tooltip.classList.add('opacity-0');\n                    setTimeout(() => {\n                        if (document.body.contains(tooltip)) {\n                            document.body.removeChild(tooltip);\n                        }\n                    }, 200);\n                }\n            }, { once: true });\n        });\n    });\n}\n\n// Mejorar el mensaje temporal para incluir tipo 'info'\nfunction showTemporaryMessage(message, type = 'success') {\n    const messageDiv = document.createElement('div');\n    let bgColor;\n    \n    switch(type) {\n        case 'success':\n            bgColor = 'bg-green-500';\n            break;\n        case 'error':\n            bgColor = 'bg-red-500';\n            break;\n        case 'info':\n            bgColor = 'bg-blue-500';\n            break;\n        default:\n            bgColor = 'bg-gray-500';\n    }\n    \n    messageDiv.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded-md shadow-lg z-50 transform transition-all duration-300 opacity-0 translate-x-full`;\n    messageDiv.textContent = message;\n    \n    document.body.appendChild(messageDiv);\n    \n    // Animación de entrada\n    setTimeout(() => {\n        messageDiv.classList.remove('opacity-0', 'translate-x-full');\n    }, 100);\n    \n    // Remover mensaje después de 3 segundos\n    setTimeout(() => {\n        messageDiv.classList.add('opacity-0', 'translate-x-full');\n        setTimeout(() => {\n            if (document.body.contains(messageDiv)) {\n                document.body.removeChild(messageDiv);\n            }\n        }, 300);\n    }, 3000);\n}\n\n// Inicializar cuando se carga la página\ndocument.addEventListener('DOMContentLoaded', function() {\n    setupDynamicFiltering();\n    setupPaginationSettings();\n    setupPaginationLoading();\n    setupTooltips();\n    console.log('Mis soluciones con Tailwind CSS, filtrado dinámico, paginación personalizable y UX mejorado cargadas correctamente');\n});"}
+</script>
 {% endblock %}

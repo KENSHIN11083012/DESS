@@ -1,0 +1,701 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel de Usuario - DESS{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos consistentes con el diseño admin */
+    .user-stat-card {
+        transition: all 0.3s ease;
+    }
+    .user-stat-card:hover {
+        transform: translateY(-2px);
+    }
+    .solution-card {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .solution-card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .favorite-btn {
+        color: #9CA3AF;
+        transition: all 0.2s ease;
+    }
+    .favorite-btn:hover {
+        color: #FCD34D;
+        transform: scale(1.1);
+    }
+    .favorite-btn.active {
+        color: #FCD34D;
+    }
+    
+    /* Clases de colores DESS para el modal de tutorial */
+    .bg-dess-primary {
+        background-color: #4A9EE0;
+    }
+    .text-dess-primary {
+        color: #4A9EE0;
+    }
+    .bg-dess-primary-dark:hover {
+        background-color: #3b8bd4;
+    }
+    .focus\:ring-dess-primary:focus {
+        box-shadow: 0 0 0 3px rgba(74, 158, 224, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<!-- Contenedor principal -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  
+  <!-- Header de bienvenida -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between flex-wrap gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">¡Bienvenido, {{ user.full_name|truncatewords:2 }}! 👋</h1>
+        <p class="text-gray-600 mt-2">
+          {% now "l, d \d\e F \d\e Y" %} • <span id="current-time"></span>
+        </p>
+      </div>
+      <div class="flex items-center space-x-3">
+        <div class="flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+          <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+          En línea
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid de estadísticas (mismo diseño que admin) -->
+  <div id="stats-section" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    
+    <!-- Soluciones Asignadas -->
+    <div id="assigned-solutions-stat" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 user-stat-card">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5">
+          <p class="text-3xl font-bold text-gray-900">{{ stats.total_assigned|default:0 }}</p>
+          <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Soluciones Asignadas</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Soluciones Listas -->
+    <div id="ready-solutions-stat" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 user-stat-card">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5">
+          <p class="text-3xl font-bold text-gray-900">{{ stats.ready_solutions|default:0 }}</p>
+          <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Listas para usar</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Favoritos -->
+    <div id="favorites-stat" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 user-stat-card">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5">
+          <p class="text-3xl font-bold text-gray-900">{{ stats.favorites|default:0 }}</p>
+          <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Favoritas</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accesos Recientes -->
+    <div id="recent-access-stat" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 user-stat-card">
+      <div class="flex items-center">
+        <div class="flex-shrink-0">
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="ml-5">
+          <p class="text-3xl font-bold text-gray-900">{{ stats.recent_accesses|default:0 }}</p>
+          <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Esta Semana</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid de secciones principales (mismo diseño que admin) -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    
+    <!-- Acceso Rápido a Soluciones -->
+    <div id="quick-access-section" class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+        Mis Soluciones
+      </h2>
+      <div class="space-y-3">
+        <a id="view-all-solutions-btn" href="{% url 'user_solutions' %}" class="block w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition duration-150 text-center">
+          Ver todas las soluciones
+        </a>
+        <a href="{% url 'user_solutions' %}?status=active" class="block text-center text-blue-600 hover:text-blue-800 py-2">
+          Solo las disponibles
+        </a>
+        {% if stats.favorites > 0 %}
+        <a href="{% url 'user_solutions' %}?favorites=true" class="block text-center text-blue-600 hover:text-blue-800 py-2">
+          Mis favoritas
+        </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Perfil y Configuración -->
+    <div id="profile-section" class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+        Mi Cuenta
+      </h2>
+      <div class="space-y-3">
+        <a id="view-profile-btn" href="{% url 'user_profile' %}" class="block w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition duration-150 text-center">
+          Ver mi perfil
+        </a>
+        <a href="#" class="block text-center text-blue-600 hover:text-blue-800 py-2" onclick="showEditProfileModal()">
+          Editar información
+        </a>
+        <a href="#" class="block text-center text-blue-600 hover:text-blue-800 py-2" onclick="showChangePasswordModal()">
+          Cambiar contraseña
+        </a>
+      </div>
+    </div>
+
+    <!-- Ayuda y Soporte -->
+    <div id="help-section" class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+        Ayuda y Soporte
+      </h2>
+      <div class="space-y-3">
+        <a href="#" class="block text-center text-blue-600 hover:text-blue-800 py-2" onclick="showHelp()">
+          Centro de ayuda
+        </a>
+        <a href="#" class="block text-center text-blue-600 hover:text-blue-800 py-2" onclick="contactSupport()">
+          Contactar soporte
+        </a>
+        <a href="#" class="block text-center text-blue-600 hover:text-blue-800 py-2" onclick="startTutorial()">
+          Tutorial del sistema
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Soluciones Favoritas -->
+  {% if favorite_solutions %}
+  <div id="favorites-section" class="bg-white rounded-lg shadow p-6 mb-8">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200 flex items-center">
+      <svg class="w-5 h-5 text-yellow-500 mr-2" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+      </svg>
+      Acceso Rápido a Favoritas
+    </h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {% for solution in favorite_solutions %}
+      <div class="solution-card bg-gray-50 rounded-lg p-4 border-2 border-gray-200 hover:border-blue-300 transition-all">
+        <div class="flex items-start justify-between mb-2">
+          <h3 class="font-medium text-gray-900 truncate mr-2">{{ solution.name }}</h3>
+          <button class="favorite-btn active" onclick="toggleFavorite({{ solution.id }})">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+            </svg>
+          </button>
+        </div>
+        <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ solution.description|truncatewords:8 }}</p>
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-500">
+            {% if solution.status == 'active' %}
+              <span class="inline-flex items-center text-green-600">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                Disponible
+              </span>
+            {% else %}
+              <span class="inline-flex items-center text-yellow-600">
+                <span class="w-2 h-2 bg-yellow-500 rounded-full mr-1"></span>
+                {{ solution.get_status_display }}
+              </span>
+            {% endif %}
+          </span>
+          {% if solution.access_url and solution.status == 'active' %}
+          <a href="{% url 'solution_access' solution.id %}" 
+             class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded-md transition">
+            Acceder
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Actividad Reciente (mismo diseño que admin) -->
+  <div id="activity-section" class="bg-white rounded-lg shadow p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200 flex items-center">
+      <svg class="w-5 h-5 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      Mi Actividad Reciente
+    </h2>
+    <div class="space-y-3">
+      {% if recent_activity %}
+        {% for activity in recent_activity %}
+        <div class="flex items-center space-x-3 py-2 border-b border-gray-100 last:border-b-0">
+          <div class="text-sm text-blue-600 font-medium min-w-0 flex-shrink-0">
+            {{ activity.accessed_at|date:"d/m/Y H:i" }}
+          </div>
+          <div class="text-sm text-gray-700 flex-1">
+            Accediste a <strong>{{ activity.solution.name }}</strong>
+          </div>
+        </div>
+        {% endfor %}
+        
+        <div class="pt-3 border-t border-gray-200">
+          <a href="{% url 'user_solutions' %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+            Ver todas mis soluciones →
+          </a>
+        </div>
+      {% else %}
+        <div class="text-center py-4">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="text-gray-500 italic mt-2">No has accedido a ninguna solución aún.</p>
+          <a href="{% url 'user_solutions' %}" class="inline-block mt-3 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm transition">
+            Explorar mis soluciones
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</main>
+
+<!-- Modal para acciones (mismo diseño que admin) -->
+<div id="actionModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div class="mt-3 text-center">
+      <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
+        <svg class="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4" id="modalTitle">Información</h3>
+      <div class="mt-2 px-7 py-3">
+        <p class="text-sm text-gray-500" id="modalContent">
+          Contenido del modal
+        </p>
+      </div>
+      <div class="items-center px-4 py-3">
+        <button id="closeModal" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Editar Información Personal -->
+<div id="editProfileModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div class="mt-3">
+      <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-dess-primary bg-opacity-10">
+        <svg class="h-6 w-6 text-dess-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg leading-6 font-semibold text-gray-900 mt-4 text-center">
+        Editar Información Personal
+      </h3>
+      <form id="editProfileForm" class="mt-4 px-7 py-3">
+        <div class="space-y-4">
+          <div>
+            <label for="editFullName" class="block text-sm font-medium text-gray-700">Nombre Completo</label>
+            <input type="text" id="editFullName" name="full_name" 
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-dess-primary focus:border-dess-primary"
+                   value="{{ user.full_name }}" autocomplete="name" required>
+          </div>
+          <div>
+            <label for="editEmail" class="block text-sm font-medium text-gray-700">Email</label>
+            <input type="email" id="editEmail" name="email" 
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-dess-primary focus:border-dess-primary"
+                   value="{{ user.email }}" autocomplete="email" required>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-center space-x-3">
+          <button type="submit" class="px-6 py-2 bg-dess-primary text-white text-sm font-medium rounded-md shadow-sm hover:bg-dess-primary-dark transition duration-150">
+            💾 Guardar Cambios
+          </button>
+          <button type="button" onclick="closeEditProfileModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-md transition duration-150">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Cambiar Contraseña -->
+<div id="changePasswordModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+  <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div class="mt-3">
+      <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-dess-primary bg-opacity-10">
+        <svg class="h-6 w-6 text-dess-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg leading-6 font-semibold text-gray-900 mt-4 text-center">
+        Cambiar Contraseña
+      </h3>
+      <form id="changePasswordForm" class="mt-4 px-7 py-3">
+        <div class="space-y-4">
+          <div>
+            <label for="currentPassword" class="block text-sm font-medium text-gray-700">Contraseña Actual</label>
+            <input type="password" id="currentPassword" name="current_password" 
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-dess-primary focus:border-dess-primary"
+                   autocomplete="current-password" required>
+          </div>
+          <div>
+            <label for="newPassword" class="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
+            <input type="password" id="newPassword" name="new_password" 
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-dess-primary focus:border-dess-primary"
+                   autocomplete="new-password" required>
+            <p class="text-xs text-gray-500 mt-1">Mínimo 8 caracteres, debe incluir letras y números</p>
+          </div>
+          <div>
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmar Nueva Contraseña</label>
+            <input type="password" id="confirmPassword" name="confirm_password" 
+                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-dess-primary focus:border-dess-primary"
+                   autocomplete="new-password" required>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-center space-x-3">
+          <button type="submit" class="px-6 py-2 bg-dess-primary text-white text-sm font-medium rounded-md shadow-sm hover:bg-dess-primary-dark transition duration-150">
+            🔒 Cambiar Contraseña
+          </button>
+          <button type="button" onclick="closeChangePasswordModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-md transition duration-150">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dess-tutorial.js' %}"></script>
+<script>
+// Actualizar hora en tiempo real
+function updateTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('es-ES', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+    });
+    const timeElement = document.getElementById('current-time');
+    if (timeElement) {
+        timeElement.textContent = timeString;
+    }
+}
+
+// Modal functionality (igual que admin)
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('actionModal');
+    const closeBtn = document.getElementById('closeModal');
+    
+    if (closeBtn) {
+        closeBtn.onclick = function() { 
+            modal.classList.add('hidden'); 
+        };
+    }
+    
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.classList.add('hidden');
+        }
+    }
+    
+    // Inicializar reloj
+    updateTime();
+    setInterval(updateTime, 1000);
+});
+
+// Funciones de usuario
+function toggleFavorite(solutionId) {
+    const btn = event.target.closest('.favorite-btn');
+    const isActive = btn.classList.contains('active');
+    
+    // Obtener token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    // Llamada AJAX al endpoint
+    fetch('{% url "api_toggle_favorite" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrfToken,
+        },
+        body: `solution_id=${solutionId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Actualizar UI basado en la respuesta
+            if (data.is_favorite) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+            showModal('Favoritos', data.message);
+        } else {
+            showModal('Error', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showModal('Error', 'Error al procesar la solicitud');
+    });
+}
+
+function changePassword() {
+    showModal('Cambiar Contraseña', 'Para cambiar tu contraseña, ve a tu perfil y utiliza la opción de seguridad correspondiente.');
+}
+
+function showHelp() {
+    showModal('Centro de Ayuda', 'Aquí encontrarás guías para usar el sistema DESS, preguntas frecuentes y tutoriales paso a paso.');
+}
+
+function contactSupport() {
+    showModal('Contactar Soporte', 'Para obtener ayuda técnica, contacta a tu administrador del sistema o envía un email a soporte@dess.com');
+}
+
+// Tutorial functionality
+let tutorial = null;
+
+function startTutorial() {
+    if (tutorial) {
+        tutorial.start();
+    } else {
+        tutorial = new DESSTutorial();
+        tutorial.start();
+    }
+}
+
+// Función para resetear el tutorial (útil para testing)
+function resetTutorial() {
+    if (tutorial) {
+        tutorial.resetTutorial();
+        showModal('Tutorial Reiniciado', 'El progreso del tutorial ha sido reiniciado. Puedes iniciarlo nuevamente cuando gustes.');
+    }
+}
+
+// Auto-mostrar tutorial para nuevos usuarios
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar tutorial y mostrarlo automáticamente para nuevos usuarios
+    tutorial = new DESSTutorial();
+    
+    // Mostrar automáticamente para nuevos usuarios con opción de salir
+    tutorial.autoShowForNewUsers();
+    
+    // Configurar formularios de modales
+    setupModalForms();
+});
+
+// Configurar formularios
+function setupModalForms() {
+    // Formulario de editar perfil
+    document.getElementById('editProfileForm').addEventListener('submit', handleEditProfile);
+    
+    // Formulario de cambiar contraseña
+    document.getElementById('changePasswordForm').addEventListener('submit', handleChangePassword);
+}
+
+function showModal(title, content) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalContent').textContent = content;
+    document.getElementById('actionModal').classList.remove('hidden');
+}
+
+// Funciones para editar perfil
+function showEditProfileModal() {
+    document.getElementById('editProfileModal').classList.remove('hidden');
+}
+
+function closeEditProfileModal() {
+    document.getElementById('editProfileModal').classList.add('hidden');
+    // Limpiar formulario
+    document.getElementById('editProfileForm').reset();
+    // Restaurar valores originales
+    document.getElementById('editFullName').value = '{{ user.full_name }}';
+    document.getElementById('editEmail').value = '{{ user.email }}';
+}
+
+function handleEditProfile(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    // Deshabilitar botón durante el envío
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Guardando...';
+    
+    fetch('{% url "api_update_profile" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeEditProfileModal();
+            showModal('✅ Información Actualizada', data.message);
+            
+            // Actualizar la información mostrada en la página
+            if (data.data) {
+                // Buscar y actualizar elementos que muestren el nombre del usuario
+                const userNameElements = document.querySelectorAll('[data-user-name]');
+                userNameElements.forEach(el => {
+                    el.textContent = data.data.full_name;
+                });
+            }
+            
+            // Opcional: recargar la página después de 2 segundos
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            showModal('❌ Error', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showModal('❌ Error', 'Error al actualizar la información. Inténtalo de nuevo.');
+    })
+    .finally(() => {
+        // Rehabilitar botón
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    });
+}
+
+// Funciones para cambiar contraseña
+function showChangePasswordModal() {
+    document.getElementById('changePasswordModal').classList.remove('hidden');
+}
+
+function closeChangePasswordModal() {
+    document.getElementById('changePasswordModal').classList.add('hidden');
+    // Limpiar formulario
+    document.getElementById('changePasswordForm').reset();
+}
+
+function handleChangePassword(event) {
+    event.preventDefault();
+    
+    // Validar que las contraseñas coincidan
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    if (newPassword !== confirmPassword) {
+        showModal('❌ Error', 'Las contraseñas no coinciden');
+        return;
+    }
+    
+    const formData = new FormData(event.target);
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    // Deshabilitar botón durante el envío
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Cambiando...';
+    
+    fetch('{% url "api_change_password" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeChangePasswordModal();
+            showModal('🔒 Contraseña Cambiada', data.message);
+            
+            // Opcional: cerrar sesión automáticamente por seguridad después de 3 segundos
+            setTimeout(() => {
+                showModal('🔄 Renovando Sesión', 'Redirigiendo al login por seguridad...');
+                setTimeout(() => {
+                    window.location.href = '{% url "logout" %}';
+                }, 1500);
+            }, 3000);
+        } else {
+            showModal('❌ Error', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showModal('❌ Error', 'Error al cambiar la contraseña. Inténtalo de nuevo.');
+    })
+    .finally(() => {
+        // Rehabilitar botón
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+    });
+}
+
+// Cerrar modales al hacer clic fuera de ellos
+document.addEventListener('click', function(event) {
+    const editModal = document.getElementById('editProfileModal');
+    const passwordModal = document.getElementById('changePasswordModal');
+    
+    if (event.target === editModal) {
+        closeEditProfileModal();
+    }
+    if (event.target === passwordModal) {
+        closeChangePasswordModal();
+    }
+});
+
+// Cerrar modales con ESC
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeEditProfileModal();
+        closeChangePasswordModal();
+    }
+});
+
+console.log('Dashboard de usuario con diseño DESS cargado correctamente');
+</script>
+{% endblock %}

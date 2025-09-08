@@ -13,6 +13,11 @@ urlpatterns = [
     path('api/status/', base_views.api_status, name='api_status_endpoint'),
     
     path('api/user/profile/', api_views.api_user_profile, name='api_user_profile'),
+    path('api/user/update-profile/', api_views.api_update_profile, name='api_update_profile'),
+    path('api/user/change-password/', api_views.api_change_password, name='api_change_password'),
+    path('api/user/toggle-favorite/', api_views.api_toggle_favorite, name='api_toggle_favorite'),
+    path('api/user/update-pagination/', api_views.api_update_pagination_preferences, name='api_update_pagination'),
+    path('api/user/preferences/', api_views.api_get_user_preferences, name='api_get_user_preferences'),
     path('api/admin/remove-assignment/', api_views.api_remove_assignment, name='api_remove_assignment'),
     path('api/admin/delete-user/', api_views.api_delete_user, name='api_delete_user'),
     path('api/admin/delete-solution/', api_views.api_delete_solution, name='api_delete_solution'),

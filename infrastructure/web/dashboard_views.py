@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.urls import reverse
 from django.contrib.auth.hashers import make_password
-from infrastructure.database.models import DESSUser, Solution, UserSolutionAssignment, UserSolutionAccess
+from infrastructure.database.models import DESSUser, Solution, UserSolutionAssignment, UserSolutionAccess, UserFavoriteSolution
 from infrastructure.security.permissions import (
     super_admin_required, 
     user_only_required, 
@@ -79,9 +79,65 @@ def dashboard_view(request):
 
 @user_only_required
 def user_dashboard_view(request):
-    """Dashboard para usuarios regulares - redirige a soluciones del usuario"""
-    # En lugar de un dashboard separado, redirigimos a las soluciones del usuario
-    return redirect('user_solutions')
+    """Dashboard principal para usuarios regulares"""
+    try:
+        from django.db.models import Q
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        # Obtener estadísticas del usuario
+        total_assigned = UserSolutionAssignment.objects.filter(
+            user=request.user,
+            is_active=True
+        ).count()
+        
+        ready_solutions = UserSolutionAssignment.objects.filter(
+            user=request.user,
+            is_active=True,
+            solution__status='active',
+            solution__access_url__isnull=False
+        ).exclude(solution__access_url='').count()
+        
+        # Obtener soluciones favoritas reales
+        favorite_solutions = Solution.objects.filter(
+            favorited_by__user=request.user,
+            usersolutionassignment__user=request.user,
+            usersolutionassignment__is_active=True
+        ).select_related().distinct()[:4]  # Máximo 4 favoritos en el dashboard
+        
+        # Actividad reciente del usuario
+        recent_activity = UserSolutionAccess.objects.filter(
+            user=request.user
+        ).select_related('solution').order_by('-accessed_at')[:10]
+        
+        # Accesos de esta semana
+        week_ago = timezone.now() - timedelta(days=7)
+        weekly_accesses = UserSolutionAccess.objects.filter(
+            user=request.user,
+            accessed_at__gte=week_ago
+        ).count()
+        
+        context = {
+            'user': request.user,
+            'page_title': 'Panel de Usuario',
+            'stats': {
+                'total_assigned': total_assigned,
+                'ready_solutions': ready_solutions,
+                'favorites': favorite_solutions.count(),
+                'recent_accesses': weekly_accesses,
+            },
+            'favorite_solutions': favorite_solutions,
+            'recent_activity': recent_activity,
+            'notifications_count': 0,  # Se implementará después
+            'notifications': [],  # Se implementará después
+        }
+        
+        return render(request, 'dashboard/user_dashboard.html', context)
+        
+    except Exception as e:
+        logger.error(f'Error en user_dashboard_view: {str(e)}')
+        messages.error(request, 'Error al cargar el dashboard de usuario')
+        return redirect('user_solutions')
 
 
 @super_admin_required
@@ -134,6 +190,15 @@ def user_solutions_view(request):
     
     # Ordenar por fecha de asignación (más recientes primero)
     assignments = assignments_query.order_by('-assigned_at')
+    
+    # Obtener IDs de soluciones favoritas del usuario
+    favorite_solution_ids = UserFavoriteSolution.objects.filter(
+        user=request.user
+    ).values_list('solution_id', flat=True)
+    
+    # Marcar cuáles son favoritas
+    for assignment in assignments:
+        assignment.solution.is_favorite = assignment.solution.id in favorite_solution_ids
     
     # Calcular estadísticas
     all_assignments = UserSolutionAssignment.objects.filter(
@@ -831,3 +896,58 @@ def admin_stats_api(request):
             'success': False,
             'error': 'Error interno del servidor'
         }, status=500)
+
+
+@ajax_login_required
+def api_toggle_favorite(request):
+    """API para alternar solución como favorita"""
+    if request.method == 'POST':
+        solution_id = request.POST.get('solution_id')
+        
+        try:
+            # Verificar que la solución existe y el usuario tiene acceso
+            solution = get_object_or_404(Solution, id=solution_id)
+            
+            # Verificar que el usuario tiene acceso a esta solución
+            if not request.user.can_access_solution(solution_id):
+                return JsonResponse({
+                    'success': False,
+                    'message': 'No tienes acceso a esta solución'
+                }, status=403)
+            
+            # Alternar favorito
+            favorite, created = UserFavoriteSolution.objects.get_or_create(
+                user=request.user,
+                solution=solution
+            )
+            
+            if created:
+                message = f'"{solution.name}" agregada a favoritos'
+                is_favorite = True
+            else:
+                favorite.delete()
+                message = f'"{solution.name}" removida de favoritos'
+                is_favorite = False
+            
+            return JsonResponse({
+                'success': True,
+                'message': message,
+                'is_favorite': is_favorite
+            })
+                
+        except ValueError as e:
+            return JsonResponse({
+                'success': False,
+                'message': str(e)
+            }, status=400)
+        except Exception as e:
+            logger.error(f'Error toggling favorite: {str(e)}')
+            return JsonResponse({
+                'success': False,
+                'message': 'Error interno del servidor'
+            }, status=500)
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Método no permitido'
+    }, status=405)

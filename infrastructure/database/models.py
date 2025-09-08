@@ -215,3 +215,33 @@ class UserSolutionAccess(models.Model):
 
     def __str__(self):
         return f"{self.user.username} -> {self.solution.name} at {self.accessed_at}"
+
+
+class UserFavoriteSolution(models.Model):
+    """
+    Modelo para gestionar soluciones favoritas de usuarios
+    """
+    user = models.ForeignKey(
+        DESSUser, 
+        on_delete=models.CASCADE,
+        related_name='favorite_solutions'
+    )
+    solution = models.ForeignKey(
+        Solution, 
+        on_delete=models.CASCADE,
+        related_name='favorited_by'
+    )
+    added_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'dess_user_favorite_solutions'
+        verbose_name = 'Solución Favorita'
+        verbose_name_plural = 'Soluciones Favoritas'
+        unique_together = ('user', 'solution')
+        indexes = [
+            models.Index(fields=['user', '-added_at'], name='idx_favorite_user_time'),
+            models.Index(fields=['solution'], name='idx_favorite_solution'),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.username} ⭐ {self.solution.name}"
