@@ -64,23 +64,10 @@ def get_user_service():
 
 def get_solution_service():
     """Obtener servicio de solución configurado."""
-    # Crear casos de uso
-    create_solution = CreateSolutionUseCase(solution_repository)
-    get_solution = GetSolutionUseCase(solution_repository)
-    update_solution = UpdateSolutionUseCase(solution_repository)
-    delete_solution = DeleteSolutionUseCase(solution_repository, assignment_repository)
-    list_solutions = ListSolutionsUseCase(solution_repository)
-    assign_solution = AssignSolutionToUserUseCase(solution_repository, assignment_repository)
-    unassign_solution = UnassignSolutionFromUserUseCase(assignment_repository)
-    
     return SolutionService(
-        create_solution_use_case=create_solution,
-        get_solution_use_case=get_solution,
-        update_solution_use_case=update_solution,
-        delete_solution_use_case=delete_solution,
-        list_solutions_use_case=list_solutions,
-        assign_solution_use_case=assign_solution,
-        unassign_solution_use_case=unassign_solution
+        solution_repository=solution_repository,
+        assignment_repository=assignment_repository,
+        user_repository=user_repository
     )
 
 

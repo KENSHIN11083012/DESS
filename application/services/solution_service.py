@@ -14,7 +14,7 @@ from core.use_cases.user_solution_use_cases import (
     AssignSolutionToUserUseCase,
     GetUserSolutionsUseCase
 )
-from core.interfaces.repositories import SolutionRepository, SolutionAssignmentRepository
+from core.interfaces.repositories import SolutionRepository, SolutionAssignmentRepository, UserRepository
 from application.dtos import (
     CreateSolutionRequest,
     UpdateSolutionRequest,
@@ -29,16 +29,22 @@ class SolutionService:
     
     def __init__(self, 
                  solution_repository: SolutionRepository,
-                 assignment_repository: SolutionAssignmentRepository):
+                 assignment_repository: SolutionAssignmentRepository,
+                 user_repository: UserRepository = None):
         self.solution_repository = solution_repository
         self.assignment_repository = assignment_repository
+        self.user_repository = user_repository
         
         # Inicializar casos de uso
         self.create_solution_use_case = CreateSolutionUseCase(solution_repository)
         self.get_solution_use_case = GetSolutionUseCase(solution_repository)
         self.list_solutions_use_case = ListSolutionsUseCase(solution_repository)
         self.update_solution_use_case = UpdateSolutionUseCase(solution_repository)
-        self.assign_solution_use_case = AssignSolutionToUserUseCase(solution_repository, assignment_repository)
+        
+        # Solo inicializar si tenemos user_repository
+        if user_repository:
+            self.assign_solution_use_case = AssignSolutionToUserUseCase(user_repository, solution_repository, assignment_repository)
+        
         self.get_user_solutions_use_case = GetUserSolutionsUseCase(assignment_repository, solution_repository)
     
     def create_solution(self, request: CreateSolutionRequest) -> SolutionResponse:
