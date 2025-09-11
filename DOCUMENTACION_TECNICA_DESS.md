@@ -1,8 +1,8 @@
 # DOCUMENTACIÓN TÉCNICA - PROJET DESS
 ## Desarrollador de Ecosistemas de Soluciones Empresariales
 
-### Versión: 1.0.0
-### Fecha: Enero 2025
+### Versión: 1.1.0
+### Fecha: Septiembre 2025
 
 ---
 
@@ -33,9 +33,10 @@ DESS (Desarrollador de Ecosistemas de Soluciones Empresariales) es una plataform
 
 - **Gestión de Usuarios**: Creación, edición y administración de usuarios con roles diferenciados
 - **Gestión de Soluciones**: Administración de soluciones empresariales con asignación a usuarios
+- **Sistema de Favoritos**: Los usuarios pueden marcar soluciones como favoritas para acceso rápido
 - **Sistema de Autenticación**: Login seguro con JWT y sesiones
 - **API REST**: Endpoints completos para integración externa
-- **Dashboard Interactivo**: Interfaz administrativa y de usuario
+- **Dashboard Interactivo**: Interfaz administrativa y de usuario con tutoriales integrados
 - **Clean Architecture**: Separación clara de responsabilidades
 - **Seguridad**: Implementación de middlewares de seguridad y permisos
 
@@ -166,6 +167,8 @@ DESS/
 ├── 📂 static/                  # Archivos Estáticos
 │   ├── 📂 css/                 # Hojas de Estilo
 │   ├── 📂 js/                  # JavaScript
+│   │   ├── dess-tutorial.js    # Sistema de tutoriales interactivos
+│   │   └── user-solutions.js   # Gestión de soluciones favoritas
 │   └── 📂 images/              # Imágenes
 │
 ├── 📂 templates/               # Templates HTML
@@ -251,6 +254,9 @@ Estos componentes son independientes de la interfaz de usuario y de los detalles
 - `DeleteSolutionUseCase`: Eliminar solución
 - `AssignSolutionUseCase`: Asignar solución a usuario
 - `GetUserSolutionsUseCase`: Obtener soluciones de un usuario
+- `AddFavoriteSolutionUseCase`: Marcar solución como favorita
+- `RemoveFavoriteSolutionUseCase`: Quitar solución de favoritos
+- `GetUserFavoriteSolutionsUseCase`: Obtener soluciones favoritas del usuario
 
 ### 3. Servicios de Aplicación
 
@@ -404,7 +410,7 @@ El sistema DESS tiene tres tipos de actores principales: Super Administradores (
 
 ### Diagrama de Casos de Uso - Sistema General
 
-Este diagrama UML presenta una vista simplificada de las acciones que puede realizar cada usuario en el sistema DESS, enfocándose únicamente en las funciones disponibles para cada actor.
+Este diagrama UML presenta las acciones que puede realizar cada usuario en el sistema DESS, enfocándose únicamente en las funciones disponibles para cada actor.
 
 ```plantuml
 @startuml
@@ -415,57 +421,42 @@ actor "Sistema Externo" as ExternalSystem
 
 rectangle "Sistema DESS" {
     
-    usecase "Crear Usuario" as CreateUser
-    usecase "Editar Usuario" as EditUser
-    usecase "Eliminar Usuario" as DeleteUser
-    usecase "Ver Estadísticas Usuarios" as ViewUserStats
-    
-    usecase "Crear Solución" as CreateSolution
-    usecase "Editar Solución" as EditSolution
-    usecase "Eliminar Solución" as DeleteSolution
-    usecase "Asignar Solución a Usuario" as AssignSolution
-    
-    usecase "Crear Deployment" as CreateDeployment
-    usecase "Ejecutar Deployment" as ExecuteDeployment
-    usecase "Ver Logs Deployment" as ViewDeploymentLogs
+    usecase "Gestionar Usuarios" as ManageUsers
+    usecase "Gestionar Soluciones" as ManageSolutions
+    usecase "Asignar Soluciones" as AssignSolutions
+    usecase "Ver Estadísticas" as ViewStats
+    usecase "Gestionar Deployments" as ManageDeployments
     
     usecase "Iniciar Sesión" as Login
     usecase "Ver Mi Perfil" as ViewProfile
-    usecase "Actualizar Mi Perfil" as UpdateProfile
+    usecase "Actualizar Perfil" as UpdateProfile
     usecase "Ver Mis Soluciones" as ViewMySolutions
     usecase "Acceder a Solución" as AccessSolution
+    usecase "Marcar Favoritos" as MarkFavorites
     
-    usecase "Consultar API" as QueryAPI
-    usecase "Obtener Estado del Sistema" as GetSystemStatus
+    usecase "Consultar APIs" as QueryAPI
+    usecase "Obtener Estado Sistema" as GetSystemStatus
 }
 
-' Super Administrador - Gestión completa
-SuperAdmin --> CreateUser
-SuperAdmin --> EditUser  
-SuperAdmin --> DeleteUser
-SuperAdmin --> ViewUserStats
-
-SuperAdmin --> CreateSolution
-SuperAdmin --> EditSolution
-SuperAdmin --> DeleteSolution
-SuperAdmin --> AssignSolution
-
-SuperAdmin --> CreateDeployment
-SuperAdmin --> ExecuteDeployment
-SuperAdmin --> ViewDeploymentLogs
-
+' Super Administrador
+SuperAdmin --> ManageUsers
+SuperAdmin --> ManageSolutions
+SuperAdmin --> AssignSolutions
+SuperAdmin --> ViewStats
+SuperAdmin --> ManageDeployments
 SuperAdmin --> Login
 SuperAdmin --> ViewProfile
 SuperAdmin --> UpdateProfile
 
-' Usuario Regular - Acceso limitado
+' Usuario Regular
 RegularUser --> Login
 RegularUser --> ViewProfile
 RegularUser --> UpdateProfile
 RegularUser --> ViewMySolutions
 RegularUser --> AccessSolution
+RegularUser --> MarkFavorites
 
-' Sistema Externo - APIs
+' Sistema Externo
 ExternalSystem --> QueryAPI
 ExternalSystem --> GetSystemStatus
 
@@ -474,6 +465,10 @@ ViewMySolutions ..> Login : <<include>>
 AccessSolution ..> Login : <<include>>
 ViewProfile ..> Login : <<include>>
 UpdateProfile ..> Login : <<include>>
+MarkFavorites ..> Login : <<include>>
+ManageUsers ..> Login : <<include>>
+ManageSolutions ..> Login : <<include>>
+AssignSolutions ..> Login : <<include>>
 
 @enduml
 ```
@@ -632,53 +627,64 @@ flowchart TD
 
 ## 👥 HISTORIAS DE USUARIO
 
-Las historias de usuario describen las funcionalidades del sistema desde la perspectiva del usuario final, siguiendo el formato estándar "Como [actor] quiero [acción] para [beneficio]". Están organizadas en épicas que agrupan funcionalidades relacionadas y incluyen criterios de aceptación detallados, estimaciones de esfuerzo y priorización.
+Las historias de usuario describen las funcionalidades del sistema desde la perspectiva del usuario final, siguiendo el formato estándar "Como [actor] quiero [acción] para [beneficio]". Están organizadas por módulos funcionales que agrupan funcionalidades relacionadas.
 
-Estas historias sirven como base para la planificación del desarrollo, definiendo claramente qué debe hacer el sistema y cómo se validará que funciona correctamente. Cada historia incluye criterios de aceptación específicos que pueden convertirse directamente en casos de prueba.
+Estas historias sirven como referencia para el desarrollo, definiendo claramente qué debe hacer el sistema desde la perspectiva del usuario.
 
-### Epic: Gestión de Usuarios
+### Gestión de Usuarios
 
-Esta épica agrupa todas las funcionalidades relacionadas con la administración de usuarios del sistema, incluyendo operaciones CRUD, visualización de estadísticas y gestión de perfiles. Es fundamental para el funcionamiento del sistema ya que establece quién puede acceder y qué permisos tienen.
+Funcionalidades relacionadas con la administración de usuarios del sistema, incluyendo operaciones CRUD, visualización de estadísticas y gestión de perfiles.
 
-| ID | Historia | Criterios de Aceptación | Prioridad | Estimación |
-|----|----------|-------------------------|-----------|------------|
-| **US-001** | **Como** super administrador **quiero** crear nuevos usuarios **para** que puedan acceder al sistema | - Formulario con campos obligatorios<br>- Validación de unicidad de username/email<br>- Generación automática de contraseña<br>- Notificación de éxito/error | Alta | 5 SP |
-| **US-002** | **Como** super administrador **quiero** editar usuarios existentes **para** mantener la información actualizada | - Formulario pre-cargado con datos actuales<br>- Validación de cambios<br>- Preservar integridad de datos<br>- Confirmación de cambios | Alta | 3 SP |
-| **US-003** | **Como** super administrador **quiero** eliminar usuarios **para** remover accesos no autorizados | - Confirmación de eliminación<br>- Validación: no eliminar único super admin<br>- Limpieza de asignaciones<br>- Registro de auditoría | Media | 3 SP |
-| **US-004** | **Como** super administrador **quiero** ver estadísticas de usuarios **para** monitorear el sistema | - Contadores: total, activos, inactivos<br>- Gráficos de distribución por rol<br>- Actividad reciente<br>- Actualización en tiempo real | Media | 5 SP |
-| **US-005** | **Como** usuario **quiero** ver y editar mi perfil **para** mantener mi información actualizada | - Vista de perfil con datos actuales<br>- Edición de nombre completo y email<br>- Validación de cambios<br>- Confirmación de actualización | Media | 3 SP |
+| ID | Historia |
+|----|----------|
+| **US-001** | **Como** super administrador **quiero** crear nuevos usuarios **para** que puedan acceder al sistema |
+| **US-002** | **Como** super administrador **quiero** editar usuarios existentes **para** mantener la información actualizada |
+| **US-003** | **Como** super administrador **quiero** eliminar usuarios **para** remover accesos no autorizados |
+| **US-004** | **Como** super administrador **quiero** ver estadísticas de usuarios **para** monitorear el sistema |
+| **US-005** | **Como** usuario **quiero** ver y editar mi perfil **para** mantener mi información actualizada |
 
-### Epic: Gestión de Soluciones
+### Gestión de Soluciones
 
-Esta épica cubre las funcionalidades para administrar las soluciones empresariales dentro del sistema DESS, incluyendo su creación, asignación a usuarios, visualización de estadísticas y control de acceso. Las soluciones son el elemento central del sistema, ya que representan las herramientas y aplicaciones que los usuarios pueden utilizar.
+Funcionalidades para administrar las soluciones empresariales dentro del sistema DESS, incluyendo su creación, asignación a usuarios, visualización de estadísticas y control de acceso.
 
-| ID | Historia | Criterios de Aceptación | Prioridad | Estimación |
-|----|----------|-------------------------|-----------|------------|
-| **US-006** | **Como** super administrador **quiero** crear soluciones **para** que estén disponibles para asignar | - Formulario con todos los campos requeridos<br>- Validación de URL de repositorio<br>- Estados predefinidos<br>- Persistencia en base de datos | Alta | 5 SP |
-| **US-007** | **Como** super administrador **quiero** asignar soluciones a usuarios **para** controlar el acceso | - Selección de usuario y solución<br>- Verificación de asignación duplicada<br>- Registro de quien realizó la asignación<br>- Notificación de éxito | Alta | 5 SP |
-| **US-008** | **Como** usuario **quiero** ver mis soluciones asignadas **para** acceder a ellas | - Lista filtrada por usuario actual<br>- Solo soluciones activas y asignadas<br>- Información básica de cada solución<br>- Enlaces de acceso cuando disponibles | Alta | 3 SP |
-| **US-009** | **Como** super administrador **quiero** ver estadísticas de soluciones **para** analizar el uso | - Contadores por estado<br>- Soluciones más/menos asignadas<br>- Distribución por tipo<br>- Métricas de acceso | Media | 5 SP |
-| **US-010** | **Como** usuario **quiero** acceder directamente a una solución **para** usar sus funcionalidades | - Validación de permisos de acceso<br>- Redirección segura<br>- Registro de acceso<br>- Manejo de soluciones inactivas | Alta | 3 SP |
+| ID | Historia |
+|----|----------|
+| **US-006** | **Como** super administrador **quiero** crear soluciones **para** que estén disponibles para asignar |
+| **US-007** | **Como** super administrador **quiero** asignar soluciones a usuarios **para** controlar el acceso |
+| **US-008** | **Como** usuario **quiero** ver mis soluciones asignadas **para** acceder a ellas |
+| **US-009** | **Como** super administrador **quiero** ver estadísticas de soluciones **para** analizar el uso |
+| **US-010** | **Como** usuario **quiero** acceder directamente a una solución **para** usar sus funcionalidades |
+| **US-011** | **Como** usuario **quiero** marcar soluciones como favoritas **para** acceder rápidamente a ellas |
+| **US-012** | **Como** usuario **quiero** ver tutoriales interactivos **para** aprender a usar el sistema |
 
-### Epic: Sistema y Seguridad
+### Experiencia de Usuario
 
-Esta épica abarca las funcionalidades transversales del sistema, incluyendo autenticación, autorización, APIs para integración externa, auditoría y aspectos de experiencia de usuario. Estas funcionalidades son críticas para la seguridad, usabilidad y extensibilidad del sistema.
+Funcionalidades enfocadas en mejorar la usabilidad y experiencia del usuario final a través de componentes interactivos, tutoriales y funcionalidades que facilitan el uso del sistema.
 
-| ID | Historia | Criterios de Aceptación | Prioridad | Estimación |
-|----|----------|-------------------------|-----------|------------|
-| **US-011** | **Como** usuario **quiero** autenticarme de forma segura **para** proteger mi cuenta | - Formulario de login seguro<br>- Validación de credenciales<br>- Creación de sesión/JWT<br>- Redirección según rol | Crítica | 5 SP |
-| **US-012** | **Como** desarrollador **quiero** APIs REST **para** integrar con sistemas externos | - Endpoints CRUD para usuarios y soluciones<br>- Autenticación JWT<br>- Documentación automática<br>- Respuestas estandarizadas | Alta | 8 SP |
-| **US-013** | **Como** administrador del sistema **quiero** logs de auditoría **para** rastrear actividades | - Registro de acciones críticas<br>- Información de usuario y timestamp<br>- Almacenamiento persistente<br>- Consulta de logs | Media | 5 SP |
-| **US-014** | **Como** usuario **quiero** que el sistema sea responsivo **para** usarlo desde cualquier dispositivo | - Diseño adaptativo<br>- Funcionamiento en móviles<br>- Navegación táctil optimizada<br>- Carga rápida | Media | 8 SP |
+| ID | Historia |
+|----|----------|
+| **US-015** | **Como** usuario nuevo **quiero** ver un tutorial guiado **para** aprender a usar el sistema |
+| **US-016** | **Como** usuario **quiero** buscar y filtrar soluciones **para** encontrar rápidamente lo que necesito |
 
-### Epic: Reportes y Exportación
+### Sistema y Seguridad
 
-Esta épica se enfoca en las capacidades de generación de reportes, exportación de datos y visualización de métricas avanzadas. Estas funcionalidades permiten a los administradores tomar decisiones informadas basadas en datos del sistema y generar reportes para stakeholders externos.
+Funcionalidades transversales del sistema, incluyendo autenticación, autorización, APIs para integración externa y auditoría.
 
-| ID | Historia | Criterios de Aceptación | Prioridad | Estimación |
-|----|----------|-------------------------|-----------|------------|
-| **US-015** | **Como** super administrador **quiero** exportar datos de usuarios **para** generar reportes | - Exportación a Excel/CSV<br>- Filtros de selección<br>- Datos completos y formateados<br>- Descarga directa | Baja | 5 SP |
-| **US-016** | **Como** super administrador **quiero** dashboard con métricas **para** tomar decisiones | - Gráficos interactivos<br>- KPIs principales<br>- Comparativas temporales<br>- Datos en tiempo real | Media | 8 SP |
+| ID | Historia |
+|----|----------|
+| **US-017** | **Como** usuario **quiero** autenticarme de forma segura **para** proteger mi cuenta |
+| **US-018** | **Como** desarrollador **quiero** APIs REST **para** integrar con sistemas externos |
+| **US-019** | **Como** administrador del sistema **quiero** logs de auditoría **para** rastrear actividades |
+| **US-020** | **Como** usuario **quiero** que el sistema sea responsivo **para** usarlo desde cualquier dispositivo |
+
+### Reportes y Exportación
+
+Capacidades de generación de reportes, exportación de datos y visualización de métricas avanzadas.
+
+| ID | Historia |
+|----|----------|
+| **US-021** | **Como** super administrador **quiero** exportar datos de usuarios **para** generar reportes |
+| **US-022** | **Como** super administrador **quiero** dashboard con métricas **para** tomar decisiones |
 
 ---
 
@@ -823,6 +829,48 @@ Asignar solución a usuario
 #### GET /api/v1/users/{id}/solutions/
 Obtener soluciones asignadas a un usuario
 
+### Favoritos
+
+Los endpoints de favoritos permiten a los usuarios gestionar sus soluciones favoritas para acceso rápido. Estas funcionalidades mejoran la experiencia de usuario al proporcionar acceso directo a las herramientas más utilizadas.
+
+#### POST /api/v1/solutions/toggle-favorite/
+Alternar solución como favorita
+
+**Request:**
+```json
+{
+  "solution_id": 3
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Sistema CRM agregada a favoritos",
+  "is_favorite": true
+}
+```
+
+#### GET /api/v1/users/me/favorites/
+Obtener soluciones favoritas del usuario actual
+
+**Response:**
+```json
+{
+  "favorites": [
+    {
+      "id": 3,
+      "name": "Sistema CRM",
+      "description": "Sistema de gestión de relaciones con clientes",
+      "access_url": "https://crm.empresa.com",
+      "added_at": "2025-09-08T10:30:00Z"
+    }
+  ],
+  "total_count": 1
+}
+```
+
 ---
 
 ## 🗄️ BASE DE DATOS
@@ -939,6 +987,18 @@ Las siguientes tablas constituyen el esquema principal de la base de datos DESS.
 | `solution_id` | INTEGER | FK a la solución |
 | `accessed_at` | DATETIME | Timestamp del acceso |
 | `ip_address` | INET | Dirección IP del acceso |
+
+#### dess_user_favorite_solutions
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | INTEGER | Clave primaria autoincremental |
+| `user_id` | INTEGER | FK al usuario |
+| `solution_id` | INTEGER | FK a la solución |
+| `added_at` | DATETIME | Fecha cuando se marcó como favorito |
+
+**Constraints:**
+- Unique constraint en (user_id, solution_id) - Un usuario no puede marcar la misma solución como favorita múltiples veces
+- Foreign keys hacia dess_users y dess_solutions con CASCADE delete
 
 ### Índices y Constraints
 
@@ -1679,6 +1739,29 @@ deploy:
 
 ### Septiembre 2025 - Versión 1.1.0
 
+#### Nuevas Funcionalidades Principales
+
+- **🌟 Sistema de Soluciones Favoritas**: 
+  - Funcionalidad completa para marcar/desmarcar soluciones como favoritas
+  - Nueva tabla `dess_user_favorite_solutions` con constraints únicos
+  - API REST para toggle de favoritos (`/api/v1/solutions/toggle-favorite/`)
+  - Integración visual en dashboard de usuario con iconos interactivos
+  - Sección dedicada de favoritos para acceso rápido
+
+- **🎓 Sistema de Tutorial Interactivo**:
+  - Tutorial guiado paso a paso con overlay visual (`dess-tutorial.js`)
+  - Controles de navegación (anterior/siguiente, omitir, cerrar)
+  - Barra de progreso visual y contador de pasos
+  - Resaltado automático de elementos con tooltips contextuales
+  - Almacenamiento de progreso del usuario
+
+- **🔍 Búsqueda y Filtrado Avanzado**:
+  - Sistema de búsqueda con debounce anti-spam (`user-solutions.js`)
+  - Filtros dinámicos por tipo y estado de solución
+  - Indicadores visuales de carga durante búsquedas
+  - Auto-submit en cambio de filtros sin recargar página
+  - Optimización UX con timeouts inteligentes (800ms)
+
 #### Correcciones de Bugs
 - **✅ Error 404 en /api/status/**: Corregido endpoint de health check que retornaba 404
   - Problema: Import incorrecto en `urls_api.py` (`api_views.api_status` → `base_views.api_status`)
@@ -1841,5 +1924,5 @@ Este proyecto está licenciado bajo MIT License - ver el archivo [LICENSE](LICEN
 
 **© 2025 DESS - Desarrollador de Ecosistemas de Soluciones Empresariales**
 
-*Documentación generada el: 1 de Enero de 2025*
-*Versión del documento: 1.0.0*
+*Documentación generada el: 8 de Septiembre de 2025*
+*Versión del documento: 1.1.0*
