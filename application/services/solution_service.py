@@ -44,8 +44,9 @@ class SolutionService:
         # Solo inicializar si tenemos user_repository
         if user_repository:
             self.assign_solution_use_case = AssignSolutionToUserUseCase(user_repository, solution_repository, assignment_repository)
-        
-        self.get_user_solutions_use_case = GetUserSolutionsUseCase(assignment_repository, solution_repository)
+            self.get_user_solutions_use_case = GetUserSolutionsUseCase(user_repository, solution_repository, assignment_repository)
+        else:
+            self.get_user_solutions_use_case = None
     
     def create_solution(self, request: CreateSolutionRequest) -> SolutionResponse:
         """Crear una nueva solución."""
@@ -88,6 +89,8 @@ class SolutionService:
     
     def get_user_solutions(self, user_id: int) -> List[SolutionResponse]:
         """Obtener soluciones asignadas a un usuario."""
+        if self.get_user_solutions_use_case is None:
+            return []
         solutions = self.get_user_solutions_use_case.execute(user_id)
         return [self._solution_to_response(solution) for solution in solutions]
     

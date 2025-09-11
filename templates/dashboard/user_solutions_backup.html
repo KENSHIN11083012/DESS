@@ -88,14 +88,14 @@
     <div class="flex justify-between items-center flex-wrap gap-4">
       <!-- Breadcrumb -->
       <div class="flex items-center space-x-2 text-sm">
-        <a href="{% url 'dashboard' %}" class="text-blue-600 hover:text-blue-800">Panel Principal</a>
+        <a href="{% url 'dashboard' %}" class="text-dess-secondary hover:text-dess-primary">Panel Principal</a>
         <span class="text-gray-400">/</span>
         <span class="text-gray-600">Mis Soluciones</span>
       </div>
       
       <!-- Estadística del usuario -->
       <div class="flex items-center space-x-4">
-        <span class="text-blue-600 font-medium">{{ solutions_stats.total_assigned|default:0 }} solución(es) asignada(s)</span>
+        <span class="text-dess-secondary font-medium">{{ solutions_stats.total_assigned|default:0 }} solución(es) asignada(s)</span>
       </div>
     </div>
   </div>
@@ -105,7 +105,7 @@
     <div class="bg-white rounded-lg shadow-md p-6">
       <div class="flex items-center">
         <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-6 h-6 text-dess-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
           </svg>
         </div>
@@ -133,7 +133,7 @@
     <div class="bg-white rounded-lg shadow-md p-6">
       <div class="flex items-center">
         <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-6 h-6 text-dess-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5a3 3 0 003 3h6a3 3 0 003-3V4"></path>
           </svg>
         </div>
@@ -206,7 +206,7 @@
       
       <div class="flex justify-between items-center">
         <div class="flex space-x-2">
-          <button type="submit" id="searchBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-150 flex items-center">
+          <button type="submit" id="searchBtn" class="bg-dess-secondary hover:bg-dess-primary text-white px-4 py-2 rounded-md transition duration-150 flex items-center">
             <svg id="searchIcon" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
@@ -285,7 +285,7 @@
           <!-- Header de la tarjeta -->
           <div class="flex items-start justify-between mb-4">
             <div class="w-12 h-12 rounded-lg flex items-center justify-center solution-icon 
-                        {% if assignment.solution.solution_type == 'web_app' %}bg-blue-100 text-blue-600
+                        {% if assignment.solution.solution_type == 'web_app' %}bg-blue-100 text-dess-secondary
                         {% elif assignment.solution.solution_type == 'desktop_app' %}bg-green-100 text-green-600
                         {% elif assignment.solution.solution_type == 'mobile_app' %}bg-purple-100 text-purple-600
                         {% elif assignment.solution.solution_type == 'api' %}bg-red-100 text-red-600
@@ -497,7 +497,7 @@
         No hay soluciones que coincidan con los filtros aplicados.
         {% if search_query %}Buscaste: "{{ search_query }}"{% endif %}
       </p>
-      <a href="{% url 'user_solutions' %}" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-150">
+      <a href="{% url 'user_solutions' %}" class="inline-flex items-center px-4 py-2 bg-dess-secondary text-white rounded-md hover:bg-dess-primary transition duration-150">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
@@ -506,7 +506,7 @@
       {% else %}
       <h3 class="text-lg font-medium text-gray-900 mb-2">No tienes soluciones asignadas</h3>
       <p class="text-gray-500 mb-6">Contacta a tu administrador para que te asigne soluciones empresariales.</p>
-      <a href="{% url 'dashboard' %}" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-150">
+      <a href="{% url 'dashboard' %}" class="inline-flex items-center px-4 py-2 bg-dess-secondary text-white rounded-md hover:bg-dess-primary transition duration-150">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-5L12 5H5a2 2 0 00-2 2z"></path>
         </svg>
@@ -859,6 +859,6 @@ function setupPaginationLoading() {
     const paginationLinks = document.querySelectorAll('a[href*=\"page=\"]');
     
     paginationLinks.forEach(link => {
-        link.addEventListener('click', function() {\n            // Agregar clase de loading a todos los enlaces\n            paginationLinks.forEach(l => l.classList.add('pagination-loading'));\n            \n            // Mostrar mensaje de carga temporal\n            showTemporaryMessage('Cargando página...', 'info');\n        });\n    });\n}\n\n// Configurar tooltips para botones de estado\nfunction setupTooltips() {\n    const buttons = document.querySelectorAll('[title]');\n    \n    buttons.forEach(button => {\n        button.addEventListener('mouseenter', function(e) {\n            const tooltip = document.createElement('div');\n            tooltip.className = 'absolute z-50 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded shadow-lg opacity-0 transition-opacity duration-200';\n            tooltip.textContent = this.getAttribute('title');\n            tooltip.id = 'tooltip-' + Math.random().toString(36).substr(2, 9);\n            \n            document.body.appendChild(tooltip);\n            \n            const rect = this.getBoundingClientRect();\n            tooltip.style.left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) + 'px';\n            tooltip.style.top = rect.bottom + 5 + 'px';\n            \n            setTimeout(() => tooltip.classList.remove('opacity-0'), 100);\n            \n            this.addEventListener('mouseleave', function() {\n                if (document.getElementById(tooltip.id)) {\n                    tooltip.classList.add('opacity-0');\n                    setTimeout(() => {\n                        if (document.body.contains(tooltip)) {\n                            document.body.removeChild(tooltip);\n                        }\n                    }, 200);\n                }\n            }, { once: true });\n        });\n    });\n}\n\n// Mejorar el mensaje temporal para incluir tipo 'info'\nfunction showTemporaryMessage(message, type = 'success') {\n    const messageDiv = document.createElement('div');\n    let bgColor;\n    \n    switch(type) {\n        case 'success':\n            bgColor = 'bg-green-500';\n            break;\n        case 'error':\n            bgColor = 'bg-red-500';\n            break;\n        case 'info':\n            bgColor = 'bg-blue-500';\n            break;\n        default:\n            bgColor = 'bg-gray-500';\n    }\n    \n    messageDiv.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded-md shadow-lg z-50 transform transition-all duration-300 opacity-0 translate-x-full`;\n    messageDiv.textContent = message;\n    \n    document.body.appendChild(messageDiv);\n    \n    // Animación de entrada\n    setTimeout(() => {\n        messageDiv.classList.remove('opacity-0', 'translate-x-full');\n    }, 100);\n    \n    // Remover mensaje después de 3 segundos\n    setTimeout(() => {\n        messageDiv.classList.add('opacity-0', 'translate-x-full');\n        setTimeout(() => {\n            if (document.body.contains(messageDiv)) {\n                document.body.removeChild(messageDiv);\n            }\n        }, 300);\n    }, 3000);\n}\n\n// Inicializar cuando se carga la página\ndocument.addEventListener('DOMContentLoaded', function() {\n    setupDynamicFiltering();\n    setupPaginationSettings();\n    setupPaginationLoading();\n    setupTooltips();\n    console.log('Mis soluciones con Tailwind CSS, filtrado dinámico, paginación personalizable y UX mejorado cargadas correctamente');\n});"}
+        link.addEventListener('click', function() {\n            // Agregar clase de loading a todos los enlaces\n            paginationLinks.forEach(l => l.classList.add('pagination-loading'));\n            \n            // Mostrar mensaje de carga temporal\n            showTemporaryMessage('Cargando página...', 'info');\n        });\n    });\n}\n\n// Configurar tooltips para botones de estado\nfunction setupTooltips() {\n    const buttons = document.querySelectorAll('[title]');\n    \n    buttons.forEach(button => {\n        button.addEventListener('mouseenter', function(e) {\n            const tooltip = document.createElement('div');\n            tooltip.className = 'absolute z-50 px-2 py-1 text-xs font-medium text-white bg-gray-900 rounded shadow-lg opacity-0 transition-opacity duration-200';\n            tooltip.textContent = this.getAttribute('title');\n            tooltip.id = 'tooltip-' + Math.random().toString(36).substr(2, 9);\n            \n            document.body.appendChild(tooltip);\n            \n            const rect = this.getBoundingClientRect();\n            tooltip.style.left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) + 'px';\n            tooltip.style.top = rect.bottom + 5 + 'px';\n            \n            setTimeout(() => tooltip.classList.remove('opacity-0'), 100);\n            \n            this.addEventListener('mouseleave', function() {\n                if (document.getElementById(tooltip.id)) {\n                    tooltip.classList.add('opacity-0');\n                    setTimeout(() => {\n                        if (document.body.contains(tooltip)) {\n                            document.body.removeChild(tooltip);\n                        }\n                    }, 200);\n                }\n            }, { once: true });\n        });\n    });\n}\n\n// Mejorar el mensaje temporal para incluir tipo 'info'\nfunction showTemporaryMessage(message, type = 'success') {\n    const messageDiv = document.createElement('div');\n    let bgColor;\n    \n    switch(type) {\n        case 'success':\n            bgColor = 'bg-green-500';\n            break;\n        case 'error':\n            bgColor = 'bg-red-500';\n            break;\n        case 'info':\n            bgColor = 'bg-dess-secondary';\n            break;\n        default:\n            bgColor = 'bg-gray-500';\n    }\n    \n    messageDiv.className = `fixed top-4 right-4 ${bgColor} text-white px-4 py-2 rounded-md shadow-lg z-50 transform transition-all duration-300 opacity-0 translate-x-full`;\n    messageDiv.textContent = message;\n    \n    document.body.appendChild(messageDiv);\n    \n    // Animación de entrada\n    setTimeout(() => {\n        messageDiv.classList.remove('opacity-0', 'translate-x-full');\n    }, 100);\n    \n    // Remover mensaje después de 3 segundos\n    setTimeout(() => {\n        messageDiv.classList.add('opacity-0', 'translate-x-full');\n        setTimeout(() => {\n            if (document.body.contains(messageDiv)) {\n                document.body.removeChild(messageDiv);\n            }\n        }, 300);\n    }, 3000);\n}\n\n// Inicializar cuando se carga la página\ndocument.addEventListener('DOMContentLoaded', function() {\n    setupDynamicFiltering();\n    setupPaginationSettings();\n    setupPaginationLoading();\n    setupTooltips();\n    console.log('Mis soluciones con Tailwind CSS, filtrado dinámico, paginación personalizable y UX mejorado cargadas correctamente');\n});"}
 </script>
 {% endblock %}

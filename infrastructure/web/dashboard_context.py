@@ -37,7 +37,7 @@ class DashboardContextBuilder:
         """Agregar estadísticas de usuarios al contexto"""
         try:
             if self.user_service:
-                # Obtener estadísticas usando el servicio de aplicación
+                # Usar consultas directas ya que el servicio no tiene método de estadísticas
                 total_users = DESSUser.objects.count()
                 active_users = DESSUser.objects.filter(is_active=True).count()
                 super_admins = DESSUser.objects.filter(role='super_admin').count()
@@ -50,7 +50,10 @@ class DashboardContextBuilder:
                     'super_admins': super_admins,
                     'regular_users': regular_users,
                 }
+                
+                logger.info(f"Estadísticas de usuarios obtenidas: {self.context['stats']}")
             else:
+                logger.warning("user_service no disponible, usando valores por defecto")
                 self.context['stats'] = {
                     'total_users': 0,
                     'active_users': 0,
@@ -74,13 +77,21 @@ class DashboardContextBuilder:
                 active_solutions = Solution.objects.filter(status='ACTIVE').count()
                 deployed_solutions = Solution.objects.filter(deployment_status='DEPLOYED').count()
                 
+                if 'stats' not in self.context:
+                    self.context['stats'] = {}
+                    
                 self.context['stats'].update({
                     'total_solutions': total_solutions,
                     'active_solutions': active_solutions,
                     'inactive_solutions': total_solutions - active_solutions,
                     'deployed_solutions': deployed_solutions,
                 })
+                
+                logger.info(f"Estadísticas de soluciones obtenidas: total={total_solutions}, active={active_solutions}, deployed={deployed_solutions}")
             else:
+                logger.warning("solution_service no disponible, usando valores por defecto")
+                if 'stats' not in self.context:
+                    self.context['stats'] = {}
                 self.context['stats'].update({
                     'total_solutions': 0,
                     'active_solutions': 0,
@@ -118,6 +129,8 @@ class DashboardContextBuilder:
                 'total_assignments': total_assignments,
                 'recent_assignments': recent_assignments,
             })
+            
+            logger.info(f"Estadísticas de asignaciones obtenidas: total={total_assignments}, recent={recent_assignments}")
         except Exception as e:
             logger.error(f"Error obteniendo estadísticas de asignaciones: {e}")
             if 'stats' not in self.context:

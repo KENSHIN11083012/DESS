@@ -35,9 +35,15 @@
         font-size: 0.75rem;
         font-weight: 500;
         border-radius: 0.375rem;
-        background-color: #f3f4f6;
-        color: #374151;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
         transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+    }
+    
+    .project-type-badge:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
     }
     
     /* Hover effects para cards - estilo DESS */
@@ -160,7 +166,7 @@
                                     <div class="text-sm font-medium text-gray-900">{{ deployment.name }}</div>
                                     <div class="text-sm text-gray-500">{{ deployment.description|truncatechars:60 }}</div>
                                     <div class="text-xs text-gray-400 mt-1">
-                                        <a href="{{ deployment.github_url }}" target="_blank" class="hover:text-blue-600">
+                                        <a href="{{ deployment.github_url }}" target="_blank" class="hover:text-dess-secondary">
                                             {{ deployment.github_url|truncatechars:40 }}
                                         </a>
                                     </div>
@@ -181,7 +187,7 @@
                             <td class="px-6 py-4">
                                 {% if deployment.deploy_url %}
                                     <a href="{{ deployment.deploy_url }}" target="_blank" 
-                                       class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                       class="text-dess-secondary hover:text-dess-primary text-sm font-medium">
                                         Puerto {{ deployment.port }}
                                         <svg class="w-3 h-3 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-2"></path>
@@ -204,7 +210,7 @@
                                     
                                     {% if deployment.status == 'stopped' or deployment.status == 'failed' %}
                                         <button onclick="deployProject('{{ deployment.id }}')" 
-                                                class="text-dess-accent hover:text-green-800 text-sm font-medium transition duration-150">
+                                                class="text-dess-accent hover:text-dess-primary text-sm font-medium transition duration-150">
                                             Desplegar
                                         </button>
                                     {% endif %}
@@ -215,7 +221,7 @@
                                             Detener
                                         </button>
                                         <button onclick="restartDeployment('{{ deployment.id }}')" 
-                                                class="text-yellow-600 hover:text-yellow-800 text-sm font-medium transition duration-150">
+                                                class="text-dess-secondary hover:text-dess-primary text-sm font-medium transition duration-150">
                                             Reiniciar
                                         </button>
                                     {% endif %}
@@ -293,8 +299,8 @@
 <div id="deploymentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
     <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
         <div class="mt-3 text-center">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
-                <svg class="animate-spin h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-dess-secondary/20 to-dess-primary/20">
+                <svg class="animate-spin h-6 w-6 text-dess-primary" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>

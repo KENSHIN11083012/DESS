@@ -88,14 +88,14 @@
     <div class="flex justify-between items-center flex-wrap gap-4">
       <!-- Breadcrumb -->
       <div class="flex items-center space-x-2 text-sm">
-        <a href="{% url 'dashboard' %}" class="text-blue-600 hover:text-blue-800">Panel Principal</a>
+        <a href="{% url 'dashboard' %}" class="text-dess-secondary hover:text-dess-primary">Panel Principal</a>
         <span class="text-gray-400">/</span>
         <span class="text-gray-600">Mis Soluciones</span>
       </div>
       
       <!-- Estadística del usuario -->
       <div class="flex items-center space-x-4">
-        <span class="text-blue-600 font-medium">{{ solutions_stats.total_assigned|default:0 }} solución(es) asignada(s)</span>
+        <span class="text-dess-secondary font-medium">{{ solutions_stats.total_assigned|default:0 }} solución(es) asignada(s)</span>
       </div>
     </div>
   </div>
@@ -105,7 +105,7 @@
     <div class="bg-white rounded-lg shadow-md p-6">
       <div class="flex items-center">
         <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-6 h-6 text-dess-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
           </svg>
         </div>
@@ -133,7 +133,7 @@
     <div class="bg-white rounded-lg shadow-md p-6">
       <div class="flex items-center">
         <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-6 h-6 text-dess-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5a3 3 0 003 3h6a3 3 0 003-3V4"></path>
           </svg>
         </div>
@@ -206,7 +206,7 @@
       
       <div class="flex justify-between items-center">
         <div class="flex space-x-2">
-          <button type="submit" id="searchBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-150 flex items-center">
+          <button type="submit" id="searchBtn" class="bg-dess-secondary hover:bg-dess-primary text-white px-4 py-2 rounded-md transition duration-150 flex items-center">
             <svg id="searchIcon" class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
@@ -285,9 +285,9 @@
           <!-- Header de la tarjeta -->
           <div class="flex items-start justify-between mb-4">
             <div class="w-12 h-12 rounded-lg flex items-center justify-center solution-icon 
-                        {% if assignment.solution.solution_type == 'web_app' %}bg-blue-100 text-blue-600
+                        {% if assignment.solution.solution_type == 'web_app' %}bg-blue-100 text-dess-secondary
                         {% elif assignment.solution.solution_type == 'desktop_app' %}bg-green-100 text-green-600
-                        {% elif assignment.solution.solution_type == 'mobile_app' %}bg-purple-100 text-purple-600
+                        {% elif assignment.solution.solution_type == 'mobile_app' %}bg-purple-100 text-dess-secondary
                         {% elif assignment.solution.solution_type == 'api' %}bg-red-100 text-red-600
                         {% elif assignment.solution.solution_type == 'database' %}bg-gray-100 text-gray-600
                         {% else %}bg-yellow-100 text-yellow-600{% endif %}">
@@ -497,7 +497,7 @@
         No hay soluciones que coincidan con los filtros aplicados.
         {% if search_query %}Buscaste: "{{ search_query }}"{% endif %}
       </p>
-      <a href="{% url 'user_solutions' %}" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-150">
+      <a href="{% url 'user_solutions' %}" class="inline-flex items-center px-4 py-2 bg-dess-secondary text-white rounded-md hover:bg-dess-primary transition duration-150">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
@@ -506,7 +506,7 @@
       {% else %}
       <h3 class="text-lg font-medium text-gray-900 mb-2">No tienes soluciones asignadas</h3>
       <p class="text-gray-500 mb-6">Contacta a tu administrador para que te asigne soluciones empresariales.</p>
-      <a href="{% url 'dashboard' %}" class="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-150">
+      <a href="{% url 'dashboard' %}" class="inline-flex items-center px-4 py-2 bg-dess-secondary text-white rounded-md hover:bg-dess-primary transition duration-150">
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-5L12 5H5a2 2 0 00-2 2z"></path>
         </svg>

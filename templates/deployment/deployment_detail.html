@@ -171,7 +171,7 @@
                 <!-- Tabs de Navegación -->
                 <div class="border-b border-gray-200">
                     <nav class="-mb-px flex">
-                        <button class="tab-button active border-blue-500 text-blue-600 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm" 
+                        <button class="tab-button active border-blue-500 text-dess-secondary whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm" 
                                 data-tab="info">
                             Información
                         </button>
@@ -202,7 +202,7 @@
                                         <span class="text-sm font-medium text-gray-500">Repositorio:</span>
                                         <div class="mt-1">
                                             <a href="{{ deployment.github_url }}" target="_blank" 
-                                               class="inline-flex items-center text-blue-600 hover:text-blue-800">
+                                               class="inline-flex items-center text-dess-secondary hover:text-dess-primary">
                                                 {{ deployment.github_url }}
                                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
@@ -248,7 +248,7 @@
                                         <span class="text-sm font-medium text-gray-500">URL de Acceso:</span>
                                         <div class="mt-1">
                                             <a href="{{ deployment.deploy_url }}" target="_blank" 
-                                               class="text-blue-600 hover:text-blue-800">
+                                               class="text-dess-secondary hover:text-dess-primary">
                                                 {{ deployment.deploy_url }}
                                             </a>
                                         </div>
@@ -279,7 +279,7 @@
                                 </button>
                                 {% elif deployment.status == 'running' %}
                                 <button onclick="restartDeployment('{{ deployment.id }}')" 
-                                        class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition duration-150">
+                                        class="bg-dess-secondary hover:bg-dess-primary text-white font-medium py-2 px-4 rounded-lg transition duration-150">
                                     Reiniciar
                                 </button>
                                 <button onclick="stopDeployment('{{ deployment.id }}')" 
@@ -399,7 +399,7 @@
                                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Configuración de Webhook</h3>
                                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                     <div class="flex items-start space-x-3">
-                                        <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-5 h-5 text-dess-secondary mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
                                         <div>
@@ -523,7 +523,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Remove active state from all tabs
             tabButtons.forEach(btn => {
-                btn.classList.remove('active', 'border-blue-500', 'text-blue-600');
+                btn.classList.remove('active', 'border-blue-500', 'text-dess-secondary');
                 btn.classList.add('border-transparent', 'text-gray-500');
             });
             
@@ -532,7 +532,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             // Add active state to clicked tab
-            this.classList.add('active', 'border-blue-500', 'text-blue-600');
+            this.classList.add('active', 'border-blue-500', 'text-dess-secondary');
             this.classList.remove('border-transparent', 'text-gray-500');
             
             // Show corresponding content

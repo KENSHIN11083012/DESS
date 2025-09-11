@@ -29,11 +29,11 @@
       <div>
         <!-- Breadcrumb -->
         <div class="flex items-center space-x-2 text-sm mb-4">
-          <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-800">Panel Principal</a>
+          <a href="{% url 'admin_dashboard' %}" class="text-dess-secondary hover:text-dess-primary">Panel Principal</a>
           <span class="text-gray-400">/</span>
-          <a href="{% url 'admin_solutions' %}" class="text-blue-600 hover:text-blue-800">Gestión de Soluciones</a>
+          <a href="{% url 'admin_solutions' %}" class="text-dess-secondary hover:text-dess-primary">Gestión de Soluciones</a>
           <span class="text-gray-400">/</span>
-          <a href="{% url 'admin_solution_detail' solution.id %}" class="text-blue-600 hover:text-blue-800">{{ solution.name }}</a>
+          <a href="{% url 'admin_solution_detail' solution.id %}" class="text-dess-secondary hover:text-dess-primary">{{ solution.name }}</a>
           <span class="text-gray-400">/</span>
           <span class="text-gray-600">Asignar a Usuarios</span>
         </div>
@@ -123,11 +123,11 @@
         <div class="flex items-center space-x-4">
           <div class="text-sm text-gray-500">
             <span class="font-medium">Seleccionados:</span> 
-            <span id="selectedCount" class="text-blue-600 font-semibold">0</span> 
+            <span id="selectedCount" class="text-dess-secondary font-semibold">0</span> 
             de {{ available_users|length }}
           </div>
           <button type="button" id="selectAllBtn" 
-                  class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                  class="text-sm text-dess-secondary hover:text-dess-primary font-medium">
             Seleccionar Todos
           </button>
           <button type="button" id="clearAllBtn" 
@@ -145,7 +145,7 @@
           <input type="checkbox" 
                  name="selected_users" 
                  value="{{ user.id }}" 
-                 class="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 focus:ring-2 mr-3">
+                 class="h-4 w-4 text-dess-secondary rounded border-gray-300 focus:ring-blue-500 focus:ring-2 mr-3">
           <div class="flex items-center flex-grow">
             <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
               <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

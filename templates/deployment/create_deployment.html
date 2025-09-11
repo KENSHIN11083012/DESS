@@ -31,7 +31,7 @@
     <div class="flex justify-between items-center flex-wrap gap-4">
       <!-- Breadcrumb -->
       <div class="flex items-center space-x-2 text-sm">
-        <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-800">Panel Principal</a>
+        <a href="{% url 'admin_dashboard' %}" class="text-dess-secondary hover:text-dess-primary">Panel Principal</a>
         <span class="text-gray-400">/</span>
         <a href="{% url 'admin_deployments' %}" class="text-dess-secondary hover:text-dess-primary transition duration-150">Gestión de Despliegues</a>
         <span class="text-gray-400">/</span>
@@ -122,7 +122,7 @@
                             <p class="mt-1 text-xs text-gray-500">URL del repositorio público de GitHub</p>
                             <div id="repo-status" class="mt-2 hidden">
                                 <div class="flex items-center text-sm">
-                                    <div id="repo-loading" class="hidden flex items-center text-blue-600">
+                                    <div id="repo-loading" class="hidden flex items-center text-dess-secondary">
                                         <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
                                         Analizando repositorio...
                                     </div>
@@ -223,7 +223,7 @@
                         
                         <div class="flex items-center">
                             <input type="checkbox" id="auto_deploy" name="auto_deploy" 
-                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                   class="h-4 w-4 text-dess-secondary focus:ring-blue-500 border-gray-300 rounded">
                             <label for="auto_deploy" class="ml-2 block text-sm text-gray-900">
                                 Activar despliegue automático en push
                             </label>
@@ -280,7 +280,7 @@
                         </div>
                         <div>
                             <span class="text-gray-500">URL de Acceso:</span>
-                            <div id="preview-url" class="font-medium text-blue-600">Se generará automáticamente</div>
+                            <div id="preview-url" class="font-medium text-dess-secondary">Se generará automáticamente</div>
                         </div>
                     </div>
                 </div>

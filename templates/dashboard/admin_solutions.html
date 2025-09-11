@@ -29,15 +29,15 @@
     <div class="flex justify-between items-center flex-wrap gap-4">
       <!-- Breadcrumb -->
       <div class="flex items-center space-x-2 text-sm">
-        <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-800">Panel Principal</a>
+        <a href="{% url 'admin_dashboard' %}" class="text-dess-secondary hover:text-dess-primary">Panel Principal</a>
         <span class="text-gray-400">/</span>
         <span class="text-gray-600">Gestión de Soluciones</span>
       </div>
       
       <!-- Estadística y acción -->
       <div class="flex items-center space-x-4">
-        <span class="text-blue-600 font-medium">{{ total_count }} solución(es)</span>
-        <a href="{% url 'admin_create_solution' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition duration-150">
+        <span class="text-dess-secondary font-medium">{{ total_count }} solución(es)</span>
+        <a href="{% url 'admin_create_solution' %}" class="bg-dess-secondary hover:bg-dess-primary text-white px-4 py-2 rounded-lg font-medium transition duration-150">
           Nueva Solución
         </a>
       </div>
@@ -70,7 +70,7 @@
         
         <!-- Botón de búsqueda -->
         <div class="flex items-end">
-          <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-150">
+          <button type="submit" class="w-full bg-dess-secondary hover:bg-dess-primary text-white px-4 py-2 rounded-md transition duration-150">
             Buscar
           </button>
         </div>
@@ -82,7 +82,7 @@
   <div class="bg-white rounded-lg shadow-md overflow-hidden">
     <div class="px-6 py-4 border-b border-gray-200 flex items-center">
       <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 text-dess-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
         </svg>
       </div>
@@ -100,7 +100,7 @@
           <!-- Header de la tarjeta -->
           <div class="flex items-start justify-between mb-4">
             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-6 h-6 text-dess-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
               </svg>
             </div>
@@ -160,7 +160,7 @@
           <!-- Acciones -->
           <div class="flex space-x-2">
             <a href="{% url 'admin_solution_detail' solution.id %}" 
-               class="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-sm px-3 py-2 rounded-md text-center transition duration-150">
+               class="flex-1 bg-dess-secondary hover:bg-dess-primary text-white text-sm px-3 py-2 rounded-md text-center transition duration-150">
               Ver Detalles
             </a>
             <a href="{% url 'admin_edit_solution' solution.id %}" 
@@ -185,7 +185,7 @@
       </div>
       <h3 class="text-lg font-medium text-gray-900 mb-2">No hay soluciones</h3>
       <p class="text-gray-500 mb-6">No se encontraron soluciones que coincidan con los criterios de búsqueda.</p>
-      <a href="{% url 'admin_create_solution' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-150">
+      <a href="{% url 'admin_create_solution' %}" class="bg-dess-secondary hover:bg-dess-primary text-white px-4 py-2 rounded-md transition duration-150">
         Crear primera solución
       </a>
     </div>

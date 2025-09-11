@@ -26,15 +26,15 @@
     <div class="flex justify-between items-center flex-wrap gap-4">
       <!-- Breadcrumb -->
       <div class="flex items-center space-x-2 text-sm">
-        <a href="{% url 'admin_dashboard' %}" class="text-blue-600 hover:text-blue-800">Panel Principal</a>
+        <a href="{% url 'admin_dashboard' %}" class="text-dess-secondary hover:text-dess-primary">Panel Principal</a>
         <span class="text-gray-400">/</span>
         <span class="text-gray-600">Gestión de Usuarios</span>
       </div>
       
       <!-- Estadística y acción -->
       <div class="flex items-center space-x-4">
-        <span class="text-blue-600 font-medium">{{ total_count }} usuario(s)</span>
-        <a href="{% url 'admin_create_user' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition duration-150">
+        <span class="text-dess-secondary font-medium">{{ total_count }} usuario(s)</span>
+        <a href="{% url 'admin_create_user' %}" class="bg-dess-secondary hover:bg-dess-primary text-white px-4 py-2 rounded-lg font-medium transition duration-150">
           Crear Usuario
         </a>
       </div>
@@ -75,7 +75,7 @@
       </div>
       
       <div class="flex justify-end">
-        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-150">
+        <button type="submit" class="bg-dess-secondary hover:bg-dess-primary text-white px-4 py-2 rounded-md transition duration-150">
           Buscar
         </button>
       </div>
@@ -109,7 +109,7 @@
             <!-- Avatar -->
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <span class="text-blue-600 font-medium text-sm">
+                <span class="text-dess-secondary font-medium text-sm">
                   {{ target_user.full_name|first|upper }}
                 </span>
               </div>
@@ -169,7 +169,7 @@
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <div class="flex space-x-2">
                 <a href="{% url 'admin_user_detail' target_user.id %}" 
-                   class="text-blue-600 hover:text-blue-900 transition duration-150">
+                   class="text-dess-secondary hover:text-blue-900 transition duration-150">
                   Ver
                 </a>
                 {% if target_user.id != user.id %}
@@ -194,7 +194,7 @@
       </div>
       <h3 class="text-lg font-medium text-gray-900 mb-2">No hay usuarios</h3>
       <p class="text-gray-500 mb-6">No se encontraron usuarios que coincidan con los criterios de búsqueda.</p>
-      <a href="{% url 'admin_create_user' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-150">
+      <a href="{% url 'admin_create_user' %}" class="bg-dess-secondary hover:bg-dess-primary text-white px-4 py-2 rounded-md transition duration-150">
         Crear primer usuario
       </a>
     </div>

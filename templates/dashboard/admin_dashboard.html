@@ -26,7 +26,7 @@
       <div class="flex items-center">
         <div class="flex-shrink-0">
           <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-dess-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
             </svg>
           </div>
@@ -43,7 +43,7 @@
       <div class="flex items-center">
         <div class="flex-shrink-0">
           <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-dess-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
             </svg>
           </div>
@@ -82,13 +82,13 @@
         Gestión de Usuarios
       </h2>
       <div class="space-y-3">
-        <a href="{% url 'admin_users' %}" class="block w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition duration-150 text-center">
+        <a href="{% url 'admin_users' %}" class="block w-full bg-dess-secondary hover:bg-dess-primary text-white font-medium py-2 px-4 rounded-md transition duration-150 text-center">
           Ver todos los usuarios
         </a>
-        <a href="{% url 'admin_create_user' %}" class="block text-center text-blue-600 hover:text-blue-800 py-2">
+        <a href="{% url 'admin_create_user' %}" class="block text-center text-dess-secondary hover:text-dess-primary py-2">
           Crear nuevo usuario
         </a>
-        <a href="#" class="block text-center text-blue-600 hover:text-blue-800 py-2" onclick="exportUsers()">
+        <a href="#" class="block text-center text-dess-secondary hover:text-dess-primary py-2" onclick="exportUsers()">
           Exportar Usuarios
         </a>
       </div>
@@ -100,13 +100,13 @@
         Gestión de Soluciones
       </h2>
       <div class="space-y-3">
-        <a href="{% url 'admin_solutions' %}" class="block w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition duration-150 text-center">
+        <a href="{% url 'admin_solutions' %}" class="block w-full bg-dess-secondary hover:bg-dess-primary text-white font-medium py-2 px-4 rounded-md transition duration-150 text-center">
           Ver todas las soluciones
         </a>
-        <a href="{% url 'admin_create_solution' %}" class="block text-center text-blue-600 hover:text-blue-800 py-2">
+        <a href="{% url 'admin_create_solution' %}" class="block text-center text-dess-secondary hover:text-dess-primary py-2">
           Crear nueva solución
         </a>
-        <a href="#" class="block text-center text-blue-600 hover:text-blue-800 py-2" onclick="deploySolutions()">
+        <a href="#" class="block text-center text-dess-secondary hover:text-dess-primary py-2" onclick="deploySolutions()">
           Gestionar despliegues
         </a>
       </div>
@@ -118,13 +118,13 @@
         Gestión de Despliegues
       </h2>
       <div class="space-y-3">
-        <a href="{% url 'admin_deployments' %}" class="block w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition duration-150 text-center">
+        <a href="{% url 'admin_deployments' %}" class="block w-full bg-dess-secondary hover:bg-dess-primary text-white font-medium py-2 px-4 rounded-md transition duration-150 text-center">
           Ver todos los despliegues
         </a>
-        <a href="{% url 'admin_create_deployment' %}" class="block text-center text-blue-600 hover:text-blue-800 py-2">
+        <a href="{% url 'admin_create_deployment' %}" class="block text-center text-dess-secondary hover:text-dess-primary py-2">
           Crear nuevo despliegue
         </a>
-        <a href="#" class="block text-center text-blue-600 hover:text-blue-800 py-2" onclick="deploySolutions()">
+        <a href="#" class="block text-center text-dess-secondary hover:text-dess-primary py-2" onclick="deploySolutions()">
           Gestionar webhooks
         </a>
       </div>
@@ -136,10 +136,10 @@
         Administración del Sistema
       </h2>
       <div class="space-y-3">
-        <a href="#" class="block text-center text-blue-600 hover:text-blue-800 py-2" onclick="generateReport()">
+        <a href="#" class="block text-center text-dess-secondary hover:text-dess-primary py-2" onclick="generateReport()">
           Generar reportes
         </a>
-        <a href="#" class="block text-center text-blue-600 hover:text-blue-800 py-2" onclick="systemMaintenance()">
+        <a href="#" class="block text-center text-dess-secondary hover:text-dess-primary py-2" onclick="systemMaintenance()">
           Mantenimiento
         </a>
       </div>
@@ -158,7 +158,7 @@
       {% if recent_activities %}
         {% for activity in recent_activities %}
         <div class="flex items-center space-x-3 py-2 border-b border-gray-100 last:border-b-0">
-          <div class="text-sm text-blue-600 font-medium min-w-0 flex-shrink-0">
+          <div class="text-sm text-dess-secondary font-medium min-w-0 flex-shrink-0">
             {{ activity.timestamp|date:"d/m/Y H:i" }}
           </div>
           <div class="text-sm text-gray-700 flex-1">
@@ -191,7 +191,7 @@
         </p>
       </div>
       <div class="items-center px-4 py-3">
-        <button id="closeModal" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+        <button id="closeModal" class="px-4 py-2 bg-dess-secondary text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-dess-primary focus:outline-none focus:ring-2 focus:ring-blue-300">
           Cerrar
         </button>
       </div>
